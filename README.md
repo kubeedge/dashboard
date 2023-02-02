@@ -1,15 +1,9 @@
-# dashboard
+﻿# dashboard
 Web UI for KubeEdge
 
 ## Environment Prepare
 
 Install `node_modules`:
-
-```bash
-npm install
-```
-
-or
 
 ```bash
 yarn
@@ -23,33 +17,23 @@ Scripts provided in `package.json`. It's safe to modify or add additional script
 
 ### Start project
 
-正常启动请运行
-npm start:dev
-
-Mock测试模式请运行
-npm start
-```
-
-### Build project
-
 ```bash
-npm run build
+npm run start
+
 ```
 
-### Check code style
+### IP config update file
 
-```bash
-npm run lint
-```
 
-You can also use script to auto fix some lint error:
+config/proxy.ts
 
-```bash
-npm run lint:fix
-```
+config/oneapi.json
 
-### Test code
+jext.config.js
 
-```bash
-npm test
-```
+
+### k8s token update
+
+mock/user.ts
+
+/src/pages/user/login/index.tsx
