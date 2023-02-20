@@ -49,4 +49,4 @@ issues:
     Closing for now as there was no activity for last 60 days after marked as stale, let us know if you need this to be reopened! 🤗
 
 # Limit the number of actions per hour, from 1-30. Default is 30
-limitPerRun: 5
+limitPerRun: 6
