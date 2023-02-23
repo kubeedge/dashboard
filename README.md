@@ -14,3 +14,11 @@ If you're interested in being a contributor and want to get involved in developi
 
 ## License
 KubeEdge is under Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
+
+## Contributors
+
+<a href="https://github.com/kubeedge/dashboard/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=kubeedge/dashboard" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
