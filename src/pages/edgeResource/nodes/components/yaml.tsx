@@ -1,18 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { FormInstance, message, Modal } from 'antd';
-import type { DeptType, listType } from '../data.d';
+import React, { useEffect, useRef, useState } from "react";
+import {  message, Modal } from "antd";
+import type { DeptType,  } from "../data.d";
 // import CodeMirrorBox from '@/components/CodeMirror';
-import { editYaml } from '../service'
+import { editYaml } from "../service";
 
-import { UnControlled as CodeMirror } from 'react-codemirror2';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/lib/codemirror.js'
+import { UnControlled as CodeMirror } from "react-codemirror2";
+import "codemirror/lib/codemirror.css";
+import "codemirror/lib/codemirror.js";
 
-import 'codemirror/mode/yaml-frontmatter/yaml-frontmatter';
-import 'codemirror/theme/idea.css'
-import 'codemirror/addon/selection/active-line';
-import yaml from 'js-yaml'
-import getYAMLJS from 'yamljs'
+import "codemirror/mode/yaml-frontmatter/yaml-frontmatter";
+import "codemirror/theme/idea.css";
+import "codemirror/addon/selection/active-line";
+import yaml from "js-yaml";
+import getYAMLJS from "yamljs";
 
 export type DeptFormValueType = Record<string, unknown> & Partial<DeptType>;
 
@@ -27,49 +27,69 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
   const { values } = props;
   const [yamlStr, setYamlStr] = useState<any>();
   const [submitVal, setSubmitVal] = useState();
-  useEffect(() => {}, [props])
-  const myCodeMirrorRef = useRef()
+  useEffect(() => {
+  }, [yamlStr, props.visible]);
 
   const handleOk = async () => {
-    console.log(getYAMLJS.parse(submitVal))
-    const res = await editYaml(values.metadata.name, getYAMLJS.parse(submitVal))
-    console.log(res)
+    console.log(getYAMLJS.parse(submitVal));
+    const res = await editYaml(
+      values.metadata.name,
+      getYAMLJS.parse(submitVal)
+    );
+    console.log(res);
     if (res.status && res.status.nodeInfo) {
-      message.success('修改成功')
+      message.success("Modify successfully");
       props.onCancel(res, true);
-      return
+      setYamlStr("");
+      return;
     }
   };
   const handleCancel = () => {
     props.onCancel(values, true);
+    setYamlStr("");
   };
   const handleBlur = () => {
     console.log(values);
-    setYamlStr(yaml.dump(values))
-  }
+    setYamlStr(yaml.dump(values));
+  };
   const handleChange = (CodeMirror, changeObj, value) => {
-    setSubmitVal(value)
-  }
+    setSubmitVal(value);
+  };
   const options = {
-    smartIndent:true,  //自动缩进
+    smartIndent: true, //自动缩进
     tabSize: 4,
     autoRefresh: true, // 自动刷新
-    styleActiveLine:true,
+    styleActiveLine: true,
     // readOnly: true, // 只读
-    matchBrackets: true,  //括号匹配，光标旁边的括号都高亮显示
+    matchBrackets: true, //括号匹配，光标旁边的括号都高亮显示
     lineNumbers: true, // 显示行号
-    theme: 'idea', // 设置主题
+    theme: "idea", // 设置主题
     mode: {
-      name: 'yaml-frontmatter'
-    }
-  }
+      name: "yaml-frontmatter",
+    },
+  };
 
   return (
-    <Modal width={840} title='YAML' visible={props.visible} destroyOnClose onOk={handleOk} onCancel={handleCancel}>
-      <CodeMirror ref={myCodeMirrorRef} cursor={{
-    line: 20,
-    ch: 1
-  }} value={yamlStr} options={options} editorDidMount={handleBlur} onChange={handleChange}></CodeMirror>
+    <Modal
+      zIndex={1002}
+      width={840}
+      title="YAML"
+      destroyOnClose
+      open={props.visible}
+      onOk={handleOk}
+      onCancel={handleCancel}
+    >
+      <CodeMirror
+        // ref={myCodeMirrorRef}
+        cursor={{
+          line: 20,
+          ch: 1,
+        }}
+        value={yamlStr}
+        options={options}
+        editorDidMount={handleBlur}
+        onChange={handleChange}
+      ></CodeMirror>
     </Modal>
   );
 };

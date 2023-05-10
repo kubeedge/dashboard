@@ -6,43 +6,41 @@
  * For details, please see
  * https://pro.ant.design/docs/deploy
  */
+
+const { API_SERVER } = process.env;
+
 export default {
-  
   dev: {
-    '/api/apis': {
-      target: 'https://192.168.3.240:6443',
-      secure: false,   // 代理切换成https添加配置
+    "/api/apis": {
+      target: API_SERVER,
+      secure: false, // 代理切换成https添加配置
       changeOrigin: true,
-      pathRewrite: { '^/api': '' },
+      pathRewrite: { "^/api": "" },
     },
-    '/api/api': {
-      target: 'https://192.168.3.240:6443',
-      secure: false,   // 代理切换成https添加配置
+    "/api/api": {
+      target: API_SERVER,
+      secure: false, // 代理切换成https添加配置
       changeOrigin: true,
-      pathRewrite: { '^/api/api': '/api' },
+      pathRewrite: { "^/api/api": "/api" },
     },
-    '/api': {
-      target: 'https://192.168.3.240:6443',
-      secure: false,   // 代理切换成https添加配置
+    "/api": {
+      target: API_SERVER,
+      secure: false, // 代理切换成https添加配置
       changeOrigin: true,
     },
-    '/profile/avatar/': {
-      target: 'https://192.168.3.240:6443/api/',
-      changeOrigin: true,
-    }
   },
   test: {
-    '/api/': {
-      target: 'https://192.168.3.240:6443/api/',
+    "/api/": {
+      target: `${API_SERVER}/api/`,
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { "^": "" },
     },
   },
   pre: {
-    '/api/': {
-      target: 'your pre url',
+    "/api/": {
+      target: "your pre url",
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { "^": "" },
     },
   },
 };

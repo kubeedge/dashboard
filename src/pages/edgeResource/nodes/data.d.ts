@@ -3,7 +3,8 @@ export type formType = {
   cloudIP: string;
   version: string;
   token: string;
-}
+  runtimeType: string;
+};
 export type listType = {
   name: string;
   uid: string;
@@ -40,5 +41,5 @@ export type DeptType = {
   createTime: Date;
   updateBy: string;
   updateTime: Date;
+  creationTimestamp: string;
 };
-

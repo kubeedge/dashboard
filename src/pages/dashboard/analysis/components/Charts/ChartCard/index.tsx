@@ -1,10 +1,9 @@
-import { Card } from 'antd';
-import type { CardProps } from 'antd/es/card';
-import React from 'react';
-import classNames from 'classnames';
-import styles from './index.less';
-import { history } from 'umi';
-
+import { Card } from "antd";
+import type { CardProps } from "antd/es/card";
+import React from "react";
+import classNames from "classnames";
+import styles from "./index.less";
+import { history, useModel } from "umi";
 
 type totalType = () => React.ReactNode;
 
@@ -14,10 +13,10 @@ const renderTotal = (time?: number | totalType | React.ReactNode) => {
   }
   let totalDom;
   switch (typeof time) {
-    case 'undefined':
+    case "undefined":
       totalDom = null;
       break;
-    case 'function':
+    case "function":
       totalDom = <div className={styles.time}>{time()}</div>;
       break;
     default:
@@ -36,17 +35,36 @@ export type ChartCardProps = {
   style?: React.CSSProperties;
 } & CardProps;
 
-class ChartCard extends React.Component<ChartCardProps> {
-  renderContent = () => {
-    const { contentHeight, title, avatar, action, time, footer, children, loading } = this.props;
+const ChartCard: React.FC<ChartCardProps> = (props) => {
+  const {
+    loading = false,
+    contentHeight,
+    title,
+    avatar,
+    action,
+    time,
+    footer,
+    children,
+    ...rest
+  } = props;
+
+  const { setInitialState } = useModel("@@initialState");
+
+  const Content = () => {
     if (loading) {
       return false;
     }
     return (
-      <div className={styles.chartCard} onClick={() => {
-        sessionStorage.setItem("nameSpace", title)
-        history.push('/edgeResource/nodes')
-      }}>
+      <div
+        className={styles.chartCard}
+        onClick={() => {
+          setInitialState((prevState) => ({
+            ...prevState,
+            namespace: title,
+          }));
+          history.push("/edgeResource/nodes");
+        }}
+      >
         <div
           className={classNames(styles.chartTop, {
             [styles.chartTopMargin]: !children && !footer,
@@ -62,8 +80,13 @@ class ChartCard extends React.Component<ChartCardProps> {
           </div>
         </div>
         {children && (
-          <div className={styles.content} style={{ height: contentHeight || 'auto' }}>
-            <div className={contentHeight && styles.contentFixed}>{children}</div>
+          <div
+            className={styles.content}
+            style={{ height: contentHeight || "auto" }}
+          >
+            <div className={contentHeight && styles.contentFixed}>
+              {children}
+            </div>
           </div>
         )}
         {footer && (
@@ -79,24 +102,15 @@ class ChartCard extends React.Component<ChartCardProps> {
     );
   };
 
-  render() {
-    const {
-      loading = false,
-      contentHeight,
-      title,
-      avatar,
-      action,
-      time,
-      footer,
-      children,
-      ...rest
-    } = this.props;
-    return (
-      <Card loading={loading} bodyStyle={{ padding: '20px 24px 8px 24px' }} {...rest}>
-        {this.renderContent()}
-      </Card>
-    );
-  }
-}
+  return (
+    <Card
+      loading={loading}
+      bodyStyle={{ padding: "20px 24px 8px 24px" }}
+      {...rest}
+    >
+      {Content()}
+    </Card>
+  );
+};
 
 export default ChartCard;

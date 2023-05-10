@@ -1,19 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Descriptions, Button } from 'antd';
-import type { JobType } from '../data';
-import YamlModal from './yaml'
-
-/* *
- *
- * @author whiteshader@163.com
- * @datetime  2021/09/16
- * 
- * */
-
-export type OperlogFormValueType = Record<string, unknown> & Partial<JobType>;
+import React, { useEffect, useState } from "react";
+import { Modal, Descriptions, Button } from "antd";
+import moment from "moment";
+import YamlModal from "./yaml";
+import { convertKiToGTM } from "@/utils/utils";
 
 export type OperlogFormProps = {
-  onCancel: (flag?: boolean, formVals?: OperlogFormValueType) => void;
+  onCancel: (flag?: boolean, formVals?: boolean) => void;
   visible: boolean;
   values: Partial<any>;
 };
@@ -23,61 +15,74 @@ const detailForm: React.FC<OperlogFormProps> = (props) => {
 
   useEffect(() => {}, [props]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [currentRow, setCurrentRow] = useState<any>();
-
 
   const handleCancel = () => {
     props.onCancel();
   };
   const handleYaml = () => {
-    setModalVisible(true)
-  }
+    setModalVisible(true);
+  };
 
   return (
     <div>
       <Modal
         width={800}
-        title='节点详情'
-        visible={props.visible}
+        title="Node Detail"
+        open={props.visible}
         destroyOnClose
         onCancel={handleCancel}
         footer={[
-          <Button key="back" onClick={handleCancel}>关闭</Button>,
-          <Button key="viewYaml" onClick={handleYaml}>YAML</Button>,
+          <Button key="back" onClick={handleCancel}>
+            Close
+          </Button>,
+          <Button key="viewYaml" onClick={handleYaml}>
+            YAML
+          </Button>,
         ]}
       >
-        <Descriptions column={24}>
-          <Descriptions.Item span={12} label='名称'>
+        <Descriptions column={24} bordered>
+          <Descriptions.Item span={12} label="Name">
             {values?.metadata?.name}
           </Descriptions.Item>
-          <Descriptions.Item span={12} label='状态'>
-            {values?.status?.phase}
+          <Descriptions.Item span={12} label="Status">
+            {values?.status?.conditions?.filter(
+              (item: any) => item.type == "Ready"
+            )[0].status === "True"
+              ? "Ready"
+              : "NotReady"}
           </Descriptions.Item>
-          <Descriptions.Item span={12} label='ID'>
+          <Descriptions.Item span={12} label="ID">
             {values?.metadata?.uid}
           </Descriptions.Item>
-          <Descriptions.Item span={12} label='节点描述'>
-            {values?.metadata?.annotations?.['node.alpha.kubernetes.io/ttl']}
+          <Descriptions.Item span={12} label="Description">
+            {values?.metadata?.annotations?.["node.alpha.kubernetes.io/ttl"]}
           </Descriptions.Item>
-          <Descriptions.Item span={12} label='创建时间'>
-            {values?.metadata?.creationTimestamp}
+          <Descriptions.Item span={12} label="Creation time">
+            {values?.metadata?.creationTimestamp &&
+              moment(values?.metadata?.creationTimestamp).format(
+                "YYYY-MM-DD HH:mm:ss"
+              )}
           </Descriptions.Item>
-          <Descriptions.Item span={12} label='主机名'>
+          <Descriptions.Item span={12} label="Hostname">
             {values?.status?.addresses?.[1]?.address}
           </Descriptions.Item>
-          <Descriptions.Item span={12} label='操作系统'>
-            {values?.status?.nodeInfo?.osImage} | {values?.status?.nodeInfo?.operatingSystem} | {values?.status?.nodeInfo?.architecture} | {values?.status?.nodeInfo?.kernelVersion}
+          <Descriptions.Item span={12} label="System">
+            {values?.status?.nodeInfo?.osImage} |{" "}
+            {values?.status?.nodeInfo?.operatingSystem} |{" "}
+            {values?.status?.nodeInfo?.architecture} |{" "}
+            {values?.status?.nodeInfo?.kernelVersion}
           </Descriptions.Item>
-          <Descriptions.Item span={24} label='网络(网卡:IP)'>
+          <Descriptions.Item span={24} label="IP">
             {values?.status?.addresses?.[0]?.address}
           </Descriptions.Item>
-          <Descriptions.Item span={24} label='规格'>
-            {values?.status?.capacity?.cpu} | {values?.status?.capacity?.memory}
+          <Descriptions.Item span={24} label="Configuration">
+            {values?.status?.capacity?.cpu}Cpu |{" "}
+            {convertKiToGTM(values?.status?.capacity?.memory || "0")}
           </Descriptions.Item>
-          <Descriptions.Item span={24} label='容器运行时版本'>
+          <Descriptions.Item span={24} label="Container runtime version">
             {values?.status?.nodeInfo?.containerRuntimeVersion}
           </Descriptions.Item>
-          <Descriptions.Item span={24} label='边缘侧软件版本'>
+          <Descriptions.Item span={24} label="Edge side software version">
             {values?.status?.nodeInfo?.kubeletVersion}
           </Descriptions.Item>
         </Descriptions>
@@ -85,16 +90,13 @@ const detailForm: React.FC<OperlogFormProps> = (props) => {
       <YamlModal
         onSubmit={async (values) => {
           setModalVisible(false);
-          setCurrentRow(undefined)
         }}
         onCancel={(res, isUpdate) => {
           setModalVisible(false);
-          setCurrentRow(undefined);
-          props.onCancel(res || undefined, isUpdate);
         }}
         visible={modalVisible}
         values={values || {}}
-      ></YamlModal>
+      />
     </div>
   );
 };

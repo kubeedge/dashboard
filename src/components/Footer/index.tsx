@@ -1,36 +1,29 @@
-import { useIntl } from 'umi';
-import { GithubOutlined } from '@ant-design/icons';
-import { DefaultFooter } from '@ant-design/pro-layout';
+import { GithubOutlined } from "@ant-design/icons";
+import { DefaultFooter } from "@ant-design/pro-layout";
 
 export default () => {
-  const intl = useIntl();
-  const defaultMessage = intl.formatMessage({
-    id: 'app.copyright.produced',
-    defaultMessage: '蚂蚁集团体验技术部出品',
-  });
-
   const currentYear = new Date().getFullYear();
 
   return (
     <DefaultFooter
-      copyright={`${currentYear} ${defaultMessage}`}
+      copyright={`${currentYear} Kubeedge Community`}
       links={[
         {
-          key: 'kubeedge',
-          title: 'kubeedge',
-          href: 'https://pro.ant.design',
+          key: "kubeedge",
+          title: "Kubeedge",
+          href: "https://kubeedge.io/en/",
           blankTarget: true,
         },
         {
-          key: 'github',
+          key: "github",
           title: <GithubOutlined />,
-          href: 'https://github.com/ant-design/ant-design-pro',
+          href: "https://github.com/kubeedge/kubeedge",
           blankTarget: true,
         },
         {
-          key: 'Ant Design',
-          title: 'Ant Design',
-          href: 'https://ant.design',
+          key: "dashboard",
+          title: "Dashboard",
+          href: "https://github.com/kubeedge/dashboard",
           blankTarget: true,
         },
       ]}

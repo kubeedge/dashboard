@@ -1,30 +1,19 @@
-import { CaretUpOutlined, CaretDownOutlined } from '@ant-design/icons';
-import React from 'react';
-import classNames from 'classnames';
-import styles from './index.less';
+import React from "react";
+import styles from "./index.less";
 
 export type CountNumProps = {
   style?: React.CSSProperties;
-  node?: Object
+  name?: string;
+  value?: number;
+  onClick?: () => void;
 };
-const CountNum: React.FC<CountNumProps> = ({
-  node
-}) => (
-  <div className={styles.countNum}>
-    {node && (
+
+const CountNum: React.FC<CountNumProps> = ({ name, value, onClick }) => (
+  <div className={styles.countNum} onClick={onClick}>
+    {name && (
       <div>
-        <div className={styles.title}>{node?.metadata?.name}</div>
-        <div>{node?.status?.addresses[0].address}</div>
-        <div>
-          <span style={{'marginRight': '20px'}}>
-            {node?.status?.conditions.filter((item: any) => item.type == 'Ready')[0].type}:
-          </span>
-          <span>{node?.status?.conditions.filter((item: any) => item.type == 'Ready')[0].status}</span>
-        </div>
-        <div>
-          <span style={{'marginRight': '20px'}}>{node.metadata.creationTimestamp}</span>
-          天
-        </div>
+        <div className={styles.title}>{value}</div>
+        <div>{name}</div>
       </div>
     )}
   </div>
