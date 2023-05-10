@@ -75,6 +75,7 @@ declare namespace API {
   };
 
   type LoginResult = {
+    apiVersion?: string;
     code?: number;
     msg?: string;
     token?: string;
@@ -121,12 +122,7 @@ declare namespace API {
   };
 
   type LoginParams = {
-    username?: string;
-    password?: string;
-    code?: string;
-    uuid?: string;
-    autoLogin?: boolean;
-    resToken?: string;
+    token?: string;
   };
 
   type ErrorResponse = {
@@ -145,7 +141,7 @@ declare namespace API {
     success?: boolean;
   };
 
-  type NoticeIconItemType = 'notification' | 'message' | 'event';
+  type NoticeIconItemType = "notification" | "message" | "event";
 
   type NoticeIconItem = {
     id?: string;
@@ -159,7 +155,6 @@ declare namespace API {
     description?: string;
     type?: NoticeIconItemType;
   };
-
 
   type MenuItemMeta = {
     title: string;
@@ -186,4 +181,3 @@ declare namespace API {
     data: RoutersMenuItem[];
   };
 }
-

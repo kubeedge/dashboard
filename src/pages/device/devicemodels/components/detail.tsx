@@ -1,18 +1,14 @@
-import { PlusOutlined } from '@ant-design/icons';
-import { Descriptions, FormInstance } from 'antd';
-import { Button, message, Modal } from 'antd';
-import React, { useState, useRef, useEffect } from 'react';
-import { useIntl, FormattedMessage, useAccess } from 'umi';
-import { FooterToolbar } from '@ant-design/pro-layout';
-import WrapContent from '@/components/WrapContent';
-import type { ProColumns, ActionType } from '@ant-design/pro-table';
-import ProTable from '@ant-design/pro-table';
-import type { DeptType, listType } from '../data.d';
-import {
-  getListByQuery,
-  removeItem,
-  getListByLabel
-} from '../service';
+import { PlusOutlined } from "@ant-design/icons";
+import { Descriptions, FormInstance } from "antd";
+import { Button, message, Modal } from "antd";
+import React, { useState, useRef, useEffect } from "react";
+import { useIntl, FormattedMessage } from "umi";
+import { FooterToolbar } from "@ant-design/pro-layout";
+import WrapContent from "@/components/WrapContent";
+import type { ProColumns, ActionType } from "@ant-design/pro-table";
+import ProTable from "@ant-design/pro-table";
+import type { DeptType, listType } from "../data.d";
+import { getListByQuery, removeItem, getListByLabel } from "../service";
 // import UpdateForm from './components/edit';
 
 /**
@@ -114,47 +110,47 @@ export type DeptFormProps = {
 
 const DeptTableList: React.FC<DeptFormProps> = (props) => {
   const formTableRef = useRef<FormInstance>();
-  const { values } = props
-  console.log(values)
-  getListByLabel('default', { labelSelector: values.name, limit: 500 }).then(res => {
-    console.log(res)
-  })
+  const { values } = props;
+  console.log(values);
+  getListByLabel("default", { labelSelector: values.name, limit: 500 }).then(
+    (res) => {
+      console.log(res);
+    }
+  );
   const actionRef = useRef<ActionType>();
-  useEffect(() => {
-    console.log(values)
-  }, []);
+
   const handleAddDevice = () => {
-    props.onAdd()
-  }
+    props.onAdd();
+  };
   const columns: ProColumns<listType>[] = [
     {
-      title: '属性名',
-      dataIndex: 'name',
-      valueType: 'text',
+      title: "属性名",
+      dataIndex: "name",
+      valueType: "text",
     },
     {
-      title: '描述',
-      dataIndex: 'creationTimestamp',
-      valueType: 'text',
+      title: "描述",
+      dataIndex: "creationTimestamp",
+      valueType: "text",
       search: false,
     },
     {
-      title: '类型',
-      dataIndex: 'creationTimestamp',
-      valueType: 'text',
+      title: "类型",
+      dataIndex: "creationTimestamp",
+      valueType: "text",
       search: false,
     },
     {
-      title: '属性详情',
-      dataIndex: 'creationTimestamp',
-      valueType: 'text',
+      title: "属性详情",
+      dataIndex: "creationTimestamp",
+      valueType: "text",
       search: false,
     },
     {
       title: "操作",
-      dataIndex: 'option',
-      width: '220px',
-      valueType: 'option',
+      dataIndex: "option",
+      width: "220px",
+      valueType: "option",
       render: (_, record) => [
         <Button
           type="link"
@@ -178,58 +174,77 @@ const DeptTableList: React.FC<DeptFormProps> = (props) => {
             //   },
             // });
           }}
-        >删除</Button>,
+        >
+          删除
+        </Button>,
       ],
     },
   ];
-  const handleOk = () => {
-  };
+  const handleOk = () => {};
   const handleCancel = () => {
     props.onCancel();
   };
 
   return (
-    <Modal width={940} title='详情' visible={props.visible} destroyOnClose onOk={handleOk} onCancel={handleCancel}>
-    <WrapContent>
-      <div style={{ width: '100%', float: 'right' }}>
-        <Descriptions column={24}>
-          <Descriptions.Item span={12} label='名称'>{values?.name}</Descriptions.Item>
-          <Descriptions.Item span={12} label='命名空间'>{values?.namespace}</Descriptions.Item>
-          <Descriptions.Item span={12} label='创建时间'>{values?.creationTimestamp}</Descriptions.Item>
-        </Descriptions>
-        <ProTable<listType>
-          headerTitle='设备孪生'
-          actionRef={actionRef}
-          formRef={formTableRef}
-          rowKey="deptId"
-          key="deptList"
-          search={{ labelWidth: 80 }}
-          toolBarRender={() => [
-            <Button
-              type="primary"
-              key="add"
-              onClick={() => {
-                handleAddDevice()
-              }}
-            >
-              <PlusOutlined />添加孪生属性
-            </Button>
-          ]}
-          request={(params) =>
-            getListByQuery('default', values.name).then((res) => {
-              return {
-                data: res.items.map(item => {
-                  return { name: item.metadata.name, uid: item.metadata.uid, creationTimestamp: item.metadata.creationTimestamp }
-                }),
-                total: res.items.length,
-                success: true,
-              };
-            })
-          }
-          columns={columns}
-        />
-      </div>
-    </WrapContent>
+    <Modal
+      width={940}
+      title="详情"
+      visible={props.visible}
+      destroyOnClose
+      onOk={handleOk}
+      onCancel={handleCancel}
+    >
+      <WrapContent>
+        <div style={{ width: "100%", float: "right" }}>
+          <Descriptions column={24}>
+            <Descriptions.Item span={12} label="名称">
+              {values?.name}
+            </Descriptions.Item>
+            <Descriptions.Item span={12} label="命名空间">
+              {values?.namespace}
+            </Descriptions.Item>
+            <Descriptions.Item span={12} label="创建时间">
+              {values?.creationTimestamp}
+            </Descriptions.Item>
+          </Descriptions>
+          <ProTable<listType>
+            headerTitle="设备孪生"
+            actionRef={actionRef}
+            formRef={formTableRef}
+            rowKey="deptId"
+            key="deptList"
+            search={{ labelWidth: 80 }}
+            toolBarRender={() => [
+              <Button
+                type="primary"
+                key="add"
+                onClick={() => {
+                  handleAddDevice();
+                }}
+              >
+                <PlusOutlined />
+                添加孪生属性
+              </Button>,
+            ]}
+            request={(params) =>
+              getListByQuery("default", values.name).then((res) => {
+                return {
+                  data: res.items.map((item) => {
+                    return {
+                      name: item.metadata.name,
+                      uid: item.metadata.uid,
+                      creationTimestamp: item.metadata.creationTimestamp,
+                    };
+                  }),
+                  total: res.items.length,
+                  success: true,
+                };
+              })
+            }
+            columns={columns}
+          />
+        </div>
+      </WrapContent>
     </Modal>
   );
 };

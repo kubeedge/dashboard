@@ -3,21 +3,28 @@ import {
   DeleteOutlined,
   ExclamationCircleOutlined,
   DownOutlined,
-} from '@ant-design/icons';
-import type { FormInstance } from 'antd';
-import { Dropdown, Menu } from 'antd';
-import { Button, message, Modal } from 'antd';
-import React, { useState, useRef, useEffect } from 'react';
-import { useIntl, FormattedMessage, history, useAccess } from 'umi';
-import { FooterToolbar } from '@ant-design/pro-layout';
-import type { ProColumns, ActionType } from '@ant-design/pro-table';
-import ProTable from '@ant-design/pro-table';
-import type { JobType, JobListParams } from './data.d';
-import { getJobList, removeJob, addJob, updateJob, exportJob, runJob } from './service';
-import UpdateForm from './components/edit';
-import DetailForm from './components/detail';
-import { getDict } from '@/pages/system/dict/service';
-import WrapContent from '@/components/WrapContent';
+} from "@ant-design/icons";
+import type { FormInstance } from "antd";
+import { Dropdown, Menu } from "antd";
+import { Button, message, Modal } from "antd";
+import React, { useState, useRef, useEffect } from "react";
+import { useIntl, FormattedMessage, history } from "umi";
+import { FooterToolbar } from "@ant-design/pro-layout";
+import type { ProColumns, ActionType } from "@ant-design/pro-table";
+import ProTable from "@ant-design/pro-table";
+import type { JobType, JobListParams } from "./data.d";
+import {
+  getJobList,
+  removeJob,
+  addJob,
+  updateJob,
+  exportJob,
+  runJob,
+} from "./service";
+import UpdateForm from "./components/edit";
+import DetailForm from "./components/detail";
+import { getDict } from "@/pages/system/dict/service";
+import WrapContent from "@/components/WrapContent";
 
 /* *
  *
@@ -32,19 +39,19 @@ import WrapContent from '@/components/WrapContent';
  * @param fields
  */
 const handleAdd = async (fields: JobType) => {
-  const hide = message.loading('正在添加');
+  const hide = message.loading("正在添加");
   try {
     const resp = await addJob({ ...fields });
     hide();
-    if(resp.code === 200) {
-      message.success('添加成功');
+    if (resp.code === 200) {
+      message.success("添加成功");
     } else {
       message.error(resp.msg);
     }
     return true;
   } catch (error) {
     hide();
-    message.error('添加失败请重试！');
+    message.error("添加失败请重试！");
     return false;
   }
 };
@@ -55,19 +62,19 @@ const handleAdd = async (fields: JobType) => {
  * @param fields
  */
 const handleUpdate = async (fields: JobType) => {
-  const hide = message.loading('正在配置');
+  const hide = message.loading("正在配置");
   try {
     const resp = await updateJob(fields);
     hide();
-    if(resp.code === 200) {
-      message.success('配置成功');
+    if (resp.code === 200) {
+      message.success("配置成功");
     } else {
       message.error(resp.msg);
     }
     return true;
   } catch (error) {
     hide();
-    message.error('配置失败请重试！');
+    message.error("配置失败请重试！");
     return false;
   }
 };
@@ -78,40 +85,42 @@ const handleUpdate = async (fields: JobType) => {
  * @param selectedRows
  */
 const handleRemove = async (selectedRows: JobType[]) => {
-  const hide = message.loading('正在删除');
+  const hide = message.loading("正在删除");
   if (!selectedRows) return true;
   try {
-    const resp = await removeJob(selectedRows.map((row) => row.jobId).join(','));
+    const resp = await removeJob(
+      selectedRows.map((row) => row.jobId).join(",")
+    );
     hide();
-    if(resp.code === 200) {
-      message.success('删除成功，即将刷新');
+    if (resp.code === 200) {
+      message.success("删除成功，即将刷新");
     } else {
       message.error(resp.msg);
     }
     return true;
   } catch (error) {
     hide();
-    message.error('删除失败，请重试');
+    message.error("删除失败，请重试");
     return false;
   }
 };
 
 const handleRemoveOne = async (selectedRow: JobType) => {
-  const hide = message.loading('正在删除');
+  const hide = message.loading("正在删除");
   if (!selectedRow) return true;
   try {
     const params = [selectedRow.jobId];
-    const resp = await removeJob(params.join(','));
+    const resp = await removeJob(params.join(","));
     hide();
-    if(resp.code === 200) {
-      message.success('删除成功，即将刷新');
+    if (resp.code === 200) {
+      message.success("删除成功，即将刷新");
     } else {
       message.error(resp.msg);
     }
     return true;
   } catch (error) {
     hide();
-    message.error('删除失败，请重试');
+    message.error("删除失败，请重试");
     return false;
   }
 };
@@ -122,15 +131,15 @@ const handleRemoveOne = async (selectedRow: JobType) => {
  * @param id
  */
 const handleExport = async () => {
-  const hide = message.loading('正在导出');
+  const hide = message.loading("正在导出");
   try {
     await exportJob();
     hide();
-    message.success('导出成功');
+    message.success("导出成功");
     return true;
   } catch (error) {
     hide();
-    message.error('导出失败，请重试');
+    message.error("导出失败，请重试");
     return false;
   }
 };
@@ -148,13 +157,11 @@ const JobTableList: React.FC = () => {
   const [statusOptions, setStatusOptions] = useState<any>([]);
   const [jobGroupOptions, setJobGroupOptions] = useState<any>([]);
 
-  const access = useAccess();
-
   /** 国际化配置 */
   const intl = useIntl();
 
   useEffect(() => {
-    getDict('sys_normal_disable').then((res) => {
+    getDict("sys_normal_disable").then((res) => {
       if (res.code === 200) {
         const opts = {};
         res.data.forEach((item: any) => {
@@ -163,7 +170,7 @@ const JobTableList: React.FC = () => {
         setStatusOptions(opts);
       }
     });
-    getDict('sys_job_group').then((res) => {
+    getDict("sys_job_group").then((res) => {
       if (res.code === 200) {
         const opts = {};
         res.data.forEach((item: any) => {
@@ -176,15 +183,19 @@ const JobTableList: React.FC = () => {
 
   const columns: ProColumns<JobType>[] = [
     {
-      title: <FormattedMessage id="monitor.Job.job_id" defaultMessage="任务ID" />,
-      dataIndex: 'jobId',
-      valueType: 'text',
+      title: (
+        <FormattedMessage id="monitor.Job.job_id" defaultMessage="任务ID" />
+      ),
+      dataIndex: "jobId",
+      valueType: "text",
       hideInSearch: true,
     },
     {
-      title: <FormattedMessage id="monitor.Job.job_name" defaultMessage="任务名称" />,
-      dataIndex: 'jobName',
-      valueType: 'text',
+      title: (
+        <FormattedMessage id="monitor.Job.job_name" defaultMessage="任务名称" />
+      ),
+      dataIndex: "jobName",
+      valueType: "text",
       render: (dom, record) => {
         return (
           <a
@@ -199,40 +210,59 @@ const JobTableList: React.FC = () => {
       },
     },
     {
-      title: <FormattedMessage id="monitor.Job.job_group" defaultMessage="任务组名" />,
-      dataIndex: 'jobGroup',
-      valueType: 'text',
+      title: (
+        <FormattedMessage
+          id="monitor.Job.job_group"
+          defaultMessage="任务组名"
+        />
+      ),
+      dataIndex: "jobGroup",
+      valueType: "text",
       valueEnum: jobGroupOptions,
     },
     {
-      title: <FormattedMessage id="monitor.Job.invoke_target" defaultMessage="调用目标字符串" />,
-      dataIndex: 'invokeTarget',
-      valueType: 'textarea',
+      title: (
+        <FormattedMessage
+          id="monitor.Job.invoke_target"
+          defaultMessage="调用目标字符串"
+        />
+      ),
+      dataIndex: "invokeTarget",
+      valueType: "textarea",
       hideInSearch: true,
     },
     {
-      title: <FormattedMessage id="monitor.Job.cron_expression" defaultMessage="cron执行表达式" />,
-      dataIndex: 'cronExpression',
-      valueType: 'text',
+      title: (
+        <FormattedMessage
+          id="monitor.Job.cron_expression"
+          defaultMessage="cron执行表达式"
+        />
+      ),
+      dataIndex: "cronExpression",
+      valueType: "text",
       hideInSearch: true,
     },
     {
       title: <FormattedMessage id="monitor.Job.status" defaultMessage="状态" />,
-      dataIndex: 'status',
-      valueType: 'select',
+      dataIndex: "status",
+      valueType: "select",
       valueEnum: statusOptions,
     },
     {
-      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="操作" />,
-      dataIndex: 'option',
-      width: '220px',
-      valueType: 'option',
+      title: (
+        <FormattedMessage
+          id="pages.searchTable.titleOption"
+          defaultMessage="操作"
+        />
+      ),
+      dataIndex: "option",
+      width: "220px",
+      valueType: "option",
       render: (_, record) => [
         <Button
           type="link"
           size="small"
           key="edit"
-          hidden={!access.hasPerms('monitor:job:edit')}
           onClick={() => {
             setModalVisible(true);
             setCurrentRow(record);
@@ -245,13 +275,12 @@ const JobTableList: React.FC = () => {
           size="small"
           danger
           key="batchRemove"
-          hidden={!access.hasPerms('monitor:job:remove')}
           onClick={async () => {
             Modal.confirm({
-              title: '删除',
-              content: '确定删除该项吗？',
-              okText: '确认',
-              cancelText: '取消',
+              title: "删除",
+              content: "确定删除该项吗？",
+              okText: "确认",
+              cancelText: "取消",
               onOk: async () => {
                 const success = await handleRemoveOne(record);
                 if (success) {
@@ -277,14 +306,17 @@ const JobTableList: React.FC = () => {
                     key="runOnce"
                     onClick={() => {
                       Modal.confirm({
-                        title: '警告',
-                        content: '确认要立即执行一次？',
-                        okText: '确认',
-                        cancelText: '取消',
+                        title: "警告",
+                        content: "确认要立即执行一次？",
+                        okText: "确认",
+                        cancelText: "取消",
                         onOk: async () => {
-                          const success = await runJob(record.jobId, record.jobGroup);
+                          const success = await runJob(
+                            record.jobId,
+                            record.jobGroup
+                          );
                           if (success) {
-                            message.success('执行成功');
+                            message.success("执行成功");
                           }
                         },
                       });
@@ -312,7 +344,9 @@ const JobTableList: React.FC = () => {
                     size="small"
                     key="history"
                     onClick={() => {
-                      history.push(`/monitor/job-log/index?jobId=${record.jobId}`);
+                      history.push(
+                        `/monitor/job-log/index?jobId=${record.jobId}`
+                      );
                     }}
                   >
                     调度日志
@@ -333,11 +367,11 @@ const JobTableList: React.FC = () => {
 
   return (
     <WrapContent>
-      <div style={{ width: '100%', float: 'right' }}>
+      <div style={{ width: "100%", float: "right" }}>
         <ProTable<JobType>
           headerTitle={intl.formatMessage({
-            id: 'pages.searchTable.title',
-            defaultMessage: '信息',
+            id: "pages.searchTable.title",
+            defaultMessage: "信息",
           })}
           actionRef={actionRef}
           formRef={formTableRef}
@@ -350,46 +384,53 @@ const JobTableList: React.FC = () => {
             <Button
               type="primary"
               key="add"
-              hidden={!access.hasPerms('monitor:job:add')}
               onClick={async () => {
                 setCurrentRow(undefined);
                 setModalVisible(true);
               }}
             >
-              <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="新建" />
+              <PlusOutlined />{" "}
+              <FormattedMessage
+                id="pages.searchTable.new"
+                defaultMessage="新建"
+              />
             </Button>,
             <Button
               type="primary"
               key="remove"
-              hidden={selectedRowsState?.length === 0 || !access.hasPerms('monitor:job:remove')}
               onClick={async () => {
                 Modal.confirm({
-                  title: '是否确认删除所选数据项?',
+                  title: "是否确认删除所选数据项?",
                   icon: <ExclamationCircleOutlined />,
-                  content: '请谨慎操作',
+                  content: "请谨慎操作",
                   async onOk() {
                     const success = await handleRemove(selectedRowsState);
                     if (success) {
                       setSelectedRows([]);
                       actionRef.current?.reloadAndRest?.();
                     }
-                  }
+                  },
                 });
               }}
             >
               <DeleteOutlined />
-              <FormattedMessage id="pages.searchTable.delete" defaultMessage="删除" />
+              <FormattedMessage
+                id="pages.searchTable.delete"
+                defaultMessage="删除"
+              />
             </Button>,
             <Button
               type="primary"
               key="export"
-              hidden={!access.hasPerms('monitor:job:export')}
               onClick={async () => {
                 handleExport();
               }}
             >
               <PlusOutlined />
-              <FormattedMessage id="pages.searchTable.export" defaultMessage="导出" />
+              <FormattedMessage
+                id="pages.searchTable.export"
+                defaultMessage="导出"
+              />
             </Button>,
           ]}
           request={(params) =>
@@ -414,21 +455,26 @@ const JobTableList: React.FC = () => {
         <FooterToolbar
           extra={
             <div>
-              <FormattedMessage id="pages.searchTable.chosen" defaultMessage="已选择" />
+              <FormattedMessage
+                id="pages.searchTable.chosen"
+                defaultMessage="已选择"
+              />
               <a style={{ fontWeight: 600 }}>{selectedRowsState.length}</a>
-              <FormattedMessage id="pages.searchTable.item" defaultMessage="项" />
+              <FormattedMessage
+                id="pages.searchTable.item"
+                defaultMessage="项"
+              />
             </div>
           }
         >
           <Button
             key="remove"
-            hidden={!access.hasPerms('monitor:job:remove')}
             onClick={async () => {
               Modal.confirm({
-                title: '删除',
-                content: '确定删除该项吗？',
-                okText: '确认',
-                cancelText: '取消',
+                title: "删除",
+                content: "确定删除该项吗？",
+                okText: "确认",
+                cancelText: "取消",
                 onOk: async () => {
                   const success = await handleRemove(selectedRowsState);
                   if (success) {
@@ -439,7 +485,10 @@ const JobTableList: React.FC = () => {
               });
             }}
           >
-            <FormattedMessage id="pages.searchTable.batchDeletion" defaultMessage="批量删除" />
+            <FormattedMessage
+              id="pages.searchTable.batchDeletion"
+              defaultMessage="批量删除"
+            />
           </Button>
         </FooterToolbar>
       )}

@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { ProFormDigit, ProFormText, ProFormSelect, ProFormTextArea } from '@ant-design/pro-form';
-import { Form, Modal, Row, Col } from 'antd';
-import type { DeptType, formType } from '../data';
+import React, { useEffect } from "react";
+import {
+  ProFormText,
+  ProFormSelect,
+  ProFormTextArea,
+} from "@ant-design/pro-form";
+import { Form, Modal, Row, Col } from "antd";
+import type { DeptType, formType } from "../data";
 
 export type DeptFormValueType = Record<string, unknown> & Partial<DeptType>;
 
 export type DeptFormProps = {
   onCancel: (flag?: boolean, formVals?: DeptFormValueType) => void;
-  onSubmit: (values: DeptFormValueType) => Promise<void>;
   visible: boolean;
   values: Partial<DeptType>;
 };
@@ -15,47 +18,46 @@ export type DeptFormProps = {
 const DeptForm: React.FC<DeptFormProps> = (props) => {
   const [form] = Form.useForm<formType>();
 
-
-
   useEffect(() => {
     form.resetFields();
   }, [form, props]);
 
   const handleOk = () => {
-    // form.submit();
-    form.setFieldValue('remark', `keadm join --kubeedge-version=${form.getFieldValue('version')} --cloudcore-ipport=${form.getFieldValue('cloudIP')} --token=${form.getFieldValue('token')}`) 
-    
+    form.validateFields().then((values) => {
+      form.setFieldValue(
+        "remark",
+        values.runtimeType === "docker"
+          ? `keadm join --token=${values.token} --cloudcore-ipport=${values.cloudIP} --kubeedge-version=${values.version} --runtimetype=docker --remote-runtime-endpoint=unix:///var/run/dockershim.sock`
+          : `keadm join --token=${values.token} --cloudcore-ipport=${values.cloudIP} --kubeedge-version=${values.version} --runtimetype=remote --remote-runtime-endpoint=unix:///run/containerd/containerd.sock`
+      );
+    });
   };
   const handleCancel = () => {
     props.onCancel();
     form.resetFields();
   };
-  const handleFinish = async (values: Record<string, any>) => {
-    props.onSubmit(values as DeptFormValueType);
-  };
 
   return (
     <Modal
       width={640}
-      title='注册节点'
-      visible={props.visible}
+      title="Add Node"
+      open={props.visible}
       destroyOnClose
-      okText='生成命令'
+      okText="Generate Command"
       onOk={handleOk}
       onCancel={handleCancel}
     >
-      <Form form={form} onFinish={handleFinish} initialValues={props.values}>
+      <Form form={form} initialValues={props.values}>
         <Row gutter={[16, 16]}>
           <Col span={24} order={1}>
             <ProFormText
               name="cloudIP"
-              label='cloudIP'
+              label="Cloud master node ip:port"
               width="xl"
-              placeholder="请输入cloudIP"
+              placeholder="192.168.33.100:10000"
               rules={[
                 {
                   required: true,
-                  message: ('请输入cloudIP！'),
                 },
               ]}
             />
@@ -65,13 +67,12 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
           <Col span={24} order={1}>
             <ProFormText
               name="version"
-              label='kubedege版本                '
+              label="Kubedege version"
               width="xl"
-              placeholder="请输入kubedege版本                "
+              placeholder="1.12.1"
               rules={[
                 {
                   required: true,
-                  message: ("请输入Name！"),
                 },
               ]}
             />
@@ -80,15 +81,18 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
         <Row gutter={[16, 16]}>
           <Col span={24} order={1}>
             <ProFormSelect
-              options={[{label: 'Docker', value: 'Docker'}, { label: 'ContainD', value: 'ContainD' }]}
-              name="noticeType"
-              label='Runtime类型'
+              options={[
+                { label: "docker", value: "docker" },
+                { label: "containerd", value: "containerd" },
+              ]}
+              name="runtimeType"
+              label="Runtime type"
               width="xl"
-              placeholder="请输入Runtime类型              "
+              placeholder="Please select a runtime type"
               rules={[
                 {
                   required: true,
-                  message: ("请输入Runtime类型！"),
+                  message: "Please select a runtime type",
                 },
               ]}
             />
@@ -98,13 +102,12 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
           <Col span={24} order={1}>
             <ProFormText
               name="token"
-              label='token'
+              label="Token"
               width="xl"
-              placeholder="请输入token"
+              placeholder="Please enter token"
               rules={[
                 {
                   required: true,
-                  message: ("请输入token！"),
                 },
               ]}
             />
@@ -112,7 +115,12 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
         </Row>
         <Row gutter={[16, 16]}>
           <Col span={24} order={1}>
-            <ProFormTextArea name="remark" label='命令' width="xl" placeholder='' />
+            <ProFormTextArea
+              name="remark"
+              label="Command"
+              width="xl"
+              // placeholder=""
+            />
           </Col>
         </Row>
       </Form>

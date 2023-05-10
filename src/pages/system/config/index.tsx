@@ -1,16 +1,22 @@
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import type { FormInstance } from 'antd';
-import { Button, message, Modal } from 'antd';
-import React, { useState, useRef, useEffect } from 'react';
-import { useIntl, FormattedMessage, useAccess } from 'umi';
-import { FooterToolbar } from '@ant-design/pro-layout';
-import WrapContent from '@/components/WrapContent';
-import type { ProColumns, ActionType } from '@ant-design/pro-table';
-import ProTable from '@ant-design/pro-table';
-import type { ConfigType, ConfigListParams } from './data.d';
-import { getConfigList, removeConfig, addConfig, updateConfig, exportConfig } from './service';
-import UpdateForm from './components/edit';
-import { getDict } from '../dict/service';
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import type { FormInstance } from "antd";
+import { Button, message, Modal } from "antd";
+import React, { useState, useRef, useEffect } from "react";
+import { useIntl, FormattedMessage } from "umi";
+import { FooterToolbar } from "@ant-design/pro-layout";
+import WrapContent from "@/components/WrapContent";
+import type { ProColumns, ActionType } from "@ant-design/pro-table";
+import ProTable from "@ant-design/pro-table";
+import type { ConfigType, ConfigListParams } from "./data.d";
+import {
+  getConfigList,
+  removeConfig,
+  addConfig,
+  updateConfig,
+  exportConfig,
+} from "./service";
+import UpdateForm from "./components/edit";
+import { getDict } from "../dict/service";
 
 /**
  *
@@ -18,26 +24,25 @@ import { getDict } from '../dict/service';
  * @datetime  2021/09/16
  * */
 
-
 /**
  * 添加节点
  *
  * @param fields
  */
 const handleAdd = async (fields: ConfigType) => {
-  const hide = message.loading('正在添加');
+  const hide = message.loading("正在添加");
   try {
     const resp = await addConfig({ ...fields });
     hide();
-    if(resp.code === 200) {
-      message.success('添加成功');
+    if (resp.code === 200) {
+      message.success("添加成功");
     } else {
       message.error(resp.msg);
     }
     return true;
   } catch (error) {
     hide();
-    message.error('添加失败请重试！');
+    message.error("添加失败请重试！");
     return false;
   }
 };
@@ -48,19 +53,19 @@ const handleAdd = async (fields: ConfigType) => {
  * @param fields
  */
 const handleUpdate = async (fields: ConfigType) => {
-  const hide = message.loading('正在配置');
+  const hide = message.loading("正在配置");
   try {
     const resp = await updateConfig(fields);
     hide();
-    if(resp.code === 200) {
-      message.success('配置成功');
+    if (resp.code === 200) {
+      message.success("配置成功");
     } else {
       message.error(resp.msg);
     }
     return true;
   } catch (error) {
     hide();
-    message.error('配置失败请重试！');
+    message.error("配置失败请重试！");
     return false;
   }
 };
@@ -71,40 +76,42 @@ const handleUpdate = async (fields: ConfigType) => {
  * @param selectedRows
  */
 const handleRemove = async (selectedRows: ConfigType[]) => {
-  const hide = message.loading('正在删除');
+  const hide = message.loading("正在删除");
   if (!selectedRows) return true;
   try {
-    const resp = await removeConfig(selectedRows.map((row) => row.configId).join(','));
+    const resp = await removeConfig(
+      selectedRows.map((row) => row.configId).join(",")
+    );
     hide();
-    if(resp.code === 200) {
-      message.success('删除成功，即将刷新');
+    if (resp.code === 200) {
+      message.success("删除成功，即将刷新");
     } else {
       message.error(resp.msg);
     }
     return true;
   } catch (error) {
     hide();
-    message.error('删除失败，请重试');
+    message.error("删除失败，请重试");
     return false;
   }
 };
 
 const handleRemoveOne = async (selectedRow: ConfigType) => {
-  const hide = message.loading('正在删除');
+  const hide = message.loading("正在删除");
   if (!selectedRow) return true;
   try {
     const params = [selectedRow.configId];
-    const resp = await removeConfig(params.join(','));
+    const resp = await removeConfig(params.join(","));
     hide();
-    if(resp.code === 200) {
-      message.success('删除成功，即将刷新');
+    if (resp.code === 200) {
+      message.success("删除成功，即将刷新");
     } else {
       message.error(resp.msg);
     }
     return true;
   } catch (error) {
     hide();
-    message.error('删除失败，请重试');
+    message.error("删除失败，请重试");
     return false;
   }
 };
@@ -115,19 +122,18 @@ const handleRemoveOne = async (selectedRow: ConfigType) => {
  * @param id
  */
 const handleExport = async () => {
-  const hide = message.loading('正在导出');
+  const hide = message.loading("正在导出");
   try {
-    await exportConfig();    
+    await exportConfig();
     hide();
-    message.success('导出成功');
+    message.success("导出成功");
     return true;
   } catch (error) {
     hide();
-    message.error('导出失败，请重试');
+    message.error("导出失败，请重试");
     return false;
   }
 };
-
 
 const ConfigTableList: React.FC = () => {
   const formTableRef = useRef<FormInstance>();
@@ -140,13 +146,11 @@ const ConfigTableList: React.FC = () => {
 
   const [configTypeOptions, setConfigTypeOptions] = useState<any>([]);
 
-  const access = useAccess();
-
   /** 国际化配置 */
   const intl = useIntl();
 
   useEffect(() => {
-    getDict('sys_yes_no').then((res) => {
+    getDict("sys_yes_no").then((res) => {
       if (res.code === 200) {
         const opts = {};
         res.data.forEach((item: any) => {
@@ -159,57 +163,88 @@ const ConfigTableList: React.FC = () => {
 
   const columns: ProColumns<ConfigType>[] = [
     {
-      title: <FormattedMessage id="system.Config.config_name" defaultMessage="参数名称" />,
-      dataIndex: 'configName',
-      valueType: 'text',
+      title: (
+        <FormattedMessage
+          id="system.Config.config_name"
+          defaultMessage="参数名称"
+        />
+      ),
+      dataIndex: "configName",
+      valueType: "text",
     },
     {
-      title: <FormattedMessage id="system.Config.config_key" defaultMessage="参数键名" />,
-      dataIndex: 'configKey',
-      valueType: 'text',
+      title: (
+        <FormattedMessage
+          id="system.Config.config_key"
+          defaultMessage="参数键名"
+        />
+      ),
+      dataIndex: "configKey",
+      valueType: "text",
     },
     {
-      title: <FormattedMessage id="system.Config.config_value" defaultMessage="参数键值" />,
-      dataIndex: 'configValue',
-      valueType: 'textarea',
+      title: (
+        <FormattedMessage
+          id="system.Config.config_value"
+          defaultMessage="参数键值"
+        />
+      ),
+      dataIndex: "configValue",
+      valueType: "textarea",
     },
     {
-      title: <FormattedMessage id="system.Config.config_type" defaultMessage="系统内置" />,
-      dataIndex: 'configType',
-      valueType: 'select',
+      title: (
+        <FormattedMessage
+          id="system.Config.config_type"
+          defaultMessage="系统内置"
+        />
+      ),
+      dataIndex: "configType",
+      valueType: "select",
       valueEnum: configTypeOptions,
     },
     {
-      title: <FormattedMessage id="system.Config.remark" defaultMessage="备注" />,
-      dataIndex: 'remark',
-      valueType: 'textarea',
+      title: (
+        <FormattedMessage id="system.Config.remark" defaultMessage="备注" />
+      ),
+      dataIndex: "remark",
+      valueType: "textarea",
       hideInSearch: true,
     },
     {
-      title: <FormattedMessage id="system.Config.create_time" defaultMessage="创建时间" />,
-      dataIndex: 'createTime',
-      valueType: 'dateRange',
+      title: (
+        <FormattedMessage
+          id="system.Config.create_time"
+          defaultMessage="创建时间"
+        />
+      ),
+      dataIndex: "createTime",
+      valueType: "dateRange",
       render: (_, record) => <span>{record.createTime}</span>,
       search: {
         transform: (value) => {
           return {
-            'params[beginTime]': value[0],
-            'params[endTime]': value[1],
+            "params[beginTime]": value[0],
+            "params[endTime]": value[1],
           };
         },
       },
     },
     {
-      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="操作" />,
-      dataIndex: 'option',
-      width: '220px',
-      valueType: 'option',
+      title: (
+        <FormattedMessage
+          id="pages.searchTable.titleOption"
+          defaultMessage="操作"
+        />
+      ),
+      dataIndex: "option",
+      width: "220px",
+      valueType: "option",
       render: (_, record) => [
         <Button
           type="link"
           size="small"
           key="edit"
-          hidden={!access.hasPerms('system:config:edit')}
           onClick={() => {
             setModalVisible(true);
             setCurrentRow(record);
@@ -222,13 +257,12 @@ const ConfigTableList: React.FC = () => {
           size="small"
           danger
           key="batchRemove"
-          hidden={!access.hasPerms('system:config:remove')}
           onClick={async () => {
             Modal.confirm({
-              title: '删除',
-              content: '确定删除该项吗？',
-              okText: '确认',
-              cancelText: '取消',
+              title: "删除",
+              content: "确定删除该项吗？",
+              okText: "确认",
+              cancelText: "取消",
               onOk: async () => {
                 const success = await handleRemoveOne(record);
                 if (success) {
@@ -240,7 +274,10 @@ const ConfigTableList: React.FC = () => {
             });
           }}
         >
-          <FormattedMessage id="pages.searchTable.delete" defaultMessage="删除" />
+          <FormattedMessage
+            id="pages.searchTable.delete"
+            defaultMessage="删除"
+          />
         </Button>,
       ],
     },
@@ -248,11 +285,11 @@ const ConfigTableList: React.FC = () => {
 
   return (
     <WrapContent>
-      <div style={{ width: '100%', float: 'right' }}>
+      <div style={{ width: "100%", float: "right" }}>
         <ProTable<ConfigType>
           headerTitle={intl.formatMessage({
-            id: 'pages.searchTable.title',
-            defaultMessage: '信息',
+            id: "pages.searchTable.title",
+            defaultMessage: "信息",
           })}
           actionRef={actionRef}
           formRef={formTableRef}
@@ -265,18 +302,20 @@ const ConfigTableList: React.FC = () => {
             <Button
               type="primary"
               key="add"
-              hidden={!access.hasPerms('system:config:add')}
               onClick={async () => {
                 setCurrentRow(undefined);
                 setModalVisible(true);
               }}
             >
-              <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="新建" />
+              <PlusOutlined />{" "}
+              <FormattedMessage
+                id="pages.searchTable.new"
+                defaultMessage="新建"
+              />
             </Button>,
             <Button
               type="primary"
               key="remove"
-              hidden={selectedRowsState?.length === 0 || !access.hasPerms('system:config:remove')}
               onClick={async () => {
                 const success = await handleRemove(selectedRowsState);
                 if (success) {
@@ -286,18 +325,23 @@ const ConfigTableList: React.FC = () => {
               }}
             >
               <DeleteOutlined />
-              <FormattedMessage id="pages.searchTable.delete" defaultMessage="删除" />
+              <FormattedMessage
+                id="pages.searchTable.delete"
+                defaultMessage="删除"
+              />
             </Button>,
             <Button
               type="primary"
               key="export"
-              hidden={!access.hasPerms('system:config:export')}
               onClick={async () => {
                 handleExport();
               }}
             >
               <PlusOutlined />
-              <FormattedMessage id="pages.searchTable.export" defaultMessage="导出" />
+              <FormattedMessage
+                id="pages.searchTable.export"
+                defaultMessage="导出"
+              />
             </Button>,
           ]}
           request={(params) =>
@@ -322,21 +366,26 @@ const ConfigTableList: React.FC = () => {
         <FooterToolbar
           extra={
             <div>
-              <FormattedMessage id="pages.searchTable.chosen" defaultMessage="已选择" />
+              <FormattedMessage
+                id="pages.searchTable.chosen"
+                defaultMessage="已选择"
+              />
               <a style={{ fontWeight: 600 }}>{selectedRowsState.length}</a>
-              <FormattedMessage id="pages.searchTable.item" defaultMessage="项" />
+              <FormattedMessage
+                id="pages.searchTable.item"
+                defaultMessage="项"
+              />
             </div>
           }
         >
           <Button
             key="remove"
-            hidden={!access.hasPerms('system:config:remove')}
             onClick={async () => {
               Modal.confirm({
-                title: '删除',
-                content: '确定删除该项吗？',
-                okText: '确认',
-                cancelText: '取消',
+                title: "删除",
+                content: "确定删除该项吗？",
+                okText: "确认",
+                cancelText: "取消",
                 onOk: async () => {
                   const success = await handleRemove(selectedRowsState);
                   if (success) {
@@ -347,7 +396,10 @@ const ConfigTableList: React.FC = () => {
               });
             }}
           >
-            <FormattedMessage id="pages.searchTable.batchDeletion" defaultMessage="批量删除" />
+            <FormattedMessage
+              id="pages.searchTable.batchDeletion"
+              defaultMessage="批量删除"
+            />
           </Button>
         </FooterToolbar>
       )}
