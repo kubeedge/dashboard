@@ -33,3 +33,13 @@ export function addRole(namespaces: string, params) {
     }
   );
 }
+
+// 详情
+export function getYaml(namespaces: string, name: string) {
+  return request(
+    `/apis/rbac.authorization.k8s.io/v1/namespaces/${namespaces}/roles/${name}`,
+    {
+      method: "get",
+    }
+  );
+}

@@ -1,14 +1,14 @@
 import request from "@/utils/request";
 
 export async function getNamespaces(options?: Record<string, any>) {
-  return request("/v1/namespaces", {
+  return request("/api/v1/namespaces", {
     method: "GET",
     ...(options || {}),
   });
 }
 
 export async function getNodes(options?: Record<string, any>) {
-  return request("/v1/nodes", {
+  return request("/api/v1/nodes", {
     method: "GET",
     ...(options || {}),
   });

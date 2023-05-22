@@ -17,8 +17,8 @@ export function getList(namespace: string) {
   );
 }
 // 删除
-export function removeItem(app: string) {
-  return request(`/apis/apps.kubeedge.io/v1alpha1/nodegroups/${app}`, {
+export function removeItem(namespace: string, name: string) {
+  return request(`/apis/apps/v1/namespaces/${namespace}/deployments/${name}`, {
     method: "delete",
   });
 }

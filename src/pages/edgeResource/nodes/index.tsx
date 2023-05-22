@@ -30,7 +30,7 @@ const handleRemoveOne = async (selectedRow: DeptType) => {
     const params = [selectedRow.name];
     const resp = await removeNode(params.join(","));
     hide();
-    if (resp.code === 200) {
+    if (resp.status === "Success") {
       message.success("Successfully deleted, about to refresh");
     } else {
       message.error(resp.msg);
@@ -207,16 +207,18 @@ const DeptTableList: React.FC = () => {
               let nodeList: any[] = [];
               if (params.state || params.uid || params.creationTimestamp) {
                 filteredRes = res.items.filter((item: any) => {
-                  let match = true;
+                  let stateMatch = true;
+                  let uidMatch = true;
+                  let creationTimestampMatch = true;
                   if (params.state) {
                     const ready =
                       item.status.conditions.filter(
                         (item: any) => item.type == "Ready"
                       )[0].status === "True";
-                    match = params.state === "Ready" ? ready : !ready;
+                    stateMatch = params.state === "Ready" ? ready : !ready;
                   }
                   if (params.uid) {
-                    match =
+                    uidMatch =
                       `${item.metadata.uid} ${item.metadata.name}`.includes(
                         params.uid
                       );
@@ -227,10 +229,10 @@ const DeptTableList: React.FC = () => {
                     const creationTimestamp = new Date(
                       item.metadata.creationTimestamp
                     );
-                    match =
+                    creationTimestampMatch =
                       creationTimestamp >= start && creationTimestamp <= end;
                   }
-                  return match;
+                  return stateMatch && uidMatch && creationTimestampMatch;
                 });
               }
               filteredRes.forEach(

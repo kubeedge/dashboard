@@ -5,6 +5,7 @@ export type listType = {
   apiGroup: string;
   kind: string;
   roleRefName: string;
+  namespace: string;
 };
 
 export type DeptType = {

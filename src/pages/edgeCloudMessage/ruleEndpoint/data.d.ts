@@ -2,14 +2,15 @@ export type listType = {
   name: string;
   uid: string;
   creationTimestamp: string;
-  ruleEndpointType: string
+  ruleEndpointType: string;
+  namespace: string;
 };
 
 export type formType = {
   name: string;
   port: string;
-  type: string
-}
+  type: string;
+};
 
 export type DeptType = {
   deptId: number;

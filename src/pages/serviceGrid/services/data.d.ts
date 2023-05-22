@@ -4,6 +4,7 @@ export type listType = {
   creationTimestamp: string;
   type: string;
   ip: string;
+  namespace: string;
 };
 
 export type DeptType = {

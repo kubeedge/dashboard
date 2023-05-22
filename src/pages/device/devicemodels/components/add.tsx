@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { ProFormText, ProFormSelect } from '@ant-design/pro-form';
-import { Form, Modal, Row, Col } from 'antd';
-import type { DeptType, listType } from '../data.d';
+import React, { useEffect } from "react";
+import { ProFormText, ProFormSelect } from "@ant-design/pro-form";
+import { Form, Modal, Row, Col } from "antd";
+import type { DeptType, listType } from "../data.d";
 
 export type DeptFormValueType = Record<string, unknown> & Partial<DeptType>;
 export type DeptFormProps = {
@@ -31,7 +31,7 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
   return (
     <Modal
       width={640}
-      title='添加模型'
+      title="添加模型"
       visible={props.visible}
       destroyOnClose
       onOk={handleOk}
@@ -90,14 +90,14 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
           <Col span={24} order={1}>
             <ProFormText
               name="propertiesName"
-              label='属性名'
+              label="属性名"
               width="xl"
               placeholder="请输入属性名"
               rules={[
                 {
                   required: false,
-                  message: ('请输入属性名'),
-                }
+                  message: "请输入属性名",
+                },
               ]}
             />
           </Col>
@@ -106,21 +106,20 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
           <Col span={24} order={1}>
             <ProFormSelect
               options={[
-                { label: 'Int', value: 'int' },
-                { label: 'String', value: 'string' },
-                { label: 'Double', value: 'double' },
-                { label: 'Float', value: 'float' },
-                { label: 'Boolean', value: 'boolean' },
-                { label: 'Bytes', value: 'bytes' },
+                { label: "Int", value: "int" },
+                { label: "String", value: "string" },
+                { label: "Double", value: "double" },
+                { label: "Float", value: "float" },
+                { label: "Boolean", value: "boolean" },
+                { label: "Bytes", value: "bytes" },
               ]}
               name="type"
-              label='属性类型'
-              width="xl"
+              label="属性类型"
               placeholder="请选择属性类型"
               rules={[
                 {
                   required: false,
-                  message: ('请选择属性类型'),
+                  message: "请选择属性类型",
                 },
               ]}
             />

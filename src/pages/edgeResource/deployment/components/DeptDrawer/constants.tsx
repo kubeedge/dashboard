@@ -78,11 +78,12 @@ export const DEPT_CONFIG: { [key: string]: FormConfig } = {
 };
 
 export const FormList: React.FC<{
-  name: string;
+  name: string | any[];
   formItemKey: string;
   value: string;
+  addName?: string;
 }> = (props) => {
-  const { name, formItemKey: key, value } = props;
+  const { name, formItemKey: key, value, addName } = props;
   return (
     <Form.List name={name}>
       {(fields, { add, remove }) => {
@@ -142,7 +143,7 @@ export const FormList: React.FC<{
                   }}
                   style={{ width: "100%" }}
                 >
-                  <PlusOutlined /> add {name}
+                  <PlusOutlined /> add {addName || name}
                 </Button>
               </Form.Item>
             </Col>

@@ -37,13 +37,7 @@ const SecretForm: React.FC<SecretFormProps> = (props) => {
       name: props.values.name,
     });
   }, [form, props]);
-  const dataOpaList: DataSourceType[] = [
-    {
-      id: 1,
-      key: "",
-      value: "",
-    },
-  ];
+  const dataOpaList: DataSourceType[] = [];
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>(() =>
     dataOpaList.map((item) => item.id)
   );
@@ -57,7 +51,7 @@ const SecretForm: React.FC<SecretFormProps> = (props) => {
     setFormType("kubernetes.io/dockerconfigjson");
   };
   const handleFinish = async (values: Record<string, any>) => {
-    const params = {
+    const params: any = {
       kind: "Secret",
       apiVersion: "v1",
       type: values.type,
@@ -81,6 +75,7 @@ const SecretForm: React.FC<SecretFormProps> = (props) => {
       values.dataSource?.forEach((item) => {
         params.data[item.key] = item.value;
       });
+      params.immutable = false;
     }
 
     props.onSubmit(params as DeptFormValueType);
@@ -106,7 +101,7 @@ const SecretForm: React.FC<SecretFormProps> = (props) => {
   return (
     <Modal
       width={640}
-      title="Add secret"
+      title="Add Secret"
       visible={props.visible}
       destroyOnClose
       onOk={handleOk}
@@ -130,7 +125,6 @@ const SecretForm: React.FC<SecretFormProps> = (props) => {
               name="namespace"
               label="Namespace"
               placeholder="Namespace"
-              style={{ width: 150 }}
               options={namespacesList}
               rules={[
                 {
@@ -142,7 +136,6 @@ const SecretForm: React.FC<SecretFormProps> = (props) => {
             <ProFormText
               name="name"
               label="Name"
-              width="xl"
               placeholder="Name"
               rules={[
                 {
@@ -227,8 +220,6 @@ const SecretForm: React.FC<SecretFormProps> = (props) => {
                     position: "top",
                     record: () => ({
                       id: Date.now(),
-                      addonBefore: "ccccccc",
-                      decs: "testdesc",
                     }),
                   }}
                   editable={{

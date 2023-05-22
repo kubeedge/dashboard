@@ -1,5 +1,4 @@
 import request from "@/utils/request";
-import type { DeptType } from "./data.d";
 
 // 列表
 export function getList(namespace: string) {
@@ -29,6 +28,17 @@ export function addItem(namespaces: string, formType: object) {
     {
       method: "post",
       data: formType,
+    }
+  );
+}
+
+export function getYaml(namespace: string, name: string) {
+  return request(
+    `/apis/rules.kubeedge.io/v1${
+      namespace ? `/namespaces/${namespace}` : ""
+    }/ruleendpoints/${name}`,
+    {
+      method: "get",
     }
   );
 }

@@ -30,12 +30,14 @@ const detailForm: React.FC<OperlogFormProps> = (props) => {
     info.password = data[info.server].password;
   }
   if (values.type == "Opaque") {
-    dataSource = Object.keys(values.data)?.map((item, index) => {
-      return {
-        key: item,
-        value: Object.values(values.data)[index],
-      };
-    });
+    dataSource = (values.data ? Object.keys(values.data) : values.data)?.map(
+      (item, index) => {
+        return {
+          key: item,
+          value: Object.values(values.data)[index],
+        };
+      }
+    );
   }
 
   const columns = [

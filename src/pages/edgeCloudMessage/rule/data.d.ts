@@ -1,7 +1,8 @@
 export type listType = {
   name: string;
   uid: string;
-  creationTimestamp: string
+  creationTimestamp: string;
+  namespace: string;
 };
 export type formType = {
   name: string;
@@ -9,8 +10,9 @@ export type formType = {
   sourceResource: string;
   target: string;
   targetResource: string;
-  description: string
-}
+  description: string;
+  namespace: string;
+};
 export type DeptType = {
   deptId: number;
   parentId: number;

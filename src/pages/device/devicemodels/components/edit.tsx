@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { ProFormText, ProFormSelect } from '@ant-design/pro-form';
-import { Form, Modal, Row, Col } from 'antd';
-import type { DeptType, listType } from '../data.d';
+import React, { useEffect } from "react";
+import { ProFormText, ProFormSelect } from "@ant-design/pro-form";
+import { Form, Modal, Row, Col } from "antd";
+import type { DeptType, listType } from "../data.d";
 
 export type DeptFormValueType = Record<string, unknown> & Partial<DeptType>;
 
@@ -36,7 +36,7 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
   return (
     <Modal
       width={640}
-      title='添加模型'
+      title="添加模型"
       visible={props.visible}
       destroyOnClose
       onOk={handleOk}
@@ -47,13 +47,12 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
           <Col span={24} order={1}>
             <ProFormText
               name="name"
-              label='名称'
-              width="xl"
+              label="名称"
               placeholder="请输入名称"
               rules={[
                 {
                   required: false,
-                  message: ('请输入名称'),
+                  message: "请输入名称",
                 },
               ]}
             />
@@ -63,13 +62,12 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
           <Col span={24} order={1}>
             <ProFormText
               name="protocol"
-              label='协议'
-              width="xl"
+              label="协议"
               placeholder="请输入协议"
               rules={[
                 {
                   required: false,
-                  message: ('请输入协议'),
+                  message: "请输入协议",
                 },
               ]}
             />
@@ -79,13 +77,12 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
           <Col span={24} order={1}>
             <ProFormText
               name="description"
-              label='描述'
-              width="xl"
+              label="描述"
               placeholder="请输入描述"
               rules={[
                 {
                   required: false,
-                  message: ('请输入描述'),
+                  message: "请输入描述",
                 },
               ]}
             />
@@ -95,14 +92,13 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
           <Col span={24} order={1}>
             <ProFormText
               name="propertiesName"
-              label='属性名'
-              width="xl"
+              label="属性名"
               placeholder="请输入属性名"
               rules={[
                 {
                   required: false,
-                  message: ('请输入属性名'),
-                }
+                  message: "请输入属性名",
+                },
               ]}
             />
           </Col>
@@ -111,21 +107,20 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
           <Col span={24} order={1}>
             <ProFormSelect
               options={[
-                { label: 'Int', value: 'int' },
-                { label: 'String', value: 'string' },
-                { label: 'Double', value: 'double' },
-                { label: 'Float', value: 'float' },
-                { label: 'Boolean', value: 'boolean' },
-                { label: 'Bytes', value: 'bytes' },
+                { label: "Int", value: "int" },
+                { label: "String", value: "string" },
+                { label: "Double", value: "double" },
+                { label: "Float", value: "float" },
+                { label: "Boolean", value: "boolean" },
+                { label: "Bytes", value: "bytes" },
               ]}
               name="type"
-              label='属性类型'
-              width="xl"
+              label="属性类型"
               placeholder="请选择属性类型"
               rules={[
                 {
                   required: false,
-                  message: ('请选择属性类型'),
+                  message: "请选择属性类型",
                 },
               ]}
             />

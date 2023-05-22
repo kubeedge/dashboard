@@ -1,35 +1,34 @@
-import request from '@/utils/request';
-import type { DeptType } from './data.d';
+import request from "@/utils/request";
 
 // 列表
 export function getList() {
- return request(`/apis/rbac.authorization.k8s.io/v1/clusterroles`, {
-  method: 'get'
- }) 
+  return request(`/apis/rbac.authorization.k8s.io/v1/clusterroles`, {
+    method: "get",
+  });
 }
+
 // 删除
 export function removeItem(clusterrole: string) {
-  return request(`/apis/rbac.authorization.k8s.io/v1/clusterroles/${clusterrole}`, {
-    method: 'delete',
-  });
+  return request(
+    `/apis/rbac.authorization.k8s.io/v1/clusterroles/${clusterrole}`,
+    {
+      method: "delete",
+    }
+  );
 }
 
-
-
-
-
-// 新增部门
-export async function addDept(params: DeptType) {
-  return request('/system/dept', {
-    method: 'POST',
-    data: params,
-  });
+export function getYaml(clusterrole: string) {
+  return request(
+    `/apis/rbac.authorization.k8s.io/v1/clusterroles/${clusterrole}`,
+    {
+      method: "get",
+    }
+  );
 }
 
-// 修改部门
-export async function updateDept(params: DeptType) {
-  return request('/system/dept', {
-    method: 'PUT',
+export function addRole(params) {
+  return request(`/apis/rbac.authorization.k8s.io/v1/clusterroles`, {
+    method: "post",
     data: params,
   });
 }

@@ -24,7 +24,7 @@ const handleAdd = async (fields: DeviceType) => {
       ...fields,
     });
     hide();
-    if (resp.metadata.creationTimestamp) {
+    if (resp.metadata?.creationTimestamp) {
       message.success("添加成功");
     }
     return true;

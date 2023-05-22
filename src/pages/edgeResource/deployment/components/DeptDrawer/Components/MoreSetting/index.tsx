@@ -984,7 +984,6 @@ const MoreSetting = React.forwardRef((props: any, ref) => {
                                     options={namespacesList}
                                     label="Namespaces"
                                     placeholder={"Namespaces"}
-                                    width="xl"
                                     fieldProps={{
                                       mode: "multiple",
                                     }}
@@ -1326,7 +1325,6 @@ const MoreSetting = React.forwardRef((props: any, ref) => {
                                     options={namespacesList}
                                     label="Namespaces"
                                     placeholder={"Namespaces"}
-                                    width="xl"
                                     fieldProps={{
                                       mode: "multiple",
                                     }}
@@ -1704,7 +1702,6 @@ const MoreSetting = React.forwardRef((props: any, ref) => {
                                     options={namespacesList}
                                     label="Namespaces"
                                     placeholder={"Namespaces"}
-                                    width="xl"
                                     fieldProps={{
                                       mode: "multiple",
                                     }}
@@ -2046,7 +2043,6 @@ const MoreSetting = React.forwardRef((props: any, ref) => {
                                     options={namespacesList}
                                     label="Namespaces"
                                     placeholder={"Namespaces"}
-                                    width="xl"
                                     fieldProps={{
                                       mode: "multiple",
                                     }}
