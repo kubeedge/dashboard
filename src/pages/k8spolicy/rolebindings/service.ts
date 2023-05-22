@@ -21,6 +21,15 @@ export function removeItem(namespaces: string, rolebindings: string) {
   );
 }
 
+export function getYaml(namespaces: string, rolebindings: string) {
+  return request(
+    `/apis/rbac.authorization.k8s.io/v1/namespaces/${namespaces}/rolebindings/${rolebindings}`,
+    {
+      method: "get",
+    }
+  );
+}
+
 // 新增
 export async function addBinding(namespaces: string, params) {
   return request(

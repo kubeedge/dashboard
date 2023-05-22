@@ -1,45 +1,53 @@
 import { PlusOutlined } from "@ant-design/icons";
 import type { FormInstance } from "antd";
-import { Button, message, Modal, Select, Input, DatePicker } from "antd";
+import { Button, message, Modal, Input, Select, DatePicker } from "antd";
 import React, { useState, useRef, useEffect } from "react";
-import { useModel } from "umi";
+import { FormattedMessage, useModel } from "umi";
 import WrapContent from "@/components/WrapContent";
 import type { ProColumns, ActionType } from "@ant-design/pro-table";
 import ProTable from "@ant-design/pro-table";
-import type { DeptType, listType } from "./data";
-import { getList, removeItem, addConfigmap, updateDept } from "./service";
-import UpdateForm from "./components/edit";
 import { getNamespaces } from "@/services/kubeedge";
+import type { DeptType, formType, listType } from "./data";
+import {
+  getList,
+  removeItem,
+  getRuleendpoints,
+  addItem,
+  getYaml,
+} from "./service";
+import UpdateForm from "./components/edit";
+import Yaml from "./components/yaml";
 
 const { RangePicker } = DatePicker;
 
-const handleAdd = async (fields: any) => {
+const handleAdd = async (fields: formType) => {
   const hide = message.loading("Adding...");
   try {
-    const resp = await addConfigmap(fields.metadata.namespace, {
-      ...fields,
-    });
+    const obj = {
+      apiVersion: "rules.kubeedge.io/v1",
+      kind: "Rule",
+      metadata: {
+        name: fields.name,
+        namespace: fields.namespace,
+        labels: {
+          description: fields.description,
+        },
+      },
+      spec: {
+        source: fields.source,
+        sourceResource: {
+          path: fields.sourceResource,
+        },
+        target: fields.target,
+        targetResource: {
+          path: fields.targetResource,
+        },
+      },
+    };
+    const resp = await addItem(fields.namespace, obj);
     hide();
     if (resp.metadata?.creationTimestamp) {
       message.success("Added successfully");
-    } else {
-      message.error(resp.msg);
-    }
-    return true;
-  } catch (error) {
-    hide();
-    message.error("Failed, please try again!");
-    return false;
-  }
-};
-
-const handleUpdate = async (fields: DeptType) => {
-  const hide = message.loading("Updating...");
-  try {
-    const resp = await updateDept(fields);
-    hide();
-    if (resp.status === "Success") {
-      message.success("Updated successfully!");
     } else {
       message.error(resp.msg);
     }
@@ -57,7 +65,7 @@ const handleRemoveOne = async (selectedRow: listType) => {
   try {
     const resp = await removeItem(selectedRow.namespace, selectedRow.name);
     hide();
-    if (resp.status === "Success") {
+    if (resp.status === "Success" || resp.metadata?.name === selectedRow.name) {
       message.success("Successfully deleted, about to refresh");
     } else {
       message.error(resp.msg);
@@ -78,6 +86,11 @@ const DeptTableList: React.FC = () => {
 
   const actionRef = useRef<ActionType>();
   const [currentRow, setCurrentRow] = useState<listType>();
+  const [ruleEndpoints, setRuleEndpoints] = useState([]);
+
+  const [yamlVisible, setYamlVisible] = useState<boolean>(false);
+  const [currentYaml, setCurrentYaml] = useState<listType>();
+
   const [namespacesList, setNamespacesList] = React.useState<any[]>([]);
 
   const initNamespacesList = async () => {
@@ -94,6 +107,12 @@ const DeptTableList: React.FC = () => {
   };
 
   useEffect(() => {
+    getRuleendpoints(initialState?.namespace).then((res) => {
+      const ruleEndpointsList = res.items.map((item) => {
+        return { label: item.metadata.name, value: item.metadata.name };
+      });
+      setRuleEndpoints(ruleEndpointsList);
+    });
     if (initialState?.namespace === "") {
       initNamespacesList();
     } else {
@@ -130,15 +149,35 @@ const DeptTableList: React.FC = () => {
       title: "Name",
       dataIndex: "name",
       valueType: "text",
-      width: 220,
-      align: "center",
       renderFormItem: () => (
-        <Input allowClear placeholder="Please enter name" />
+        <Input
+          allowClear
+          placeholder="Please enter name"
+          style={{ width: 160 }}
+        />
       ),
     },
     {
-      title: "Labels",
-      dataIndex: "labels",
+      title: "Source",
+      dataIndex: "source",
+      valueType: "text",
+      search: false,
+    },
+    {
+      title: "SourceResource",
+      dataIndex: "sourceResource",
+      valueType: "text",
+      search: false,
+    },
+    {
+      title: "Target",
+      dataIndex: "target",
+      valueType: "text",
+      search: false,
+    },
+    {
+      title: "TargetResource",
+      dataIndex: "targetResource",
       valueType: "text",
       search: false,
     },
@@ -146,13 +185,12 @@ const DeptTableList: React.FC = () => {
       title: "Creation time",
       dataIndex: "creationTimestamp",
       valueType: "dateTime",
-      width: 220,
-      align: "center",
       formItemProps: {
-        labelCol: { span: 8 },
+        labelCol: { span: 9 },
       },
       renderFormItem: () => (
         <RangePicker
+          style={{ width: 220 }}
           allowClear
           placeholder={["Start Time", "End Time"]}
           showTime={{ format: "HH:mm:ss" }}
@@ -165,8 +203,19 @@ const DeptTableList: React.FC = () => {
       dataIndex: "option",
       width: "220px",
       valueType: "option",
-      search: false,
       render: (_, record) => [
+        <Button
+          type="link"
+          size="small"
+          key="batchRemove"
+          onClick={async () => {
+            const res = await getYaml(record.namespace, record.name);
+            setCurrentYaml(res);
+            setYamlVisible(true);
+          }}
+        >
+          YAML
+        </Button>,
         <Button
           type="link"
           size="small"
@@ -197,11 +246,12 @@ const DeptTableList: React.FC = () => {
     <WrapContent>
       <div style={{ width: "100%", float: "right" }}>
         <ProTable<listType>
-          headerTitle="Configmap"
+          headerTitle="Rule"
           actionRef={actionRef}
           formRef={formTableRef}
           rowKey="deptId"
           key="deptList"
+          search={{ labelWidth: 120 }}
           toolBarRender={() => [
             <Button
               type="primary"
@@ -211,7 +261,8 @@ const DeptTableList: React.FC = () => {
                 setModalVisible(true);
               }}
             >
-              <PlusOutlined /> Add Configmap
+              <PlusOutlined />
+              {"Add Rule"}
             </Button>,
           ]}
           params={{ namespaceSetting: initialState.namespace }}
@@ -222,7 +273,7 @@ const DeptTableList: React.FC = () => {
                 ...formTableRef?.current?.getFieldsValue?.(),
               };
               let filteredRes = res.items;
-              let configmapList: any[] = [];
+              let ruleList: any[] = [];
               if (
                 combinedParams.namespace?.length ||
                 combinedParams.name ||
@@ -258,18 +309,21 @@ const DeptTableList: React.FC = () => {
               }
               filteredRes.forEach(
                 (item: { metadata: any; spec: any; status: any }) => {
-                  configmapList.push({
+                  ruleList.push({
                     name: item.metadata.name,
                     namespace: item.metadata.namespace,
                     uid: item.metadata.uid,
                     creationTimestamp: item.metadata.creationTimestamp,
-                    labels: JSON.stringify(item?.metadata?.labels),
+                    source: item.spec.source,
+                    sourceResource: item.spec.sourceResource.path,
+                    target: item.spec.target,
+                    targetResource: item.spec.targetResource.path,
                   });
                 }
               );
               return {
-                data: configmapList,
-                total: configmapList.length,
+                data: ruleList,
+                total: ruleList.length,
                 success: true,
               };
             })
@@ -280,11 +334,7 @@ const DeptTableList: React.FC = () => {
       <UpdateForm
         onSubmit={async (values) => {
           let success = false;
-          if (values.deptId) {
-            success = await handleUpdate({ ...values } as DeptType);
-          } else {
-            success = await handleAdd({ ...values } as DeptType);
-          }
+          success = await handleAdd({ ...values } as formType);
           if (success) {
             setModalVisible(false);
             setCurrentRow(undefined);
@@ -297,8 +347,24 @@ const DeptTableList: React.FC = () => {
           setModalVisible(false);
           setCurrentRow(undefined);
         }}
+        ruleEndpoints={ruleEndpoints}
         visible={modalVisible}
         values={currentRow || {}}
+      />
+      <Yaml
+        onSubmit={async (values) => {
+          setYamlVisible(false);
+          setCurrentYaml(undefined);
+          if (actionRef.current) {
+            actionRef.current.reload();
+          }
+        }}
+        onCancel={() => {
+          setYamlVisible(false);
+          setCurrentYaml(undefined);
+        }}
+        visible={yamlVisible}
+        values={currentYaml || {}}
       />
     </WrapContent>
   );

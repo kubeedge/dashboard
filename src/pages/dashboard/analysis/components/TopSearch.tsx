@@ -43,7 +43,7 @@ const TopSearch = ({ loading }: { loading: boolean }) => {
       setState: setRulesList,
       name: "Rules",
       api: getRules,
-      path: "/edgeCloudMessage/ruleRoute",
+      path: "/edgeCloudMessage/rule",
     },
   ];
 

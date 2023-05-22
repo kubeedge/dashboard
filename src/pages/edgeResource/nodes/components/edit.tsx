@@ -53,7 +53,6 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
             <ProFormText
               name="cloudIP"
               label="Cloud master node ip:port"
-              width="xl"
               placeholder="192.168.33.100:10000"
               rules={[
                 {
@@ -68,7 +67,6 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
             <ProFormText
               name="version"
               label="Kubedege version"
-              width="xl"
               placeholder="1.12.1"
               rules={[
                 {
@@ -87,7 +85,6 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
               ]}
               name="runtimeType"
               label="Runtime type"
-              width="xl"
               placeholder="Please select a runtime type"
               rules={[
                 {
@@ -103,7 +100,6 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
             <ProFormText
               name="token"
               label="Token"
-              width="xl"
               placeholder="Please enter token"
               rules={[
                 {
@@ -118,7 +114,6 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
             <ProFormTextArea
               name="remark"
               label="Command"
-              width="xl"
               // placeholder=""
             />
           </Col>

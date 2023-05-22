@@ -73,7 +73,6 @@ const DeptTableList: React.FC = () => {
         <Button
           type="link"
           size="small"
-          danger
           key="batchRemove"
           onClick={async () => {
             const res = await getYaml(record.name);
@@ -91,7 +90,7 @@ const DeptTableList: React.FC = () => {
     <WrapContent>
       <div style={{ width: "100%", float: "right" }}>
         <ProTable<listType>
-          headerTitle="CRD"
+          headerTitle="Crd"
           actionRef={actionRef}
           formRef={formTableRef}
           rowKey="uid"
@@ -108,9 +107,12 @@ const DeptTableList: React.FC = () => {
               let crdList: any[] = [];
               if (combinedParams.name || combinedParams.creationTimestamp) {
                 filteredRes = res.items.filter((item: any) => {
-                  let match = true;
+                  let nameMatch = true;
+                  let creationTimestampMatch = true;
                   if (combinedParams.name) {
-                    match = item.metadata.name.includes(combinedParams.name);
+                    nameMatch = item.metadata.name.includes(
+                      combinedParams.name
+                    );
                   }
                   if (combinedParams.creationTimestamp) {
                     const start = new Date(combinedParams.creationTimestamp[0]);
@@ -118,10 +120,10 @@ const DeptTableList: React.FC = () => {
                     const creationTimestamp = new Date(
                       item.metadata.creationTimestamp
                     );
-                    match =
+                    creationTimestampMatch =
                       creationTimestamp >= start && creationTimestamp <= end;
                   }
-                  return match;
+                  return nameMatch && creationTimestampMatch;
                 });
               }
               filteredRes.forEach(

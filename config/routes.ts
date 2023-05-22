@@ -28,18 +28,18 @@
     title: "menu.dashboard.analysis",
   },
   {
-    name: "Edge Resource",
+    name: "Node",
     icon: "ClusterOutlined",
-    path: "/edgeResource",
+    path: "/node",
     routes: [
       {
         path: "/",
-        redirect: "/edgeResource/nodes",
+        redirect: "/node/nodes",
       },
       {
         name: "nodes",
         icon: "PartitionOutlined",
-        path: "/edgeResource/nodes",
+        path: "/node/nodes",
         component: "edgeResource/nodes/index",
 
         wrappers: ["@/components/KeepAlive"],
@@ -47,9 +47,30 @@
         title: "menu.title.nodes",
       },
       {
+        name: "nodeGroup",
+        icon: "PartitionOutlined",
+        path: "/node/nodeGroup",
+        component: "customize/nodeGroup/index",
+
+        wrappers: ["@/components/KeepAlive"],
+        KeepAlive: false,
+        title: "menu.title.nodes",
+      },
+    ],
+  },
+  {
+    name: "Application",
+    icon: "AppstoreOutlined",
+    path: "/application",
+    routes: [
+      {
+        path: "/",
+        redirect: "/application/deployment",
+      },
+      {
         name: "deployment",
         icon: "PartitionOutlined",
-        path: "/edgeResource/deployment",
+        path: "/application/deployment",
         component: "edgeResource/deployment/index",
 
         wrappers: ["@/components/KeepAlive"],
@@ -57,9 +78,30 @@
         title: "menu.title.nodes",
       },
       {
+        name: "edgeApplication",
+        icon: "PartitionOutlined",
+        path: "/application/edgeApplication",
+        component: "customize/edgeApplication/index",
+
+        wrappers: ["@/components/KeepAlive"],
+        KeepAlive: false,
+        title: "menu.title.nodes",
+      },
+    ],
+  },
+  {
+    name: "Config",
+    icon: "SettingOutlined",
+    path: "/config",
+    routes: [
+      {
+        path: "/",
+        redirect: "/config/configmap",
+      },
+      {
         name: "configmap",
         icon: "PartitionOutlined",
-        path: "/edgeResource/configmap",
+        path: "/config/configmap",
         component: "edgeResource/configmap/index",
 
         wrappers: ["@/components/KeepAlive"],
@@ -69,7 +111,7 @@
       {
         name: "secret",
         icon: "PartitionOutlined",
-        path: "/edgeResource/secret",
+        path: "/config/secret",
         component: "edgeResource/secret/index",
 
         wrappers: ["@/components/KeepAlive"],
@@ -127,19 +169,17 @@
         name: "ruleEndpoint",
         icon: "PartitionOutlined",
         path: "/edgeCloudMessage/ruleEndpoint",
-        // component: "edgeCloudMessage/ruleEndpoint/index",
-        component: "404",
+        component: "edgeCloudMessage/ruleEndpoint/index",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,
         title: "menu.title.nodes",
       },
       {
-        name: "ruleRoute",
+        name: "rule",
         icon: "PartitionOutlined",
-        path: "/edgeCloudMessage/ruleRoute",
-        // component: "edgeCloudMessage/ruleRoute/index",
-        component: "404",
+        path: "/edgeCloudMessage/rule",
+        component: "edgeCloudMessage/rule/index",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,
@@ -156,8 +196,7 @@
         name: "services",
         icon: "PartitionOutlined",
         path: "/serviceGrid/services",
-        // component: "serviceGrid/services/index",
-        component: "404",
+        component: "serviceGrid/services/index",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,
@@ -173,15 +212,13 @@
     routes: [
       {
         path: "/",
-        // redirect: "/k8spolicy/serviceaccounts",
-        component: "404",
+        redirect: "/k8spolicy/serviceaccounts",
       },
       {
         name: "serviceaccounts",
         icon: "PartitionOutlined",
         path: "/k8spolicy/serviceaccounts",
-        // component: "k8spolicy/serviceaccounts/index",
-        component: "404",
+        component: "k8spolicy/serviceaccounts/index",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,
@@ -191,8 +228,7 @@
         name: "roles",
         icon: "PartitionOutlined",
         path: "/k8spolicy/roles",
-        // component: "k8spolicy/roles/index",
-        component: "404",
+        component: "k8spolicy/roles/index",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,
@@ -202,8 +238,7 @@
         name: "rolebindings",
         icon: "PartitionOutlined",
         path: "/k8spolicy/rolebindings",
-        // component: "k8spolicy/rolebindings/index",
-        component: "404",
+        component: "k8spolicy/rolebindings/index",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,
@@ -213,8 +248,7 @@
         name: "clusterroles",
         icon: "PartitionOutlined",
         path: "/k8spolicy/clusterroles",
-        // component: "k8spolicy/clusterroles/index",
-        component: "404",
+        component: "k8spolicy/clusterroles/index",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,
@@ -224,8 +258,7 @@
         name: "clusterrolebindings",
         icon: "PartitionOutlined",
         path: "/k8spolicy/clusterrolebindings",
-        // component: "k8spolicy/clusterrolebindings/index",
-        component: "404",
+        component: "k8spolicy/clusterrolebindings/index",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,
@@ -243,28 +276,6 @@
         icon: "PartitionOutlined",
         path: "/customize/crd",
         component: "customize/crd/index",
-
-        wrappers: ["@/components/KeepAlive"],
-        KeepAlive: false,
-        title: "menu.title.nodes",
-      },
-      {
-        name: "edgeApplication",
-        icon: "PartitionOutlined",
-        path: "/customize/edgeApplication",
-        // component: "customize/edgeApplication/index",
-        component: "404",
-
-        wrappers: ["@/components/KeepAlive"],
-        KeepAlive: false,
-        title: "menu.title.nodes",
-      },
-      {
-        name: "nodeGroup",
-        icon: "PartitionOutlined",
-        path: "/customize/nodeGroup",
-        // component: "customize/nodeGroup/index",
-        component: "404",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,

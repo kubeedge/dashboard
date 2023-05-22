@@ -1,153 +1,110 @@
 import { PlusOutlined } from "@ant-design/icons";
 import type { FormInstance } from "antd";
-import { Button, message, Modal } from "antd";
+import { Button, message, Modal, Input, DatePicker, Select } from "antd";
 import React, { useState, useRef, useEffect } from "react";
-import { useIntl, FormattedMessage } from "umi";
-import { FooterToolbar } from "@ant-design/pro-layout";
+import { FormattedMessage, useModel } from "umi";
 import WrapContent from "@/components/WrapContent";
 import type { ProColumns, ActionType } from "@ant-design/pro-table";
 import ProTable from "@ant-design/pro-table";
-import type { DeptType, listType } from "./data.d";
-import { getList, removeItem, addDept, updateDept } from "./service";
+import type { listType } from "./data.d";
+import { getList, removeItem, addBinding, getYaml } from "./service";
 import AddForm from "./components/add";
+import Yaml from "./components/yaml";
 
-/**
- * 添加节点
- *
- * @param fields
- */
-const handleAdd = async (fields: DeptType) => {
-  const hide = message.loading("正在添加");
-  try {
-    const resp = await addDept({ ...fields });
-    hide();
-    if (resp.code === 200) {
-      message.success("添加成功");
-    } else {
-      message.error(resp.msg);
-    }
-    return true;
-  } catch (error) {
-    hide();
-    message.error("添加失败请重试！");
-    return false;
-  }
-};
-
-/**
- * 更新节点
- *
- * @param fields
- */
-const handleUpdate = async (fields: DeptType) => {
-  const hide = message.loading("正在配置");
-  try {
-    const resp = await updateDept(fields);
-    hide();
-    if (resp.code === 200) {
-      message.success("配置成功");
-    } else {
-      message.error(resp.msg);
-    }
-    return true;
-  } catch (error) {
-    hide();
-    message.error("配置失败请重试！");
-    return false;
-  }
-};
-
-/**
- * 删除节点
- *
- * @param selectedRows
- */
-const handleRemove = async (selectedRows: listType[]) => {
-  const hide = message.loading("正在删除");
-  if (!selectedRows) return true;
-  try {
-    const resp = await removeItem(
-      selectedRows.map((row) => row.name).join(",")
-    );
-    hide();
-    if (resp.code === 200) {
-      message.success("删除成功，即将刷新");
-    } else {
-      message.error(resp.msg);
-    }
-    return true;
-  } catch (error) {
-    hide();
-    message.error("删除失败，请重试");
-    return false;
-  }
-};
-
-const handleRemoveOne = async (selectedRow: listType) => {
-  const hide = message.loading("正在删除");
-  if (!selectedRow) return true;
-  try {
-    const resp = await removeItem(selectedRow.name);
-    hide();
-    if (resp.status === "Success") {
-      message.success("删除成功，即将刷新");
-    } else {
-      message.error("删除失败");
-    }
-    return true;
-  } catch (error) {
-    hide();
-    message.error("删除失败，请重试");
-    return false;
-  }
-};
+const { RangePicker } = DatePicker;
 
 const DeptTableList: React.FC = () => {
   const formTableRef = useRef<FormInstance>();
+  const { initialState } = useModel("@@initialState");
 
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   const actionRef = useRef<ActionType>();
   const [currentRow, setCurrentRow] = useState<listType>();
-  const [selectedRowsState, setSelectedRows] = useState<listType[]>([]);
 
-  /** 国际化配置 */
-  const intl = useIntl();
+  const [yamlVisible, setYamlVisible] = useState<boolean>(false);
+  const [currentYaml, setCurrentYaml] = useState<listType>();
 
-  useEffect(() => {}, []);
+  const handleAdd = async (fields: any) => {
+    const hide = message.loading("Adding...");
+    try {
+      const resp = await addBinding({
+        ...fields,
+      });
+      hide();
+      if (resp.metadata?.creationTimestamp) {
+        message.success("Added successfully");
+      } else {
+        message.error(resp.msg);
+      }
+      return true;
+    } catch (error) {
+      hide();
+      message.error("Failed, please try again!");
+      return false;
+    }
+  };
+
+  const handleRemoveOne = async (selectedRow: listType) => {
+    const hide = message.loading("Deleting...");
+    if (!selectedRow) return true;
+    try {
+      const resp = await removeItem(selectedRow.name);
+      hide();
+      if (
+        resp.status === "Success" ||
+        resp.metadata?.name === selectedRow.name
+      ) {
+        message.success("Successfully deleted, about to refresh");
+      } else {
+        message.error(resp.msg);
+      }
+      return true;
+    } catch (error) {
+      hide();
+      message.error("Deletion failed, please try again");
+      return false;
+    }
+  };
 
   const columns: ProColumns<listType>[] = [
     {
-      title: "名称",
+      title: "Name",
       dataIndex: "name",
       valueType: "text",
-    },
-    {
-      title: "roleRef",
-      dataIndex: "roleRef",
-      valueType: "text",
-      render: (_, record) => (
-        <span>
-          {record.apiGroup}
-          <br />
-          {record.kind}
-          <br />
-          {record.roleRefName}
-        </span>
-      ),
-    },
-    {
-      title: "创建时间",
-      dataIndex: "creationTimestamp",
-      valueType: "dateTime",
-    },
-    {
-      title: (
-        <FormattedMessage
-          id="pages.searchTable.titleOption"
-          defaultMessage="操作"
+      renderFormItem: () => (
+        <Input
+          allowClear
+          placeholder="Please enter name"
+          style={{ width: 160 }}
         />
       ),
+    },
+    {
+      title: "RoleRef",
+      dataIndex: "roleRef",
+      valueType: "text",
+      search: false,
+    },
+    {
+      title: "Creation time",
+      dataIndex: "creationTimestamp",
+      valueType: "dateTime",
+      formItemProps: {
+        labelCol: { span: 9 },
+      },
+      renderFormItem: () => (
+        <RangePicker
+          style={{ width: 220 }}
+          allowClear
+          placeholder={["Start Time", "End Time"]}
+          showTime={{ format: "HH:mm:ss" }}
+          format="YYYY-MM-DD HH:mm:ss"
+        />
+      ),
+    },
+    {
+      title: "Operation",
       dataIndex: "option",
       width: "220px",
       valueType: "option",
@@ -155,14 +112,24 @@ const DeptTableList: React.FC = () => {
         <Button
           type="link"
           size="small"
+          key="batchRemove"
+          onClick={async () => {
+            const res = await getYaml(record.name);
+            setCurrentYaml(res);
+            setYamlVisible(true);
+          }}
+        >
+          YAML
+        </Button>,
+        <Button
+          type="link"
+          size="small"
           danger
           key="batchRemove"
           onClick={async () => {
             Modal.confirm({
-              title: "删除",
-              content: "确定删除该项吗？",
-              okText: "确认",
-              cancelText: "取消",
+              title: "Delete",
+              content: "Are you sure to delete this item?",
               onOk: async () => {
                 const success = await handleRemoveOne(record);
                 if (success) {
@@ -174,7 +141,7 @@ const DeptTableList: React.FC = () => {
             });
           }}
         >
-          删除
+          Delete
         </Button>,
       ],
     },
@@ -184,7 +151,7 @@ const DeptTableList: React.FC = () => {
     <WrapContent>
       <div style={{ width: "100%", float: "right" }}>
         <ProTable<listType>
-          headerTitle="clusterrolebindings"
+          headerTitle="Clusterrolebinding"
           actionRef={actionRef}
           formRef={formTableRef}
           rowKey="deptId"
@@ -199,27 +166,52 @@ const DeptTableList: React.FC = () => {
                 setModalVisible(true);
               }}
             >
-              <PlusOutlined />{" "}
-              <FormattedMessage
-                id="pages.searchTable.new"
-                defaultMessage="新建"
-              />
+              <PlusOutlined />
+              {"Add Clusterrolebinding"}
             </Button>,
           ]}
           request={(params) =>
             getList().then((res) => {
-              return {
-                data: res.items.map((item) => {
-                  return {
+              const combinedParams = {
+                ...params,
+                ...formTableRef?.current?.getFieldsValue?.(),
+              };
+              let filteredRes = res.items;
+              let bindingList: any[] = [];
+              if (combinedParams.name || combinedParams.creationTimestamp) {
+                filteredRes = res.items.filter((item: any) => {
+                  let nameMatch = true;
+                  let creationTimestampMatch = true;
+                  if (combinedParams.name) {
+                    nameMatch = item.metadata.name.includes(
+                      combinedParams.name
+                    );
+                  }
+                  if (combinedParams.creationTimestamp) {
+                    const start = new Date(combinedParams.creationTimestamp[0]);
+                    const end = new Date(combinedParams.creationTimestamp[1]);
+                    const creationTimestamp = new Date(
+                      item.metadata.creationTimestamp
+                    );
+                    creationTimestampMatch =
+                      creationTimestamp >= start && creationTimestamp <= end;
+                  }
+                  return nameMatch && creationTimestampMatch;
+                });
+              }
+              filteredRes.forEach(
+                (item: { metadata: any; roleRef: any; status: any }) => {
+                  bindingList.push({
                     name: item.metadata.name,
                     uid: item.metadata.uid,
                     creationTimestamp: item.metadata.creationTimestamp,
-                    apiGroup: item.roleRef.apiGroup,
-                    kind: item.roleRef.kind,
-                    roleRefName: item.roleRef.name,
-                  };
-                }),
-                total: res.items.length,
+                    roleRef: JSON.stringify(item.roleRef),
+                  });
+                }
+              );
+              return {
+                data: bindingList,
+                total: bindingList.length,
                 success: true,
               };
             })
@@ -230,11 +222,7 @@ const DeptTableList: React.FC = () => {
       <AddForm
         onSubmit={async (values) => {
           let success = false;
-          if (values.deptId) {
-            success = await handleUpdate({ ...values } as DeptType);
-          } else {
-            success = await handleAdd({ ...values } as DeptType);
-          }
+          success = await handleAdd({ ...values });
           if (success) {
             setModalVisible(false);
             setCurrentRow(undefined);
@@ -249,6 +237,21 @@ const DeptTableList: React.FC = () => {
         }}
         visible={modalVisible}
         values={currentRow || {}}
+      />
+      <Yaml
+        onSubmit={async (values) => {
+          setYamlVisible(false);
+          setCurrentYaml(undefined);
+          if (actionRef.current) {
+            actionRef.current.reload();
+          }
+        }}
+        onCancel={() => {
+          setYamlVisible(false);
+          setCurrentYaml(undefined);
+        }}
+        visible={yamlVisible}
+        values={currentYaml || {}}
       />
     </WrapContent>
   );

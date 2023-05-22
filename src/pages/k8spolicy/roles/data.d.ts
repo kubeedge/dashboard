@@ -1,7 +1,8 @@
 export type listType = {
   name: string;
   uid: string;
-  creationTimestamp: string
+  creationTimestamp: string;
+  namespace: string;
 };
 
 export type DeptType = {

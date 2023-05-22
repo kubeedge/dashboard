@@ -21,7 +21,7 @@ const handleAdd = async (fields: SecretType) => {
       ...fields,
     });
     hide();
-    if (resp.metadata.creationTimestamp) {
+    if (resp.metadata?.creationTimestamp) {
       message.success("Added successfully");
     } else {
       message.error(resp.msg);
@@ -50,7 +50,7 @@ const handleRemoveOne = async (selectedRow: listType) => {
   try {
     const resp = await removeItem(selectedRow.namespace, selectedRow.name);
     hide();
-    if (resp.code === 200) {
+    if (resp.status === "Success") {
       message.success("Successfully deleted, about to refresh");
     } else {
       message.error(resp.msg);
@@ -216,7 +216,7 @@ const DeptTableList: React.FC = () => {
               }}
             >
               <PlusOutlined />
-              Add secret
+              Add Secret
             </Button>,
           ]}
           params={{ namespaceSetting: initialState.namespace }}
@@ -234,16 +234,20 @@ const DeptTableList: React.FC = () => {
                 combinedParams.creationTimestamp
               ) {
                 filteredRes = res.items.filter((item: any) => {
-                  let match = true;
+                  let namespaceMatch = true;
+                  let nameMatch = true;
+                  let creationTimestampMatch = true;
                   if (combinedParams.namespace) {
-                    match =
+                    namespaceMatch =
                       combinedParams.namespace.includes("") ||
                       combinedParams.namespace.includes(
                         item.metadata.namespace
                       );
                   }
                   if (combinedParams.name) {
-                    match = item.metadata.name.includes(combinedParams.name);
+                    nameMatch = item.metadata.name.includes(
+                      combinedParams.name
+                    );
                   }
                   if (combinedParams.creationTimestamp) {
                     const start = new Date(combinedParams.creationTimestamp[0]);
@@ -251,10 +255,10 @@ const DeptTableList: React.FC = () => {
                     const creationTimestamp = new Date(
                       item.metadata.creationTimestamp
                     );
-                    match =
+                    creationTimestampMatch =
                       creationTimestamp >= start && creationTimestamp <= end;
                   }
-                  return match;
+                  return namespaceMatch && nameMatch && creationTimestampMatch;
                 });
               }
               filteredRes.forEach(

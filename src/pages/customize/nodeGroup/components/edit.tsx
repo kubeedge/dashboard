@@ -1,15 +1,10 @@
-import React, { useEffect } from 'react';
-import { ProFormDigit, ProFormText, ProFormRadio, ProFormTreeSelect } from '@ant-design/pro-form';
-import { Form, Modal, Row, Col } from 'antd';
-import { useIntl, FormattedMessage } from 'umi';
-import type { DeptType, listType } from '../data.d';
-
-/* *
- *
- * @author whiteshader@163.com
- * @datetime  2021/09/16
- * 
- * */
+import React, { useEffect } from "react";
+import { ProFormText, ProFormSelect } from "@ant-design/pro-form";
+import { Form, Modal, Row, Col } from "antd";
+import type { DeptType, listType } from "../data.d";
+import { FormList } from "@/pages/edgeResource/deployment/components/DeptDrawer/constants";
+import { getNodesList } from "@/pages/edgeResource/nodes/service";
+import { arrayToObject } from "@/utils/utils";
 
 export type DeptFormValueType = Record<string, unknown> & Partial<DeptType>;
 
@@ -22,6 +17,18 @@ export type DeptFormProps = {
 
 const DeptForm: React.FC<DeptFormProps> = (props) => {
   const [form] = Form.useForm();
+  const [nodesList, setNodesList] = React.useState<any[]>([]);
+  const initNodesList = async () => {
+    const nodesListRes = await getNodesList();
+    setNodesList(
+      (nodesListRes?.items || []).map((item: any) => {
+        return { label: item.metadata.name, value: item.metadata.name };
+      })
+    );
+  };
+  useEffect(() => {
+    initNodesList();
+  }, []);
 
   useEffect(() => {
     form.resetFields();
@@ -30,7 +37,6 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
     });
   }, [form, props]);
 
-  const intl = useIntl();
   const handleOk = () => {
     form.submit();
   };
@@ -39,13 +45,26 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
     form.resetFields();
   };
   const handleFinish = async (values: Record<string, any>) => {
-    props.onSubmit(values as DeptFormValueType);
+    const params = {
+      kind: "NodeGroup",
+      apiVersion: "apps.kubeedge.io/v1alpha1",
+      metadata: {
+        name: values.name,
+      },
+      spec: {
+        nodes: values.nodes,
+        matchLabels: values.matchLabels
+          ? arrayToObject(values.matchLabels)
+          : values.matchLabels,
+      },
+    };
+    props.onSubmit(params);
   };
 
   return (
     <Modal
       width={640}
-      title='新建'
+      title="Add Nodegroup"
       visible={props.visible}
       destroyOnClose
       onOk={handleOk}
@@ -55,19 +74,38 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
         <Row gutter={[16, 16]}>
           <Col span={24} order={1}>
             <ProFormText
-              name="deptName"
-              label='name'
-              width="xl"
-              placeholder="请输入Name"
+              name="name"
+              label="Name"
+              placeholder="Name"
               rules={[
                 {
-                  required: false,
-                  message: (
-                    <FormattedMessage id="请输入Name！" defaultMessage="请输入Name！" />
-                  ),
+                  required: true,
+                  message: "Missing name!",
                 },
               ]}
             />
+          </Col>
+          <Col span={24} order={2}>
+            <ProFormSelect
+              name={"nodes"}
+              options={nodesList}
+              label="Nodes"
+              placeholder={"Nodes"}
+              fieldProps={{
+                mode: "multiple",
+              }}
+              rules={[
+                {
+                  required: true,
+                  message: "Please select namespaces",
+                },
+              ]}
+            />
+          </Col>
+          <Col span={24} order={3}>
+            <Form.Item label="MatchLabels">
+              <FormList name="matchLabels" formItemKey="key" value="value" />
+            </Form.Item>
           </Col>
         </Row>
       </Form>

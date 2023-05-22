@@ -71,7 +71,7 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
   return (
     <Modal
       width={720}
-      title="Add configmap"
+      title="Add Configmap"
       visible={props.visible}
       destroyOnClose
       onOk={handleOk}
@@ -84,7 +84,6 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
               name="namespace"
               label="Namespace"
               placeholder="Namespace"
-              style={{ width: 150 }}
               options={namespacesList}
               rules={[
                 {
@@ -96,7 +95,6 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
             <ProFormText
               name="name"
               label="Name"
-              width="xl"
               placeholder="Name"
               rules={[
                 {

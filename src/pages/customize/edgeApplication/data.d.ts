@@ -1,15 +1,8 @@
-
-/* *
- *
- * @author whiteshader@163.com
- * @datetime  2021/09/16
- * 
- * */
-
 export type listType = {
   name: string;
   uid: string;
-  creationTimestamp: string
+  creationTimestamp: string;
+  namespace: string;
 };
 export type DeptType = {
   name: any;

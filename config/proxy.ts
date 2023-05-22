@@ -28,6 +28,11 @@ export default {
       secure: false, // 代理切换成https添加配置
       changeOrigin: true,
     },
+    "/apis": {
+      target: API_SERVER,
+      secure: false, // 代理切换成https添加配置
+      changeOrigin: true,
+    },
   },
   test: {
     "/api/": {

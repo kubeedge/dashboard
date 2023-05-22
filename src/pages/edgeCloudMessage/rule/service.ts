@@ -1,5 +1,5 @@
 import request from "@/utils/request";
-import type { DeptType, formType } from "./data.d";
+import type { DeptType, formType } from "./data";
 
 // 列表
 export function getList(namespace: string) {
@@ -22,9 +22,11 @@ export function removeItem(namespaces: string, app: string) {
   );
 }
 
-export function getNodeList(namespaces: string) {
+export function getRuleendpoints(namespace: string) {
   return request(
-    `/apis/rules.kubeedge.io/v1/namespaces/${namespaces}/ruleendpoints`,
+    `/apis/rules.kubeedge.io/v1${
+      namespace ? `/namespaces/${namespace}` : ""
+    }/ruleendpoints`,
     {
       method: "get",
     }
@@ -36,4 +38,13 @@ export function addItem(namespaces: string, formType: object) {
     method: "post",
     data: formType,
   });
+}
+
+export function getYaml(namespace: string, name: string) {
+  return request(
+    `/apis/rules.kubeedge.io/v1/namespaces/${namespace}/rules/${name}`,
+    {
+      method: "get",
+    }
+  );
 }
