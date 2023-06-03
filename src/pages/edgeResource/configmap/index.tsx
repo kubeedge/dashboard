@@ -7,8 +7,9 @@ import WrapContent from "@/components/WrapContent";
 import type { ProColumns, ActionType } from "@ant-design/pro-table";
 import ProTable from "@ant-design/pro-table";
 import type { DeptType, listType } from "./data";
-import { getList, removeItem, addConfigmap, updateDept } from "./service";
+import { getList, removeItem, addConfigmap, getDetail } from "./service";
 import UpdateForm from "./components/edit";
+import DetailForm from "./components/detail";
 import { getNamespaces } from "@/services/kubeedge";
 
 const { RangePicker } = DatePicker;
@@ -33,19 +34,11 @@ const handleAdd = async (fields: any) => {
   }
 };
 
-const handleUpdate = async (fields: DeptType) => {
-  const hide = message.loading("Updating...");
+const handleDetail = async (namespace: string, name: string) => {
   try {
-    const resp = await updateDept(fields);
-    hide();
-    if (resp.status === "Success") {
-      message.success("Updated successfully!");
-    } else {
-      message.error(resp.msg);
-    }
-    return true;
+    const res = await getDetail(namespace, name);
+    return res;
   } catch (error) {
-    hide();
     message.error("Failed, please try again!");
     return false;
   }
@@ -77,6 +70,7 @@ const DeptTableList: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   const actionRef = useRef<ActionType>();
+  const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
   const [currentRow, setCurrentRow] = useState<listType>();
   const [namespacesList, setNamespacesList] = React.useState<any[]>([]);
 
@@ -170,6 +164,18 @@ const DeptTableList: React.FC = () => {
         <Button
           type="link"
           size="small"
+          key="runOnce"
+          onClick={async () => {
+            const res = await handleDetail(record.namespace, record.name);
+            setDetailModalVisible(true);
+            setCurrentRow(res);
+          }}
+        >
+          Detail
+        </Button>,
+        <Button
+          type="link"
+          size="small"
           danger
           key="batchRemove"
           onClick={async () => {
@@ -222,7 +228,7 @@ const DeptTableList: React.FC = () => {
                 ...formTableRef?.current?.getFieldsValue?.(),
               };
               let filteredRes = res.items;
-              let configmapList: any[] = [];
+              const configmapList: any[] = [];
               if (
                 combinedParams.namespace?.length ||
                 combinedParams.name ||
@@ -280,11 +286,7 @@ const DeptTableList: React.FC = () => {
       <UpdateForm
         onSubmit={async (values) => {
           let success = false;
-          if (values.deptId) {
-            success = await handleUpdate({ ...values } as DeptType);
-          } else {
-            success = await handleAdd({ ...values } as DeptType);
-          }
+          success = await handleAdd({ ...values } as DeptType);
           if (success) {
             setModalVisible(false);
             setCurrentRow(undefined);
@@ -298,6 +300,14 @@ const DeptTableList: React.FC = () => {
           setCurrentRow(undefined);
         }}
         visible={modalVisible}
+        values={currentRow || {}}
+      />
+      <DetailForm
+        onCancel={(isUpdate, res) => {
+          setDetailModalVisible(isUpdate || false);
+          setCurrentRow(res || undefined);
+        }}
+        visible={detailModalVisible}
         values={currentRow || {}}
       />
     </WrapContent>

@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { FormInstance, message, Modal } from "antd";
-import type { DeptType, listType } from "../data.d";
+import { message, Modal } from "antd";
+import type { DeptType } from "../data.d";
 // import CodeMirrorBox from '@/components/CodeMirror';
 import { editYaml } from "../service";
 
-import { UnControlled as CodeMirror } from "react-codemirror2";
+import { Controlled as CodeMirror } from "react-codemirror2";
 import "codemirror/lib/codemirror.css";
 import "codemirror/lib/codemirror.js";
 
@@ -25,9 +25,8 @@ export type DeptFormProps = {
 
 const DeptForm: React.FC<DeptFormProps> = (props) => {
   const { values } = props;
-  const [yamlStr, setYamlStr] = useState<any>();
+  const [yamlStr, setYamlStr] = useState<any>(yaml.dump(values));
   const [submitVal, setSubmitVal] = useState();
-  useEffect(() => {}, [props]);
   const myCodeMirrorRef = useRef();
 
   const handleOk = async () => {
@@ -45,14 +44,8 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
       return;
     }
   };
-  const handleCancel = () => {
-    props.onCancel(values, true);
-  };
-  const handleBlur = () => {
-    console.log(values);
-    setYamlStr(yaml.dump(values));
-  };
-  const handleChange = (CodeMirror, changeObj, value) => {
+  const handleChange = (codeMirror, changeObj, value) => {
+    setYamlStr(value);
     setSubmitVal(value);
   };
   const options = {
@@ -69,20 +62,31 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
     },
   };
 
+  const handleEditorDidMount = (editor) => {
+    // editor.setSize("100%", "100%");
+    editor.refresh();
+    editor.setValue(yamlStr);
+  };
+
+  useEffect(() => {
+    setYamlStr(yaml.dump(values));
+  }, [values]);
+
   return (
     <Modal
       width={840}
       title="YAML"
-      visible={props.visible}
+      zIndex={1001}
+      open={props.visible}
       onOk={handleOk}
-      onCancel={handleCancel}
+      onCancel={props.onCancel}
     >
       <CodeMirror
         ref={myCodeMirrorRef}
         value={yamlStr}
         options={options}
-        editorDidMount={handleBlur}
-        onChange={handleChange}
+        editorDidMount={handleEditorDidMount}
+        onBeforeChange={handleChange}
       ></CodeMirror>
     </Modal>
   );

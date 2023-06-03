@@ -34,22 +34,25 @@ pnpm install
 ### Start project
 
 ```bash with npm
-npm run dev --apiserver=[[proxy address, eg. https://192.168.33.129:6443]]
+npm run dev --apiserver={proxy address}
+Example: npm run dev --apiserver=https://192.168.33.129:6443
 ```
 or
 
 ```bash with yarn
-yarn dev --apiserver=[[proxy address, eg. https://192.168.33.129:6443]]
+yarn dev --apiserver={proxy address}
+Example: yarn dev --apiserver=https://192.168.33.129:6443
 ```
 or
 
 ```bash with pnpm
-pnpm dev --apiserver=[[proxy address, eg. https://192.168.33.129:6443]]
+pnpm dev --apiserver={proxy address}
+Example: pnpm dev --apiserver=https://192.168.33.129:6443
 ```
 
 ### Login with token
 ```bash
 kubectl create serviceaccount curl-user -n kube-system
 kubectl create clusterrolebinding curl-user-binding --clusterrole=cluster-admin --serviceaccount=kube-system:curl-user -n kube-system
-kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep curl-user | awk '{print $1}'
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep curl-user | awk '{print $1}')
 ```

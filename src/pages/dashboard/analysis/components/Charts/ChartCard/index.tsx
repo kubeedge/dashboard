@@ -62,7 +62,7 @@ const ChartCard: React.FC<ChartCardProps> = (props) => {
             ...prevState,
             namespace: title,
           }));
-          history.push("/edgeResource/nodes");
+          history.push("/node/nodes");
         }}
       >
         <div
