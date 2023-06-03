@@ -127,6 +127,7 @@ const detailForm: React.FC<OperlogFormProps> = (props) => {
     <div>
       <Modal
         width={1200}
+        zIndex={1000}
         title={
           <span
             style={{
@@ -242,17 +243,20 @@ const detailForm: React.FC<OperlogFormProps> = (props) => {
           </Tabs.TabPane>
         </Tabs>
       </Modal>
-      <YamlModal
-        onSubmit={async (values) => {
-          setModalVisible(false);
-        }}
-        onCancel={(res, isUpdate) => {
-          setModalVisible(false);
-          props.onCancel(isUpdate, res || undefined);
-        }}
-        visible={modalVisible}
-        values={values || {}}
-      ></YamlModal>
+      {modalVisible && (
+        <YamlModal
+          onSubmit={async (values) => {
+            setModalVisible(false);
+          }}
+          onCancel={(res, isUpdate) => {
+            setModalVisible(false);
+            // props.onCancel(isUpdate, res || undefined);
+            // props.onCancel();
+          }}
+          visible={modalVisible}
+          values={values || {}}
+        ></YamlModal>
+      )}
     </div>
   );
 };

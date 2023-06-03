@@ -22,7 +22,7 @@ const TopSearch = ({ loading }: { loading: boolean }) => {
       setState: setNodesList,
       name: "Nodes",
       api: getNodes,
-      path: "/edgeResource/nodes",
+      path: "/node/nodes",
     },
     {
       state: devicesList,
@@ -36,7 +36,7 @@ const TopSearch = ({ loading }: { loading: boolean }) => {
       setState: setDeploymentsList,
       name: "Deployments",
       api: getDeployments,
-      path: "/edgeResource/deployment",
+      path: "/application/deployment",
     },
     {
       state: rulesList,

@@ -2,7 +2,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import type { FormInstance } from "antd";
 import { Button, message, Modal, Select, Input, DatePicker } from "antd";
 import React, { useState, useRef, useEffect } from "react";
-import { useModel, FormattedMessage } from "umi";
+import { useModel } from "umi";
 import WrapContent from "@/components/WrapContent";
 import type { ProColumns, ActionType } from "@ant-design/pro-table";
 import ProTable from "@ant-design/pro-table";
@@ -227,7 +227,7 @@ const DeptTableList: React.FC = () => {
                 ...formTableRef?.current?.getFieldsValue?.(),
               };
               let filteredRes = res.items;
-              let secretList: any[] = [];
+              const secretList: any[] = [];
               if (
                 combinedParams.namespace?.length ||
                 combinedParams.name ||

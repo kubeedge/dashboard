@@ -18,7 +18,7 @@ const detailForm: React.FC<OperlogFormProps> = (props) => {
   };
 
   let dataSource = [];
-  let info = {
+  const info = {
     server: "",
     username: "",
     password: "",
@@ -52,53 +52,51 @@ const detailForm: React.FC<OperlogFormProps> = (props) => {
     },
   ];
   return (
-    <div>
-      <Modal
-        width={640}
-        title="Secret Detail"
-        visible={props.visible}
-        destroyOnClose
-        onCancel={handleCancel}
-        footer={[
-          <Button key="back" onClick={handleCancel}>
-            Cancel
-          </Button>,
-        ]}
-      >
-        <Descriptions column={24}>
-          <Descriptions.Item span={12} label="Namespace">
-            {values?.metadata?.namespace}
-          </Descriptions.Item>
-          <Descriptions.Item span={12} label="Name">
-            {values?.metadata?.name}
-          </Descriptions.Item>
-          <Descriptions.Item span={12} label="CreationTime">
-            {values?.metadata?.creationTimestamp}
-          </Descriptions.Item>
-          <Descriptions.Item span={12} label="Type">
-            {values?.type}
-          </Descriptions.Item>
-        </Descriptions>
-        {values.type == "kubernetes.io/dockerconfigjson" && (
-          <Card bodyStyle={{ padding: 15 }}>
-            <Descriptions column={24}>
-              <Descriptions.Item span={24} label="docker server">
-                {info?.server}
-              </Descriptions.Item>
-              <Descriptions.Item span={24} label="docker username">
-                {info?.username}
-              </Descriptions.Item>
-              <Descriptions.Item span={24} label="docker password">
-                {info?.password}
-              </Descriptions.Item>
-            </Descriptions>
-          </Card>
-        )}
-        {values.type == "Opaque" && (
-          <Table dataSource={dataSource} columns={columns} pagination={false} />
-        )}
-      </Modal>
-    </div>
+    <Modal
+      width={640}
+      title="Secret Detail"
+      open={props.visible}
+      destroyOnClose
+      onCancel={handleCancel}
+      footer={[
+        <Button key="back" onClick={handleCancel}>
+          Cancel
+        </Button>,
+      ]}
+    >
+      <Descriptions column={24}>
+        <Descriptions.Item span={12} label="Namespace">
+          {values?.metadata?.namespace}
+        </Descriptions.Item>
+        <Descriptions.Item span={12} label="Name">
+          {values?.metadata?.name}
+        </Descriptions.Item>
+        <Descriptions.Item span={12} label="CreationTime">
+          {values?.metadata?.creationTimestamp}
+        </Descriptions.Item>
+        <Descriptions.Item span={12} label="Type">
+          {values?.type}
+        </Descriptions.Item>
+      </Descriptions>
+      {values.type == "kubernetes.io/dockerconfigjson" && (
+        <Card bodyStyle={{ padding: 15 }}>
+          <Descriptions column={24}>
+            <Descriptions.Item span={24} label="docker server">
+              {info?.server}
+            </Descriptions.Item>
+            <Descriptions.Item span={24} label="docker username">
+              {info?.username}
+            </Descriptions.Item>
+            <Descriptions.Item span={24} label="docker password">
+              {info?.password}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      )}
+      {values.type == "Opaque" && (
+        <Table dataSource={dataSource} columns={columns} pagination={false} />
+      )}
+    </Modal>
   );
 };
 

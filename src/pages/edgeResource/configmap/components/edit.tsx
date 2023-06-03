@@ -50,21 +50,6 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
       },
       data: arrayToObject(values.data),
     };
-    // if (values.type == "kubernetes.io/dockerconfigjson") {
-    //   const auth = window.btoa(`${values.username}: ${values.password}`);
-    //   const info = {};
-    //   info[values.server] = {
-    //     username: values.username,
-    //     password: values.password,
-    //     auth: auth,
-    //   };
-    //   const base64Data = window.btoa(JSON.stringify(info));
-    //   params.data[".dockerconfigjson"] = base64Data;
-    // } else if (values.type == "Opaque") {
-    //   values.dataSource?.forEach((item) => {
-    //     params.data[item.key] = item.value;
-    //   });
-    // }
     props.onSubmit(params as DeptFormValueType);
   };
 
