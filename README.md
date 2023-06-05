@@ -16,11 +16,6 @@ nodejs, npm/yarn/pnpm is needed, pnpm is recommended
 npm install
 ```
 
-## Contributing
-If you're interested in being a contributor and want to get involved in developing the KubeEdge code, please see [CONTRIBUTING](./CONTRIBUTING.md) for details on submitting patches and the contribution workflow.
-
-## License
-KubeEdge is under Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
 ```bash with yarn
 yarn install
 ```
@@ -56,3 +51,9 @@ kubectl create serviceaccount curl-user -n kube-system
 kubectl create clusterrolebinding curl-user-binding --clusterrole=cluster-admin --serviceaccount=kube-system:curl-user -n kube-system
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep curl-user | awk '{print $1}')
 ```
+
+## Contributing
+If you're interested in being a contributor and want to get involved in developing the KubeEdge code, please see [CONTRIBUTING](./CONTRIBUTING.md) for details on submitting patches and the contribution workflow.
+
+## License
+KubeEdge is under Apache 2.0 license. See the [LICENSE](LICENSE) file for details.

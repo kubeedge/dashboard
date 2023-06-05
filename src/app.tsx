@@ -22,10 +22,16 @@ export async function getInitialState(): Promise<{
   loading?: boolean;
   namespace?: string;
 }> {
-  const response = await login({});
-  if (response.apiVersion) {
+  if (localStorage.getItem("token")) {
+    const response = await login({});
+    if (response.apiVersion) {
+      return {
+        isLogin: true,
+        settings: defaultSettings,
+        namespace: "",
+      };
+    }
     return {
-      isLogin: true,
       settings: defaultSettings,
       namespace: "",
     };
