@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 
-// 查询deployments列表
+// 查询列表
 export function getNodesList() {
   return request(`/api/v1/nodes`, {
     method: "get",
