@@ -1,0 +1,28 @@
+.currentDate {
+  border: 1px solid #E2E8F0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  color: var(--primaryColor);
+  padding: 10px 20px 10px 50px;
+  font-weight: 500; 
+  font-size: 14px;
+  position: relative;
+}
+.currentDate i {
+  margin-right: 10px;
+  font-size: 20px;
+  position: absolute;
+  left: 20px;
+}
+
+@media only screen and (max-width: 767px) {
+  .currentDate {
+    display: none;
+  }
+}
+
+/* For dark mode */
+[class="dark"] .currentDate {
+  border: 1px solid #373a40;
+}

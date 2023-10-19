@@ -1,0 +1,42 @@
+.card {
+  width: 100%;
+  cursor: pointer;
+  padding: 20px 24px 8px;
+  background-color: #fff;
+}
+
+.card-top {
+  width: 100%;
+
+}
+
+.card-top-name {
+  height: 22px;
+  font-size: 16px;
+  font-weight: 700;
+  color: rgb(0, 0, 0);
+  line-height: 22px;
+}
+
+.card-top-time {
+  height: 38px;
+  margin-top: 4px;
+  margin-bottom: 0px;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break: break-all;
+}
+
+.card-bottom {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.card-bottom span {
+  margin-left: 8px;
+  color: rgba(0, 0, 0, 0.85);
+}
