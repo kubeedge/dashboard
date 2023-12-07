@@ -7,7 +7,7 @@ This project is currently in development, and we will iterate it continuously. W
 
 ## Contact
 If you have any questions, feel free to reach out to us in the following ways:
-* [Slack #dashboard](https://join.slack.com/t/kubeedge/shared_invite/enQtNjc0MTg2NTg2MTk0LWJmOTBmOGRkZWNhMTVkNGU1ZjkwNDY4MTY4YTAwNDAyMjRkMjdlMjIzYmMxODY1NGZjYzc4MWM5YmIxZjU1ZDI)
+* [Slack #dashboard](https://kubeedge.io/docs/community/slack/)
 
 ## Prepare environment
 nodejs, npm/yarn/pnpm is needed, pnpm is recommended
