@@ -53,6 +53,7 @@ kubectl create serviceaccount curl-user -n kube-system
 kubectl create clusterrolebinding curl-user-binding --clusterrole=cluster-admin --serviceaccount=kube-system:curl-user -n kube-system
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep curl-user | awk '{print $1}')
 ```
+
 Kubernetes Versions >= 1.24
 ```bash
 kubectl create serviceaccount curl-user -n kube-system
