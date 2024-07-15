@@ -2,27 +2,22 @@ import { PlusOutlined } from "@ant-design/icons";
 import type { FormInstance } from "antd";
 import { Button, message, Modal } from "antd";
 import React, { useState, useRef, useEffect } from "react";
-import { useIntl, FormattedMessage, useModel } from "umi";
-import { FooterToolbar } from "@ant-design/pro-layout";
-import WrapContent from "@/components/WrapContent";
+import { FormattedMessage, useModel } from "umi";
 import type { ProColumns, ActionType } from "@ant-design/pro-table";
 import ProTable from "@ant-design/pro-table";
-import type { listType, DeviceType } from "./data.d";
-import { getList, removeItem, addDevice, getInfo } from "./service";
 import AddForm from "./components/add";
 import DetailForm from "./components/detail";
+import WrapContent from "@/components/WrapContent";
+import type { Device } from "@/models/device";
+import { createDevice, deleteDevice, getDevice, listDevices } from "@/services/device";
 
-/**
- * 添加节点
- *
- * @param fields
- */
-const handleAdd = async (fields: DeviceType) => {
+const handleAdd = async (device: Device) => {
   const hide = message.loading("正在添加");
   try {
-    const resp = await addDevice(sessionStorage.getItem("nameSpace"), {
-      ...fields,
-    });
+    const resp = await createDevice(
+      sessionStorage.getItem("nameSpace") || "default",
+      device,
+    );
     hide();
     if (resp.metadata?.creationTimestamp) {
       message.success("添加成功");
@@ -35,13 +30,13 @@ const handleAdd = async (fields: DeviceType) => {
   }
 };
 
-const handleRemoveOne = async (selectedRow: listType) => {
+const handleRemoveOne = async (device: Device) => {
   const hide = message.loading("正在删除");
-  if (!selectedRow) return true;
+  if (!device) return true;
   try {
-    const resp = await removeItem(
-      sessionStorage.getItem("nameSpace"),
-      selectedRow.name
+    const resp = await deleteDevice(
+      sessionStorage.getItem("nameSpace") || "default",
+      device.metadata.name,
     );
     hide();
     if (resp.status === "Success") {
@@ -57,49 +52,55 @@ const handleRemoveOne = async (selectedRow: listType) => {
   }
 };
 
-const DeptTableList: React.FC = () => {
+const handleDetail = async (name: string) => {
+  try {
+    const res = await getDevice(
+      sessionStorage.getItem("nameSpace") || "default",
+      name,
+    );
+    return res;
+  } catch (error) {
+    message.error("获取失败请重试！");
+    return null;
+  }
+};
+
+const DeviceTableList: React.FC = () => {
   const formTableRef = useRef<FormInstance>();
-  const { initialState, setInitialState } = useModel("@@initialState");
+  const {
+    initialState,
+    // setInitialState
+  } = useModel("@@initialState");
 
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
   const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<listType>();
-  const [selectedRowsState, setSelectedRows] = useState<listType[]>([]);
+  const [currentRow, setCurrentRow] = useState<Device>();
+  // const [selectedRowsState, setSelectedRows] = useState<Device[]>([]);
 
-  /** 国际化配置 */
-  const intl = useIntl();
+  // const intl = useIntl();
 
   useEffect(() => {}, []);
-  const handleDetail = async (name: string) => {
-    try {
-      const res = await getInfo(sessionStorage.getItem("nameSpace"), name);
-      return res;
-    } catch (error) {
-      message.error("获取失败请重试！");
-      return false;
-    }
-  };
 
-  const columns: ProColumns<listType>[] = [
+  const columns: ProColumns<Device>[] = [
     {
       title: "名称",
-      dataIndex: "name",
+      dataIndex: ["metadata", "name"],
       valueType: "text",
     },
     {
       title: "协议",
-      dataIndex: "protocol",
+      dataIndex: ["spec", "protocol", "protocolName"],
       valueType: "text",
     },
     {
       title: "节点",
-      dataIndex: "node",
+      dataIndex: ["spec", "nodeName"],
       valueType: "text",
     },
     {
       title: "创建时间",
-      dataIndex: "creationTimestamp",
+      dataIndex: ["metadata", "creationTimestamp"],
       valueType: "dateTime",
     },
     {
@@ -118,7 +119,7 @@ const DeptTableList: React.FC = () => {
           size="small"
           key="runOnce"
           onClick={async () => {
-            const res = await handleDetail(record.name);
+            const res = await handleDetail(record.metadata.name);
             setDetailModalVisible(true);
             setCurrentRow(res);
           }}
@@ -156,12 +157,12 @@ const DeptTableList: React.FC = () => {
   return (
     <WrapContent>
       <div style={{ width: "100%", float: "right" }}>
-        <ProTable<listType>
+        <ProTable<Device>
           headerTitle="设备实例"
           actionRef={actionRef}
           formRef={formTableRef}
-          rowKey="deptId"
-          key="deptList"
+          rowKey={(device: Device) => device.metadata.uid}
+          key="deviceList"
           search={{ labelWidth: 120 }}
           toolBarRender={() => [
             <Button
@@ -175,20 +176,10 @@ const DeptTableList: React.FC = () => {
               <PlusOutlined /> 添加实例
             </Button>,
           ]}
-          request={(params) =>
-            getList(initialState.namespace).then((res) => {
+          request={() =>
+            listDevices(initialState.namespace).then((res) => {
               return {
-                data: res.items.map((item) => {
-                  return {
-                    name: item.metadata.name,
-                    uid: item.metadata.uid,
-                    creationTimestamp: item.metadata.creationTimestamp,
-                    protocol:
-                      item.spec.protocol.customizedProtocol.protocolName,
-                    node: item.spec.nodeSelector.nodeSelectorTerms[0]
-                      .matchExpressions[0].values[0],
-                  };
-                }),
+                data: res.items,
                 total: res.items.length,
                 success: true,
               };
@@ -201,7 +192,7 @@ const DeptTableList: React.FC = () => {
       <AddForm
         onSubmit={async (values) => {
           let success = false;
-          success = await handleAdd({ ...values } as DeviceType);
+          success = await handleAdd({ ...values } as Device);
           if (success) {
             setModalVisible(false);
             setCurrentRow(undefined);
@@ -230,4 +221,4 @@ const DeptTableList: React.FC = () => {
   );
 };
 
-export default DeptTableList;
+export default DeviceTableList;

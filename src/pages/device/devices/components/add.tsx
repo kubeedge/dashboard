@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from "react";
 import ProForm, {
-  ProFormDigit,
   ProFormText,
-  ProFormRadio,
-  ProFormTreeSelect,
   ProFormSelect,
   ProFormTextArea,
 } from "@ant-design/pro-form";
-import { Form, Modal, Row, Col, Input } from "antd";
-import { useIntl, FormattedMessage, useModel } from "umi";
-import type { DeviceType, listType } from "../data";
-import { getDevicemodelsList, getNodes } from "../service";
-import { EditableProTable, ProColumns } from "@ant-design/pro-table";
-import { times } from "lodash";
+import { Form, Modal, Row, Col } from "antd";
+import { useModel } from "umi";
+import { EditableProTable, type ProColumns } from "@ant-design/pro-table";
+import type { Device } from "@/models/device";
+import { listDeviceModels } from "@/services/devicemodel";
+import { listNodes } from "@/services/node";
 
 /* *
  *
@@ -21,21 +18,23 @@ import { times } from "lodash";
  *
  * */
 
-export type DeviceFormValueType = Record<string, unknown> & Partial<DeviceType>;
+export type DeviceFormValueType = Record<string, unknown> & Partial<Device>;
 
-export type DeptFormProps = {
+export type DeviceFormProps = {
   onCancel: (flag?: boolean, formVals?: DeviceFormValueType) => void;
   onSubmit: (values: DeviceFormValueType) => Promise<void>;
   visible: boolean;
-  values: Partial<listType>;
+  values: Partial<Device>;
 };
+
 type DataSourceType = {
   id: React.Key;
   key?: string;
   type?: string;
   value?: string;
 };
-const DeptForm: React.FC<DeptFormProps> = (props) => {
+
+const DeviceForm: React.FC<DeviceFormProps> = (props) => {
   const { initialState } = useModel("@@initialState");
   const [form] = Form.useForm();
   const twinsList: DataSourceType[] = [
@@ -49,59 +48,48 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>(() =>
     twinsList.map((item) => item.id)
   );
+
   useEffect(() => {
     form.resetFields();
     form.setFieldsValue({
-      name: props.values.name,
+      name: props.values.metadata?.name,
     });
   }, [form, props]);
 
-  const intl = useIntl();
+  // const intl = useIntl();
   const handleOk = () => {
     form.submit();
   };
+
   const handleCancel = () => {
     props.onCancel();
     form.resetFields();
   };
+
   const handleFinish = async (values: Record<string, any>) => {
     const params = {
-      apiVersion: "devices.kubeedge.io/v1alpha2",
+      apiVersion: "devices.kubeedge.io/v1beta1",
       kind: "Device",
       metadata: {
         labels: {
           description: values.description,
         },
         name: values.name,
-        namespace: sessionStorage.getItem("nameSpace"),
+        namespace: sessionStorage.getItem("nameSpace") || "default",
       },
       spec: {
         deviceModelRef: {
           name: values.model,
         },
-        nodeSelector: {
-          nodeSelectorTerms: [
-            {
-              matchExpressions: [
-                {
-                  key: "",
-                  operator: "In",
-                  values: [values.node],
-                },
-              ],
-            },
-          ],
-        },
+        nodeName: values.node,
         protocol: {
-          customizedProtocol: {
-            protocolName: values.protocol,
-          },
+          protocolName: values.protocol,
         },
       },
       status: {
         twins: values.dataSource.map((item) => {
           return {
-            desired: {
+            observedDesired: {
               metadata: {
                 type: item.type,
               },
@@ -157,7 +145,7 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
     <Modal
       width={640}
       title="添加实例"
-      visible={props.visible}
+      open={props.visible}
       destroyOnClose
       onOk={handleOk}
       onCancel={handleCancel}
@@ -184,7 +172,7 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
               name="model"
               label="设备模型"
               request={async () => {
-                const res = await getDevicemodelsList(initialState.namespace);
+                const res = await listDeviceModels(initialState.namespace);
                 return res.items.map((item) => {
                   return {
                     label: item.metadata.name,
@@ -206,7 +194,7 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
               name="node"
               label="节点"
               request={async () => {
-                const res = await getNodes();
+                const res = await listNodes();
                 return res.items.map((item) => {
                   return {
                     label: item.metadata.name,
@@ -268,4 +256,4 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
   );
 };
 
-export default DeptForm;
+export default DeviceForm;

@@ -1,20 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Descriptions, Button, Tabs, message, FormInstance, Table } from 'antd';
-import type { DeviceType } from '../data';
-import { ProColumns, ActionType, ProTable } from '@ant-design/pro-table';
-/* *
+import React from 'react';
+import { Modal, Descriptions, Button, Table } from 'antd';
+import type { Device, Twin } from '@/models/device';
+/**
  *
  * @author whiteshader@163.com
  * @datetime  2021/09/16
- * 
- * */
+ *
+ **/
 
-export type OperlogFormValueType = Record<string, unknown> & Partial<DeviceType>;
+export type OperlogFormValueType = Record<string, unknown> & Partial<Device>;
 
 export type OperlogFormProps = {
   onCancel: (flag?: boolean, formVals?: OperlogFormValueType) => void;
   visible: boolean;
-  values: Partial<any>;
+  values: Partial<Device>;
 };
 
 const detailForm: React.FC<OperlogFormProps> = (props) => {
@@ -23,43 +22,36 @@ const detailForm: React.FC<OperlogFormProps> = (props) => {
     props.onCancel();
   };
   console.log(values);
-  
-  const dataSource = values.status?.twins?.map(item => {
-    return {
-      key: item.propertyName,
-      type: item.desired?.metadata?.type,
-      value: item.desired?.value,
-      valueup: item.reported?.value
-    }
-  })
+
   const columns = [
     {
       title: '属性名',
-      dataIndex: 'key',
+      dataIndex: ["propertyName"],
       width: '25%',
     },
     {
       title: '类型',
-      dataIndex: 'type',
+      dataIndex: ["observedDesired", "metadata", "type"],
       width: '25%',
     },
     {
       title: '属性值',
-      dataIndex: 'value',
+      dataIndex: ["observedDesired", "metadata", "value"],
       width: '25%',
     },
     {
       title: '上报值',
-      dataIndex: 'valueup',
+      dataIndex: ["reported", "value"],
       width: '25%',
     },
-  ]
+  ];
+
   return (
     <div>
       <Modal
         width={1200}
         title='容器应用详情'
-        visible={props.visible}
+        open={props.visible}
         destroyOnClose
         onCancel={handleCancel}
         footer={[
@@ -71,10 +63,10 @@ const detailForm: React.FC<OperlogFormProps> = (props) => {
             {values?.metadata?.name}
           </Descriptions.Item>
           <Descriptions.Item span={8} label='协议'>
-            {values?.spec?.protocol?.customizedProtocol?.protocolName}
+            {values?.spec?.protocol?.protocolName}
           </Descriptions.Item>
           <Descriptions.Item span={8} label='节点'>
-            {values?.spec?.nodeSelector?.nodeSelectorTerms[0]?.matchExpressions[0]?.values[0] || ''}
+            {values?.spec?.nodeName || ''}
           </Descriptions.Item>
           <Descriptions.Item span={8} label='创建时间'>
             {values?.metadata?.creationTimestamp}
@@ -83,7 +75,12 @@ const detailForm: React.FC<OperlogFormProps> = (props) => {
             {values?.metadata?.labels?.description}
           </Descriptions.Item>
         </Descriptions>
-        <Table dataSource={dataSource} columns={columns} pagination={false}/>
+        <Table
+          dataSource={values?.status?.twins}
+          columns={columns}
+          rowKey={(twin: Twin) => twin.propertyName}
+          pagination={false}
+        />
       </Modal>
     </div>
   );
