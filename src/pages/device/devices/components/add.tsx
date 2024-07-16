@@ -67,6 +67,7 @@ const DeviceForm: React.FC<DeviceFormProps> = (props) => {
   };
 
   const handleFinish = async (values: Record<string, any>) => {
+    const namespace = initialState.namespace || "default";
     const params = {
       apiVersion: "devices.kubeedge.io/v1beta1",
       kind: "Device",
@@ -75,7 +76,7 @@ const DeviceForm: React.FC<DeviceFormProps> = (props) => {
           description: values.description,
         },
         name: values.name,
-        namespace: sessionStorage.getItem("nameSpace") || "default",
+        namespace: namespace,
       },
       spec: {
         deviceModelRef: {

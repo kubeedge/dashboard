@@ -129,8 +129,8 @@
         name: "devicemodels",
         icon: "PartitionOutlined",
         path: "/device/devicemodels",
-        // component: "device/devicemodels/index",
-        component: "404",
+        component: "device/devicemodels/index",
+        // component: "404",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,
@@ -140,8 +140,8 @@
         name: "devices",
         icon: "PartitionOutlined",
         path: "/device/devices",
-        // component: "device/devices/index",
-        component: "404",
+        component: "device/devices/index",
+        // component: "404",
 
         wrappers: ["@/components/KeepAlive"],
         KeepAlive: false,

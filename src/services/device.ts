@@ -22,9 +22,9 @@ export function getDevice(namespace: string, name: string) {
   );
 }
 
-export async function createDevice(namespaces, data: Device) {
+export async function createDevice(namespace: string, data: Device) {
   return request<Device>(
-    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespaces}/devices`,
+    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespace}/devices`,
     {
       method: "POST",
       data,
@@ -32,9 +32,9 @@ export async function createDevice(namespaces, data: Device) {
   );
 }
 
-export function deleteDevice(namespaces: string, name: string) {
+export function deleteDevice(namespace: string, name: string) {
   return request<Status>(
-    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespaces}/devices/${name}`,
+    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespace}/devices/${name}`,
     {
       method: "DELETE",
     }

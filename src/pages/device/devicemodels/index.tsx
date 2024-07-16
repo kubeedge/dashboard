@@ -3,31 +3,58 @@ import type { FormInstance } from "antd";
 import { Button, message, Modal } from "antd";
 import React, { useState, useRef, useEffect } from "react";
 import { useModel, FormattedMessage } from "umi";
-import { FooterToolbar } from "@ant-design/pro-layout";
-import WrapContent from "@/components/WrapContent";
 import type { ProColumns, ActionType } from "@ant-design/pro-table";
 import ProTable from "@ant-design/pro-table";
-import type { DeptType, formType, listType } from "./data.d";
-import { getList, removeItem, addItem, getListByQuery } from "./service";
+import type { formType } from "./data.d";
 import UpdateForm from "./components/edit";
 import DetailForm from "./components/detail";
 import AddForm from "./components/add";
+import WrapContent from "@/components/WrapContent";
+import {
+  createDeviceModel,
+  deleteDeviceModel,
+  getDeviceModel,
+  listDeviceModels,
+} from '@/services/devicemodel';
+import type { Status } from "@/models/common";
+import type { DeviceModel } from "@/models/devicemodel";
 
-export type DeptFormValueType = Record<string, unknown> & Partial<DeptType>;
-/**
- * 更新节点
- *
- * @param fields
- */
-// const handleUpdate = async (fields: DeptType) => {
+export type DeptFormValueType = Record<string, string> & Partial<formType>;
+
+const typeOptions = {
+  INT: {
+    accessMode: "ReadWrite",
+    minimum: "1",
+    maximum: "5",
+    unit: "度",
+  },
+  STRING: { accessMode: "ReadWrite" },
+  DOUBLE: {
+    accessMode: "ReadWrite",
+    minimum: "1.0",
+    maximum: "5.0",
+    unit: "度",
+  },
+  FLOAT: {
+    accessMode: "ReadWrite",
+    minimum: "1.0",
+    maximum: "5.0",
+    unit: "度",
+  },
+  BOOLEAN: { accessMode: "ReadWrite" },
+  BYTES: { accessMode: "ReadWrite" },
+  STREAM: { accessMode: "ReadWrite" },
+};
+
+// const handleUpdate = async (data: DeviceModel) => {
 //   const hide = message.loading('正在配置');
 //   try {
-//     const resp = await updateDept(fields);
+//     const resp = await updateDeviceModel(data.metadata.namespace, data.metadata.name, data) as Status;
 //     hide();
 //     if(resp.code === 200) {
 //       message.success('配置成功');
 //     } else {
-//       message.error(resp.msg);
+//       message.error(resp.message);
 //     }
 //     return true;
 //   } catch (error) {
@@ -37,112 +64,90 @@ export type DeptFormValueType = Record<string, unknown> & Partial<DeptType>;
 //   }
 // };
 
-const handleRemoveOne = async (selectedRow: listType) => {
-  const hide = message.loading("正在删除");
-  if (!selectedRow) return true;
-  try {
-    const resp = await removeItem("default", selectedRow.name);
-    hide();
-    if (!resp.code) {
-      message.success("删除成功");
-    } else {
-      message.error("删除失败");
-    }
-    return true;
-  } catch (error) {
-    hide();
-    message.error("删除失败，请重试");
-    return false;
-  }
-};
-const typeOptions = {
-  int: {
-    accessMode: "ReadWrite",
-    defaultValue: 1,
-    minimum: 1,
-    maximum: 5,
-    unit: "度",
-  },
-  string: { accessMode: "ReadWrite", defaultValue: "default" },
-  double: {
-    accessMode: "ReadWrite",
-    defaultValue: "1.0",
-    minimum: "1.0",
-    maximum: "5.0",
-    unit: "度",
-  },
-  float: {
-    accessMode: "ReadWrite",
-    defaultValue: "1.0",
-    minimum: "1.0",
-    maximum: "5.0",
-    unit: "度",
-  },
-  boolean: { accessMode: "ReadWrite", defaultValue: true },
-  bytes: { accessMode: "ReadWrite" },
-};
-const handleAdd = async (form: DeptFormValueType) => {
-  const obj = {
-    apiVersion: "devices.kubeedge.io/v1alpha2",
-    kind: "DeviceModel",
-    metadata: {
-      name: form.name,
-      namespace: "default",
-    },
-    spec: {
-      protocol: form.protocol,
-      properties: [
-        {
-          name: form.propertiesName,
-          description: form.description,
-          type: {
-            [form.type + ""]: typeOptions[form.type + ""],
-          },
-        },
-      ],
-    },
-  };
-  const hide = message.loading("正在添加");
-  try {
-    const resp = await addItem("default", obj);
-    hide();
-    if (!resp.code) {
-      message.success("添加成功");
-    } else {
-      message.error(resp.message);
-    }
-    return true;
-  } catch (error) {
-    hide();
-    message.error("添加失败请重试！");
-    return false;
-  }
-};
-
-const DeptTableList: React.FC = () => {
+const DeviceModelTableList: React.FC = () => {
   const formTableRef = useRef<FormInstance>();
   const { initialState } = useModel("@@initialState");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
   const [addModalVisible, setAddModelVisible] = useState<boolean>(false);
   const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<listType>();
+  const [currentRow, setCurrentRow] = useState<DeviceModel>();
   useEffect(() => {}, []);
-  const columns: ProColumns<listType>[] = [
+
+  const handleRemoveOne = async (selectedRow: DeviceModel) => {
+    const hide = message.loading("正在删除");
+    if (!selectedRow) return true;
+    try {
+      const resp = await deleteDeviceModel(selectedRow.metadata?.namespace, selectedRow.metadata?.name);
+      hide();
+      if (!resp.code) {
+        message.success("删除成功");
+      } else {
+        message.error("删除失败");
+      }
+      return true;
+    } catch (error) {
+      hide();
+      message.error("删除失败，请重试");
+      return false;
+    }
+  };
+
+  const handleAdd = async (form: DeptFormValueType) => {
+    const namespace = initialState.namespace || "default";
+    const obj: DeviceModel = {
+      apiVersion: "devices.kubeedge.io/v1beta1",
+      kind: "DeviceModel",
+      metadata: {
+        name: form.name,
+        namespace: namespace,
+      },
+      spec: {
+        protocol: form.protocol,
+        properties: [
+          {
+            name: form.propertiesName,
+            description: form.description,
+            type: form.type,
+            ...(typeOptions[form.type + ""] || {}),
+          },
+        ],
+      },
+    };
+
+    const hide = message.loading("正在添加");
+
+    try {
+      hide();
+      const resp = await createDeviceModel(namespace, obj) as Status;
+      if (!resp.code) {
+        message.success("添加成功");
+      } else {
+        message.error(resp.message);
+      }
+      return true;
+    } catch (error) {
+      hide();
+      message.error("添加失败请重试！");
+      return false;
+    }
+  };
+
+  const columns: ProColumns<DeviceModel>[] = [
     {
       title: "名称",
-      dataIndex: "name",
+      dataIndex: ["metadata", "name"],
       valueType: "text",
     },
     {
       title: "协议",
-      dataIndex: "protocol",
+      dataIndex: ["spec", "protocol"],
       valueType: "text",
       search: false,
     },
     {
       title: "创建时间",
-      dataIndex: "creationTimestamp",
+      dataIndex: ["metadata", "creationTimestamp"],
       valueType: "dateTime",
       search: false,
     },
@@ -199,11 +204,11 @@ const DeptTableList: React.FC = () => {
   return (
     <WrapContent>
       <div style={{ width: "100%", float: "right" }}>
-        <ProTable<listType>
+        <ProTable<DeviceModel>
           headerTitle="设备模型"
           actionRef={actionRef}
           formRef={formTableRef}
-          rowKey="deptId"
+          rowKey={(model: DeviceModel) => model.metadata.uid}
           key="deptList"
           search={{ labelWidth: 80 }}
           toolBarRender={() => [
@@ -221,34 +226,21 @@ const DeptTableList: React.FC = () => {
           ]}
           request={(params) => {
             if (params.name) {
-              return getListByQuery("default", params.name).then((res) => {
+              return getDeviceModel(
+                initialState.namespace || "default",
+                params.name
+              ).then((res) => {
                 return {
-                  data: [
-                    {
-                      name: res.metadata.name,
-                      uid: res.metadata.uid,
-                      creationTimestamp: res.metadata.creationTimestamp,
-                      protocol: res?.spec?.protocol,
-                      namespace: item.metadata.namespace,
-                    },
-                  ],
+                  data: [res],
                   total: 1,
                   success: true,
                 };
               });
             } else {
-              return getList(initialState.namespace).then((res) => {
+              return listDeviceModels(initialState.namespace).then((res) => {
                 console.log(params);
                 return {
-                  data: res.items.map((item) => {
-                    return {
-                      name: item.metadata.name,
-                      uid: item.metadata.uid,
-                      creationTimestamp: item.metadata.creationTimestamp,
-                      protocol: item?.spec?.protocol,
-                      namespace: item.metadata.namespace,
-                    };
-                  }),
+                  data: res.items,
                   total: res.items.length,
                   success: true,
                 };
@@ -280,6 +272,7 @@ const DeptTableList: React.FC = () => {
       <AddForm
         onSubmit={async (values) => {
           let success = false;
+          console.log(values);
           success = await handleAdd({ ...values } as formType);
           if (success) {
             setAddModelVisible(false);
@@ -323,4 +316,4 @@ const DeptTableList: React.FC = () => {
   );
 };
 
-export default DeptTableList;
+export default DeviceModelTableList;

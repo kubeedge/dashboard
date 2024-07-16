@@ -1,21 +1,22 @@
 import React, { useEffect } from "react";
 import { ProFormText, ProFormSelect } from "@ant-design/pro-form";
 import { Form, Modal, Row, Col } from "antd";
-import type { DeptType, listType } from "../data.d";
+import type { DeviceModel } from "@/models/devicemodel";
 
-export type DeptFormValueType = Record<string, unknown> & Partial<DeptType>;
+export type DeptFormValueType = Record<string, unknown> & Partial<DeviceModel>;
 export type DeptFormProps = {
   onCancel: (flag?: boolean, formVals?: DeptFormValueType) => void;
   onSubmit: (values: DeptFormValueType) => Promise<void>;
   visible: boolean;
-  values: Partial<listType>;
+  values: Partial<DeviceModel>;
 };
+
 const DeptForm: React.FC<DeptFormProps> = (props) => {
   const [form] = Form.useForm();
   useEffect(() => {
     form.resetFields();
     form.setFieldsValue({
-      name: props.values.name,
+      name: props.values?.metadata?.name,
     });
   }, [form, props]);
   const handleOk = () => {
@@ -106,12 +107,13 @@ const DeptForm: React.FC<DeptFormProps> = (props) => {
           <Col span={24} order={1}>
             <ProFormSelect
               options={[
-                { label: "Int", value: "int" },
-                { label: "String", value: "string" },
-                { label: "Double", value: "double" },
-                { label: "Float", value: "float" },
-                { label: "Boolean", value: "boolean" },
-                { label: "Bytes", value: "bytes" },
+                { label: "Int", value: "INT" },
+                { label: "String", value: "STRING" },
+                { label: "Double", value: "DOUBLE" },
+                { label: "Float", value: "FLOAT" },
+                { label: "Boolean", value: "BOOLEAN" },
+                { label: "Bytes", value: "BYTES" },
+                { label: "Stream", value: "STREAM" },
               ]}
               name="type"
               label="属性类型"

@@ -68,6 +68,17 @@ export interface Condition {
   message?: string;
 }
 
+interface LabelSelectorRequirement {
+  key: string;
+  operator: string;
+  values?: string[];
+}
+
+export interface LabelSelector {
+  matchLabels?: Record<string, string>;
+  matchExpressions?: LabelSelectorRequirement[];
+}
+
 interface StatusCause {
   reason?: string;
   message?: string;

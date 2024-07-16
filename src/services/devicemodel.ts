@@ -13,18 +13,18 @@ export function listDeviceModels(namespace: string) {
   );
 }
 
-export function getDeviceModel(namespaces: string, name: string) {
+export function getDeviceModel(namespace: string, name: string) {
   return request<DeviceModel>(
-    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespaces}/devicemodels/${name}`,
+    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespace}/devicemodels/${name}`,
     {
       method: "GET",
     }
   );
 }
 
-export function createDeviceModel(namespaces: string, data: object) {
+export function createDeviceModel(namespace: string, data: DeviceModel) {
   return request<DeviceModel>(
-    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespaces}/devicemodels`,
+    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespace}/devicemodels`,
     {
       method: "POST",
       data,
@@ -32,9 +32,19 @@ export function createDeviceModel(namespaces: string, data: object) {
   );
 }
 
-export function deleteDeviceModel(namespaces: string, name: string) {
+export function updateDeviceModel(namespace: string, name: string, data: DeviceModel) {
+  return request<DeviceModel>(
+    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespace}/devicemodels/${name}`,
+    {
+      method: "PUT",
+      data,
+    }
+  );
+}
+
+export function deleteDeviceModel(namespace: string, name: string) {
   return request<Status>(
-    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespaces}/devicemodels/${name}`,
+    `/apis/devices.kubeedge.io/v1beta1/namespaces/${namespace}/devicemodels/${name}`,
     {
       method: "DELETE",
     }

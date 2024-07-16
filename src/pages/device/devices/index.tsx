@@ -15,7 +15,7 @@ const handleAdd = async (device: Device) => {
   const hide = message.loading("正在添加");
   try {
     const resp = await createDevice(
-      sessionStorage.getItem("nameSpace") || "default",
+      device.metadata.namespace,
       device,
     );
     hide();
@@ -35,7 +35,7 @@ const handleRemoveOne = async (device: Device) => {
   if (!device) return true;
   try {
     const resp = await deleteDevice(
-      sessionStorage.getItem("nameSpace") || "default",
+      device.metadata.namespace,
       device.metadata.name,
     );
     hide();
@@ -52,10 +52,10 @@ const handleRemoveOne = async (device: Device) => {
   }
 };
 
-const handleDetail = async (name: string) => {
+const handleDetail = async (namespace: string, name: string) => {
   try {
     const res = await getDevice(
-      sessionStorage.getItem("nameSpace") || "default",
+      namespace,
       name,
     );
     return res;
@@ -119,7 +119,7 @@ const DeviceTableList: React.FC = () => {
           size="small"
           key="runOnce"
           onClick={async () => {
-            const res = await handleDetail(record.metadata.name);
+            const res = await handleDetail(record.metadata.namespace, record.metadata.name);
             setDetailModalVisible(true);
             setCurrentRow(res);
           }}

@@ -1,14 +1,13 @@
 import { PlusOutlined } from "@ant-design/icons";
-import { Descriptions, FormInstance } from "antd";
+import type { FormInstance } from "antd";
+import { Descriptions } from "antd";
 import { Button, message, Modal } from "antd";
 import React, { useState, useRef, useEffect } from "react";
-import { useIntl, FormattedMessage } from "umi";
-import { FooterToolbar } from "@ant-design/pro-layout";
 import WrapContent from "@/components/WrapContent";
 import type { ProColumns, ActionType } from "@ant-design/pro-table";
 import ProTable from "@ant-design/pro-table";
-import type { DeptType, listType } from "../data.d";
-import { getListByQuery, removeItem, getListByLabel } from "../service";
+import { getDeviceModel } from '@/services/devicemodel';
+import type { DeviceModel, ModelProperty } from "@/models/devicemodel";
 // import UpdateForm from './components/edit';
 
 /**
@@ -98,31 +97,32 @@ import { getListByQuery, removeItem, getListByLabel } from "../service";
 //   }
 // };
 
-export type DeptFormValueType = Record<string, unknown> & Partial<DeptType>;
+export type DeptFormValueType = Record<string, unknown> & Partial<DeviceModel>;
 
 export type DeptFormProps = {
   onCancel: (flag?: boolean, formVals?: DeptFormValueType) => void;
   onSubmit: (values: DeptFormValueType) => Promise<void>;
   onAdd: () => void;
   visible: boolean;
-  values: Partial<listType>;
+  values: Partial<DeviceModel>;
 };
 
 const DeptTableList: React.FC<DeptFormProps> = (props) => {
   const formTableRef = useRef<FormInstance>();
   const { values } = props;
   console.log(values);
-  getListByLabel("default", { labelSelector: values.name, limit: 500 }).then(
-    (res) => {
-      console.log(res);
-    }
-  );
+  // listDeployments("default", { labelSelector: values?.metadata?.name, limit: 500 }).then(
+  //   (res) => {
+  //     console.log(res);
+  //   }
+  // );
   const actionRef = useRef<ActionType>();
 
   const handleAddDevice = () => {
     props.onAdd();
   };
-  const columns: ProColumns<listType>[] = [
+
+  const columns: ProColumns<ModelProperty>[] = [
     {
       title: "属性名",
       dataIndex: "name",
@@ -130,19 +130,19 @@ const DeptTableList: React.FC<DeptFormProps> = (props) => {
     },
     {
       title: "描述",
-      dataIndex: "creationTimestamp",
+      dataIndex: "description",
       valueType: "text",
       search: false,
     },
     {
       title: "类型",
-      dataIndex: "creationTimestamp",
+      dataIndex: "type",
       valueType: "text",
       search: false,
     },
     {
       title: "属性详情",
-      dataIndex: "creationTimestamp",
+      dataIndex: "unit",
       valueType: "text",
       search: false,
     },
@@ -198,16 +198,16 @@ const DeptTableList: React.FC<DeptFormProps> = (props) => {
         <div style={{ width: "100%", float: "right" }}>
           <Descriptions column={24}>
             <Descriptions.Item span={12} label="名称">
-              {values?.name}
+              {values?.metadata?.name}
             </Descriptions.Item>
             <Descriptions.Item span={12} label="命名空间">
-              {values?.namespace}
+              {values?.metadata?.namespace}
             </Descriptions.Item>
             <Descriptions.Item span={12} label="创建时间">
-              {values?.creationTimestamp}
+              {values?.metadata?.creationTimestamp}
             </Descriptions.Item>
           </Descriptions>
-          <ProTable<listType>
+          <ProTable<ModelProperty>
             headerTitle="设备孪生"
             actionRef={actionRef}
             formRef={formTableRef}
@@ -227,16 +227,13 @@ const DeptTableList: React.FC<DeptFormProps> = (props) => {
               </Button>,
             ]}
             request={(params) =>
-              getListByQuery("default", values.name).then((res) => {
+              getDeviceModel(
+                values?.metadata?.namespace || "default",
+                values?.metadata?.name,
+              ).then((res) => {
                 return {
-                  data: res.items.map((item) => {
-                    return {
-                      name: item.metadata.name,
-                      uid: item.metadata.uid,
-                      creationTimestamp: item.metadata.creationTimestamp,
-                    };
-                  }),
-                  total: res.items.length,
+                  data: res.spec?.properties,
+                  total: res.spec?.properties.length,
                   success: true,
                 };
               })

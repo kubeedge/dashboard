@@ -1,6 +1,6 @@
 import type { ObjectMeta, ResourceList, TypeMeta } from "./common";
 
-interface ModelProperty {
+export interface ModelProperty {
   accessMode: string;
   description?: string;
   maximum?: string;
