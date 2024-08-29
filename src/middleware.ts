@@ -1,12 +1,7 @@
-import Axios from 'axios'
 import { cookies } from 'next/headers';
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-const request = Axios.create({
-  baseURL: process.env.API_SERVER,
-});
 
 const protectedPaths = new Set([
   '/',
@@ -36,17 +31,24 @@ async function handleApiProxy(req: NextRequest) {
       headers[key] = value
     });
     const path = req.nextUrl.pathname.replace('/api/', '/')
+    const url = new URL(path, process.env.API_SERVER);
 
-    const response = await request(path, {
+    const resp = await fetch(url, {
       method: req.method,
       headers,
-      data: req.body,
-    });
+      body: req.body,
+    })
+    const body = await resp.json();
 
-    return NextResponse.json(response.data);
+    return NextResponse.json(body, {
+      status: resp.status,
+      headers: resp.headers,
+    });
   } catch (error: any) {
-    return NextResponse.json(error?.response?.data || error, {
-      status: error?.response?.status || 500,
+    return NextResponse.json({
+      message: error?.message || error || 'Something went wrong',
+    }, {
+      status: error?.status || 500,
     });
   }
 }
