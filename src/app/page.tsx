@@ -111,13 +111,13 @@ const DashboardCir = (props: {
 
   return (
     <Grid container spacing={2} justifyContent="center">
-      <Grid item xs={12} sm={6} md={4}>
+      <Grid item xs={12} sm={12} md={12}>
         <ProgressCard title="CPU" progressData={cpuData} />
       </Grid>
-      <Grid item xs={12} sm={6} md={4}>
+      <Grid item xs={12} sm={12} md={12}>
         <ProgressCard title="Memory" progressData={memoryData} />
       </Grid>
-      <Grid item xs={12} sm={6} md={4}>
+      <Grid item xs={12} sm={12} md={12}>
         <ProgressCard title="Pod" progressData={podData} />
       </Grid>
     </Grid>
@@ -150,10 +150,6 @@ export default function Home() {
         <DashboardCir
           pods={data?.items}
         />
-      </div>
-
-      <div className={styles.description}>
-        <PodsTable data={data?.items} />
       </div>
     </div>
   );
