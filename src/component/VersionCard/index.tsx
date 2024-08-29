@@ -13,7 +13,7 @@ interface VersionCardProps {
 
 export const VersionCard = ({title, statusData}: VersionCardProps) => {
   return (
-    <Card sx={{ boxShadow: 'none',height: '115px' }}>
+    <Card sx={{ boxShadow: 'none',height: '125px' }}>
       {/* Title Section */}
       <Box sx={{
         backgroundColor: '#f5f5f5', // Background color
@@ -28,7 +28,7 @@ export const VersionCard = ({title, statusData}: VersionCardProps) => {
       <CardContent>
         <Grid container spacing={2}>
           {/* Right Side */}
-          <Grid item xs={6} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
             {statusData?.map((data, index) => (
               <Typography
                 key={index}

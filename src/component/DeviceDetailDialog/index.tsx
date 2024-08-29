@@ -25,8 +25,7 @@ function DeviceDetailDialog({ open, onClose, data }: DeviceDetailDialogProps) {
     <Dialog open={!!open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Device Detail</DialogTitle>
       <DialogContent>
-        {/* 第一部分: 表单 */}
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ marginTop: 1 }}>
           <Grid item xs={4}>
             <TextField
               label="Name"
@@ -84,7 +83,6 @@ function DeviceDetailDialog({ open, onClose, data }: DeviceDetailDialogProps) {
           </Grid>
         </Grid>
 
-        {/* 第二部分: 表格 */}
         <Table sx={{ marginTop: 2 }}>
           <TableHead>
             <TableRow>
