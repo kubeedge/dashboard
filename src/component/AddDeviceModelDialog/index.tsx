@@ -2,6 +2,7 @@
 import React from 'react';
 import { Box, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { DeviceModel } from '@/types/deviceModel';
+import { useAlert } from '@/hook/useAlert';
 
 const attributeTypes = ['INT', 'STRING', 'DOUBLE', 'FLOAT', 'BOOLEAN', 'BYTES'];
 
@@ -59,8 +60,9 @@ const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogP
     attributeName: '',
     attributeType: '',
   });
+  const { setErrorMessage } = useAlert();
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const newErrors: any = {};
     if (!name) newErrors.name = 'Miss name';
     if (!protocol) newErrors.protocol = 'Miss protocol';
@@ -71,24 +73,29 @@ const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogP
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
     } else {
-      onSubmit?.(event, {
-        apiVersion: "devices.kubeedge.io/v1beta1",
-        kind: "DeviceModel",
-        metadata: {
-          name: name,
-        },
-        spec: {
-          protocol: protocol,
-          properties: [
-            {
-              name: attributeName,
-              description: description,
-              type: attributeType,
-              ...((typeOptions as any)[attributeType] || {}),
-            },
-          ],
-        },
-      });
+      try {
+        await onSubmit?.(event, {
+          apiVersion: "devices.kubeedge.io/v1beta1",
+          kind: "DeviceModel",
+          metadata: {
+            name: name,
+          },
+          spec: {
+            protocol: protocol,
+            properties: [
+              {
+                name: attributeName,
+                description: description,
+                type: attributeType,
+                ...((typeOptions as any)[attributeType] || {}),
+              },
+            ],
+          },
+        });
+        handleClose(event);
+      } catch (error: any) {
+        setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create DeviceModel');
+      }
     }
   };
 

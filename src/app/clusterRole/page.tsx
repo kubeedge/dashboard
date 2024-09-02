@@ -52,13 +52,8 @@ export default function ClusterrolesPage() {
   };
 
   const handleSubmit = async (_: any, record: ClusterRole) => {
-    try {
-      await createClusterRole(record);
-      mutate();
-      handleAddDialogClose();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create ClusterRole');
-    }
+    await createClusterRole(record);
+    mutate();
   }
 
   const handleYamlDialogClose = () => {

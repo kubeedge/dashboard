@@ -5,6 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { ConfigMap } from '@/types/configMap';
 import { useListNamespaces } from '@/api/namespace';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddConfigmapDialogProps {
   open?: boolean;
@@ -18,6 +19,7 @@ const AddConfigmapDialog = ({ open, onClose, onSubmit }: AddConfigmapDialogProps
   const [labels, setLabels] = useState([{ key: '', value: '' }]);
   const [data, setData] = useState([{ key: '', value: '' }]);
   const namespaceData = useListNamespaces()?.data;
+  const { setErrorMessage } = useAlert();
 
   const handleAddLabel = () => {
     setLabels([...labels, { key: '', value: '' }]);
@@ -35,7 +37,7 @@ const AddConfigmapDialog = ({ open, onClose, onSubmit }: AddConfigmapDialogProps
     setData(data.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (!namespace || !name) {
       return;
     }
@@ -60,7 +62,13 @@ const AddConfigmapDialog = ({ open, onClose, onSubmit }: AddConfigmapDialogProps
         return acc;
       }, {}),
     };
-    onSubmit?.(event, body);
+
+    try {
+      await onSubmit?.(event, body);
+      handleClose(event);
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create ConfigMap');
+    }
   };
 
   const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

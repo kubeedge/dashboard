@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { ClusterRoleBinding, Subject, RoleRef } from '@/types/clusterRoleBinding';
 import { useListNamespaces } from '@/api/namespace';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddClusterRoleBindingDialogProps {
   open?: boolean;
@@ -16,6 +17,7 @@ const AddClusterRoleBindingDialog = ({ open, onClose, onSubmit }: AddClusterRole
   const [roleRef, setRoleRef] = React.useState<RoleRef>({ kind: '', name: '', apiGroup: '' });
   const [subjects, setSubjects] = React.useState<Subject[]>([]);
   const { data } = useListNamespaces();
+  const { setErrorMessage } = useAlert();
 
   const handleRoleRefChange = (field: string, value: string) => setRoleRef(prev => ({ ...prev, [field]: value }));
   const handleSubjectChange = (index: number, field: string, value: string) => {
@@ -27,16 +29,21 @@ const AddClusterRoleBindingDialog = ({ open, onClose, onSubmit }: AddClusterRole
   const handleAddSubject = () => setSubjects([...subjects, { kind: '', name: '', namespace: '' }]);
   const handleRemoveSubject = (index: number) => setSubjects(subjects.filter((_, i) => i !== index));
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    onSubmit?.(event, {
-      apiVersion: 'rbac.authorization.k8s.io/v1',
-      kind: 'ClusterRoleBinding',
-      metadata: {
-        name,
-      },
-      roleRef,
-      subjects,
-    });
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    try {
+      await onSubmit?.(event, {
+        apiVersion: 'rbac.authorization.k8s.io/v1',
+        kind: 'ClusterRoleBinding',
+        metadata: {
+          name,
+        },
+        roleRef,
+        subjects,
+      });
+      handleClose(event);
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create ClusterRoleBinding');
+    }
   };
 
   const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Box, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { RuleEndpoint } from '@/types/ruleEndpoint';
 import { useListNamespaces } from '@/api/namespace';
-import { set } from 'react-hook-form';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddRuleEndpointDialogProps {
   open?: boolean;
@@ -17,6 +17,7 @@ const AddRuleEndpointDialog = ({ open, onClose, onSubmit }: AddRuleEndpointDialo
   const [endpointType, setEndpointType] = React.useState('');
   const [servicePort, setServicePort] = React.useState('');
   const { data } = useListNamespaces();
+  const { setErrorMessage } = useAlert();
 
   const [errors, setErrors] = useState<any>({
     namespace: '',
@@ -24,7 +25,7 @@ const AddRuleEndpointDialog = ({ open, onClose, onSubmit }: AddRuleEndpointDialo
     secrets: '',
   });
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const newErrors: any = {};
     if (!namespace) newErrors.namespace = 'Missing namespace';
     if (!name) newErrors.name = 'Missing name';
@@ -34,22 +35,27 @@ const AddRuleEndpointDialog = ({ open, onClose, onSubmit }: AddRuleEndpointDialo
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
     } else {
-      onSubmit?.(event, {
-        apiVersion: 'rules.kubeedge.io/v1',
-        kind: 'RuleEndpoint',
-        metadata: {
-          namespace,
-          name,
-        },
-        spec: {
-          ruleEndpointType: endpointType,
-          ...(endpointType === 'servicebus' && {
-            properties: {
-              service_port: servicePort,
-            },
-           }),
-        }
-      });
+      try {
+        await onSubmit?.(event, {
+          apiVersion: 'rules.kubeedge.io/v1',
+          kind: 'RuleEndpoint',
+          metadata: {
+            namespace,
+            name,
+          },
+          spec: {
+            ruleEndpointType: endpointType,
+            ...(endpointType === 'servicebus' && {
+              properties: {
+                service_port: servicePort,
+              },
+             }),
+          }
+        });
+        handleClose(event);
+      } catch (error: any) {
+        setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create RuleEndpoint');
+      }
     }
   };
 

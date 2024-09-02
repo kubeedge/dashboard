@@ -4,6 +4,7 @@ import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, F
 import { ServiceAccount } from '@/types/serviceAccount';
 import { useListNamespaces } from '@/api/namespace';
 import { useListSecrets } from '@/api/secret';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddServiceAccountDialogProps {
   open?: boolean;
@@ -18,12 +19,13 @@ const AddServiceAccountDialog = ({ open, onClose, onSubmit }: AddServiceAccountD
   const [formErrors, setFormErrors] = React.useState<any>({});
   const namespaceData = useListNamespaces()?.data;
   const { data, mutate } = useListSecrets(namespace);
+  const { setErrorMessage } = useAlert();
 
   useEffect(() => {
     mutate();
   }, [namespace, mutate]);
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const newErrors: any = {};
     if (!namespace) newErrors.namespace = 'Missing namespace';
     if (!name) newErrors.name = 'Missing name';
@@ -32,17 +34,22 @@ const AddServiceAccountDialog = ({ open, onClose, onSubmit }: AddServiceAccountD
     if (Object.keys(newErrors).length > 0) {
       setFormErrors(newErrors);
     } else {
-      onSubmit?.(event, {
-        apiVersion: 'v1',
-        kind: 'ServiceAccount',
-        metadata: {
-          namespace,
-          name,
-        },
-        secrets: secrets.map((secret) => ({
-          name: secret,
-        })),
-      });
+      try {
+        await onSubmit?.(event, {
+          apiVersion: 'v1',
+          kind: 'ServiceAccount',
+          metadata: {
+            namespace,
+            name,
+          },
+          secrets: secrets.map((secret) => ({
+            name: secret,
+          })),
+        });
+        handleClose(event);
+      } catch (error: any) {
+        setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create ServiceAccount');
+      }
     }
   };
 

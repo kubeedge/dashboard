@@ -12,6 +12,7 @@ import { Device } from '@/types/device';
 import { useListNodes } from '@/api/node';
 import { useListDeviceModels } from '@/api/deviceModel';
 import { useNamespace } from '@/hook/useNamespace';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddDeviceDialogProps {
   open?: boolean;
@@ -27,6 +28,7 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
   const { namespace } = useNamespace();
   const nodeData = useListNodes()?.data;
   const deviceModelData = useListDeviceModels(namespace)?.data;
+  const { setErrorMessage } = useAlert();
 
   const handleAddAttribute = () => {
     setAttributes([...attributes, { attributeName: '', type: '', attributeValue: '' }]);
@@ -42,7 +44,7 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
     setAttributes(attributes.filter((_, i) => i !== index));
   };
 
-  const onFormSubmit = (data: any) => {
+  const onFormSubmit = async (data: any) => {
     const device: Device = {
       apiVersion: "devices.kubeedge.io/v1beta1",
       kind: "Device",
@@ -82,7 +84,13 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
         }),
       },
     };
-    onSubmit?.(device);
+
+    try {
+      await onSubmit?.(device);
+      handleClose();
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Device');
+    }
   };
 
   const handleClose = () => {

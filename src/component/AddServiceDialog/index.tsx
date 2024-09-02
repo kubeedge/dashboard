@@ -6,6 +6,7 @@ import {
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
 import { Service } from '@/types/service';
 import { useListNamespaces } from '@/api/namespace';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddServiceDialogProps {
   open?: boolean;
@@ -27,6 +28,7 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
   const [type, setType] = useState('');
   const [formErrors, setFormErrors] = useState<any>({});
   const namespaceData = useListNamespaces()?.data;
+  const { setErrorMessage } = useAlert();
 
   const handleAddAnnotations = () => {
     setAnnotations([...annotations, { key: '', value: '' }]);
@@ -106,7 +108,7 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
     setSessionAffinity(event.target.value);
   };
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const errors: any = {};
     if (!type) errors.type = 'Missing type';
     // Add additional form validation if needed
@@ -149,7 +151,13 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
         externalIPs: externalIPs ? externalIPs.split(',') : undefined,
       }
     };
-    onSubmit?.(event, body);
+
+    try {
+      await onSubmit?.(event, body);
+      handleClose(event);
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Service');
+    }
   };
 
   const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

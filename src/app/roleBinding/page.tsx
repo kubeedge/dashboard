@@ -60,13 +60,8 @@ export default function RolebindingsPage() {
   };
 
   const handleOnSubmit = async (_: any, newRoleBinding: RoleBinding) => {
-    try {
-      await createRoleBinding(namespace, newRoleBinding);
-      mutate();
-      handleAddRoleBindingDialogClose();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create RoleBinding');
-    }
+    await createRoleBinding(newRoleBinding?.metadata?.namespace || namespace || 'default', newRoleBinding);
+    mutate();
   }
 
   const handleYamlDialogClose = () => setYamlDialogOpen(false);

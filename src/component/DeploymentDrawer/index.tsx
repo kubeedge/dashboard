@@ -5,17 +5,19 @@ import ContainerInfoForm from './DeploymentForms/ContainerInfoForm';
 import StorageMountForm from './DeploymentForms/StorageMountForm';
 import MoreSettingForm from './DeploymentForms/MoreSettingForm';
 import { Deployment } from '@/types/deployment';
+import { useAlert } from '@/hook/useAlert';
 
 const steps = ['Basic Info', 'Container Info', 'Storage Mount', 'More Setting'];
 
 interface DeploymentDrawerProps {
   open?: boolean;
   onClose?: () => void;
-  data?: Deployment | null;
+  onSubmit?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, data: Deployment) => void;
 }
 
-export default function DeploymentDrawer({ open, onClose, data }: DeploymentDrawerProps) {
+export default function DeploymentDrawer({ open, onClose, onSubmit }: DeploymentDrawerProps) {
   const [activeStep, setActiveStep] = useState(0);
+  const { setErrorMessage } = useAlert();
 
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
@@ -29,10 +31,19 @@ export default function DeploymentDrawer({ open, onClose, data }: DeploymentDraw
     setActiveStep(0);
   };
 
-  const handleFormSubmit = () => {
-    alert('Form Submitted');
-    onClose?.();
+  const handleFormSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    try {
+      await onSubmit?.(event, {} as Deployment);
+      handleClose(event);
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Deployment');
+    }
   };
+
+  const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    handleReset();
+    onClose?.();
+  }
 
   const getStepContent = (step: number) => {
     switch (step) {
@@ -50,7 +61,7 @@ export default function DeploymentDrawer({ open, onClose, data }: DeploymentDraw
   };
 
   return (
-    <Drawer anchor="right" open={open} onClose={onClose} sx={{
+    <Drawer anchor="right" open={open} onClose={handleClose} sx={{
       '& .MuiDrawer-paper': {
         width: '70%',
         maxWidth: '70%',

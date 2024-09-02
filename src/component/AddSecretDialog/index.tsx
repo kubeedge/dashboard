@@ -16,13 +16,13 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  Typography,
   IconButton,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useListNamespaces } from '@/api/namespace';
 import { Secret } from '@/types/secret';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddSecretDialogProps {
   open?: boolean;
@@ -39,6 +39,7 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
   const [dockerPassword, setDockerPassword] = useState('');
   const [data, setData] = useState<{key: string, value: string}[]>([]);
   const namespaceData = useListNamespaces()?.data;
+  const { setErrorMessage } = useAlert();
 
   const handleNamespaceChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setNamespace(event.target.value);
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setName(event.target.value);
@@ -54,7 +55,7 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
     setData(data.filter((_, i) => i !== index));
   };
 
-  const handleSave = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSave = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const body: Secret = {
       apiVersion: 'v1',
       kind: 'Secret',
@@ -74,7 +75,12 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
         })),
       } : data.reduce((acc, cur) => ({ ...acc, [cur.key]: cur.value }), {}),
     };
-    onSubmit?.(event, body);
+    try {
+      await onSubmit?.(event, body);
+      handleClose(event);
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Secret');
+    }
   };
 
   const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

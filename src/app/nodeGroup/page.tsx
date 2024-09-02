@@ -80,13 +80,8 @@ export default function NodeGroupPage() {
   };
 
   const handleAddNodeGroup = async (_: any, record: NodeGroup) => {
-    try {
-      await createNodeGroup(record);
-      mutate();
-      handleCloseAddNodeGroupDialog();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create NodeGroup');
-    }
+    await createNodeGroup(record);
+    mutate();
   };
 
   return (

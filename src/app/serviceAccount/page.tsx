@@ -90,13 +90,8 @@ export default function ServiceAccountsPage() {
   };
 
   const handleAddFormSubmit = async (_: any, record: ServiceAccount) => {
-    try {
-      await createServiceAccount(record?.metadata?.namespace || '', record);
-      mutate();
-      handleAddDialogClose();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create ServiceAccount');
-    }
+    await createServiceAccount(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
   };
 
   return (

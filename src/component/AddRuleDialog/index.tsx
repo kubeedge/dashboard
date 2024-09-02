@@ -4,6 +4,7 @@ import { Box, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActio
 import { useListNamespaces } from '@/api/namespace';
 import { Rule } from '@/types/rule';
 import { useListRuleEndpoints } from '@/api/ruleEndpoint';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddRuleDialogProps {
   open?: boolean;
@@ -19,6 +20,7 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
   const [target, setTarget] = useState('');
   const [targetResource, setTargetResource] = useState('');
   const [description, setDescription] = useState('');
+  const { setErrorMessage } = useAlert();
 
   const namespaceData = useListNamespaces()?.data;
   const { data, mutate } = useListRuleEndpoints(namespace);
@@ -36,7 +38,7 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
     targetResource: '',
   });
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const newErrors: any = {};
     if (!namespace) newErrors.namespace = 'Missing namespace';
     if (!name) newErrors.name = 'Missing name';
@@ -48,27 +50,32 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
     } else {
-      onSubmit?.(event, {
-        apiVersion: 'rules.kubeedge.io/v1',
-        kind: 'Rule',
-        metadata: {
-          namespace,
-          name,
-          labels: {
-            description: description,
+      try {
+        await onSubmit?.(event, {
+          apiVersion: 'rules.kubeedge.io/v1',
+          kind: 'Rule',
+          metadata: {
+            namespace,
+            name,
+            labels: {
+              description: description,
+            },
           },
-        },
-        spec: {
-          source: source,
-          sourceResource: {
-            path: sourceResource,
+          spec: {
+            source: source,
+            sourceResource: {
+              path: sourceResource,
+            },
+            target: target,
+            targetResource: {
+              path: targetResource,
+            },
           },
-          target: target,
-          targetResource: {
-            path: targetResource,
-          },
-        },
-      });
+        });
+        handleClose(event);
+      } catch (error: any) {
+        setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Rule');
+      }
     }
   };
 

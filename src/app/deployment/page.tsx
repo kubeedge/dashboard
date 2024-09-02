@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { ColumnDefinition, TableCard } from '@/component/TableCard';
 import { Box, TextField, Button } from '@mui/material';
-import { deleteDeployment, getDeployment, useListDeployments } from '@/api/deployment';
+import { createDeployment, deleteDeployment, getDeployment, useListDeployments } from '@/api/deployment';
 import { Deployment } from '@/types/deployment';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
@@ -90,6 +90,11 @@ export default function DeploymentPage() {
     });
   };
 
+  const handleSubmit = async (_: any, record: Deployment) => {
+    await createDeployment(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
+  }
+
   return (
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
@@ -110,7 +115,7 @@ export default function DeploymentPage() {
       <DeploymentDrawer
         open={drawerOpen}
         onClose={handleDrawerClose}
-        data={currentDeployment}
+        onSubmit={handleSubmit}
       />
       <DeploymentDetailDialog
         open={detailOpen}

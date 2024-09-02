@@ -71,13 +71,8 @@ export default function ConfigmapPage() {
   };
 
   const handleSubmit = async (_: any, record: ConfigMap) => {
-    try {
-      await createConfigMap(record?.metadata?.namespace || namespace || 'default', record);
-      mutate();
-      handleCloseDialog();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create ConfigMap');
-    }
+    await createConfigMap(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
   }
 
   const handleRefreshClick = () => {

@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { RoleBinding, RoleRef, Subject } from '@/types/roleBinding';
 import { useListNamespaces } from '@/api/namespace';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddRoleBindingDialogProps {
   open?: boolean;
@@ -17,6 +18,7 @@ const AddRoleBindingDialog = ({ open, onClose, onSubmit }: AddRoleBindingDialogP
   const [roleRef, setRoleRef] = useState<RoleRef>({ kind: '', name: '', apiGroup: '' });
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const { data } = useListNamespaces();
+  const { setErrorMessage } = useAlert();
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setName(event.target.value);
@@ -40,17 +42,22 @@ const AddRoleBindingDialog = ({ open, onClose, onSubmit }: AddRoleBindingDialogP
     setSubjects(subjects.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
-    onSubmit?.(event, {
-      apiVersion: 'rbac.authorization.k8s.io/v1',
-      kind: 'RoleBinding',
-      metadata: {
-        namespace,
-        name,
-      },
-      roleRef,
-      subjects,
-    });
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    try {
+      await onSubmit?.(event, {
+        apiVersion: 'rbac.authorization.k8s.io/v1',
+        kind: 'RoleBinding',
+        metadata: {
+          namespace,
+          name,
+        },
+        roleRef,
+        subjects,
+      });
+      handleClose(event);
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create RoleBinding');
+    }
   };
 
   const handleClose = (event: React.MouseEvent<HTMLButtonElement>) => {
