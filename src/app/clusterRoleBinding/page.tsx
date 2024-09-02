@@ -48,14 +48,8 @@ export default function ClusterRoleBindingPage() {
   };
 
   const handleSubmit = async (_: any, record: ClusterRoleBinding) => {
-    try {
-      await createClusterRoleBinding(record);
-      mutate();
-
-      handleAddDialogClose();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create ClusterRoleBinding');
-    }
+    await createClusterRoleBinding(record);
+    mutate();
   };
 
   const handleQueryClick = () => {

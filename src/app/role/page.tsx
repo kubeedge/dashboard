@@ -82,12 +82,8 @@ export default function RolesPage() {
   };
 
   const handleOnSubmit = async (_: any, record: Role) => {
-    try {
-      await createRole(record?.metadata?.namespace || namespace || 'default', record);
-      mutate();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Role');
-    }
+    await createRole(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
   }
 
   const handleAddRoleDialogClose = () => {

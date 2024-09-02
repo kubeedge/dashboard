@@ -90,13 +90,8 @@ export default function DevicesPage() {
   };
 
   const handleSubmit = async (device: Device) => {
-    try {
-      await createDevice(device?.metadata?.namespace || 'default', device);
-      mutate();
-      handleCloseAddDeviceDialog();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Device');
-    }
+    await createDevice(device?.metadata?.namespace || namespace || 'default', device);
+    mutate();
   }
 
   return (

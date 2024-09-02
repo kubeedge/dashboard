@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { useListNamespaces } from '@/api/namespace';
 import { PolicyRule, Role } from '@/types/role';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddRoleDialogProps {
   open?: boolean;
@@ -16,6 +17,7 @@ const AddRoleDialog = ({ open, onClose, onSubmit }: AddRoleDialogProps) => {
   const [name, setName] = useState('');
   const [rules, setRules] = useState<PolicyRule[]>([{ verbs: [''], apiGroups: [''], resources: [''], resourceNames: [''] }]);
   const { data } = useListNamespaces();
+  const { setErrorMessage } = useAlert();
 
   const handleNamespaceChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setNamespace(event.target.value);
@@ -39,16 +41,21 @@ const AddRoleDialog = ({ open, onClose, onSubmit }: AddRoleDialogProps) => {
     setRules(rules.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>,) => {
-    onSubmit?.(event, {
-      apiVersion: 'rbac.authorization.k8s.io/v1',
-      kind: 'Role',
-      metadata: {
-        namespace,
-        name,
-      },
-      rules,
-    });
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>,) => {
+    try {
+      await onSubmit?.(event, {
+        apiVersion: 'rbac.authorization.k8s.io/v1',
+        kind: 'Role',
+        metadata: {
+          namespace,
+          name,
+        },
+        rules,
+      });
+      handleClose(event);
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Role');
+    }
   };
 
   const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

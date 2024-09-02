@@ -1,18 +1,29 @@
 // src/component/AddEdgeApplicationDialog.js
 import React, { useState } from 'react';
+import { parse } from 'yaml'
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Box, MenuItem } from '@mui/material';
 import { useListNamespaces } from '@/api/namespace';
 import { useListNodeGroups } from '@/api/nodeGroup';
 import { NodeGroup } from '@/types/nodeGroup';
 import { EdgeApplication } from '@/types/edgeApplication';
+import { useAlert } from '@/hook/useAlert';
+
+interface WorkloadTemplateFieldProps {
+  index: number;
+  onRemove: (index: number) => void;
+  value: string;
+  onChange: (value: string, index: number) => void;
+}
 
 // Function to create a WorkloadTemplate field
-const WorkloadTemplateField = ({ index, onRemove }: {index: number, onRemove: (index: number) => any}) => (
+const WorkloadTemplateField = ({ index, onRemove, value, onChange }: WorkloadTemplateFieldProps) => (
   <Box sx={{ marginBottom: '16px' }}>
     <TextField
       fullWidth
       multiline
       rows={4}
+      value={value}
+      onChange={(event) => onChange(event.target.value, index)}
       placeholder="manifests yaml"
       required
       error={false} // Add validation error if needed
@@ -23,16 +34,26 @@ const WorkloadTemplateField = ({ index, onRemove }: {index: number, onRemove: (i
   </Box>
 );
 
+interface TargetNodeGroupFieldProps {
+  index: number;
+  onRemove: (index: number) => void;
+  nodeGroups?: NodeGroup[];
+  value: { name: string, overrides: string };
+  onChange: (index: number, field: string, value: string) => void;
+}
+
 // Function to create a TargetNodeGroup field
-const TargetNodeGroupField = ({ index, onRemove, data }: { index: number, data?: NodeGroup[], onRemove: (index: number) => any }) => (
+const TargetNodeGroupField = ({ index, onRemove, nodeGroups, value, onChange }: TargetNodeGroupFieldProps) => (
   <Box sx={{ marginBottom: '16px' }}>
     <TextField
       fullWidth
       select
       placeholder="name"
+      value={value?.name}
+      onChange={(event) => onChange(index, 'name', event.target.value)}
       sx={{ marginBottom: '8px' }}
     >
-      {data?.map((nodeGroup) => (
+      {nodeGroups?.map((nodeGroup) => (
         <MenuItem key={nodeGroup?.metadata?.uid} value={nodeGroup?.metadata?.name}>{nodeGroup?.metadata?.name}</MenuItem>
       ))}
     </TextField>
@@ -40,6 +61,8 @@ const TargetNodeGroupField = ({ index, onRemove, data }: { index: number, data?:
       fullWidth
       multiline
       rows={4}
+      value={value?.overrides}
+      onChange={(event) => onChange(index, 'overrides', event.target.value)}
       placeholder="overriders yaml"
       required
       error={false} // Add validation error if needed
@@ -58,28 +81,41 @@ interface AddEdgeApplicationDialogProps {
 const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicationDialogProps) => {
   const [namespace, setNamespace] = useState('');
   const [name, setName] = useState('');
-  const [workloadTemplates, setWorkloadTemplates] = useState<any[]>([]);
-  const [targetNodeGroups, setTargetNodeGroups] = useState<any[]>([]);
+  const [workloadTemplates, setWorkloadTemplates] = useState<string[]>([]);
+  const [targetNodeGroups, setTargetNodeGroups] = useState<{name: string, overrides: string}[]>([]);
   const namespaceData = useListNamespaces()?.data;
   const nodeGroupData = useListNodeGroups()?.data;
+  const { setErrorMessage } = useAlert();
 
   const handleAddWorkloadTemplate = () => {
-    setWorkloadTemplates([...workloadTemplates, {}]);
+    setWorkloadTemplates([...workloadTemplates, '']);
   };
+
+  const handleChangeWorkloadTemplate = (value: string, index: number) => {
+      const templates = [...workloadTemplates];
+      (templates as any)[index] = value;
+      setWorkloadTemplates(templates);
+  }
 
   const handleRemoveWorkloadTemplate = (index: number) => {
     setWorkloadTemplates(workloadTemplates.filter((_, i) => i !== index));
   };
 
   const handleAddTargetNodeGroup = () => {
-    setTargetNodeGroups([...targetNodeGroups, {}]);
+    setTargetNodeGroups([...targetNodeGroups, { name: '', overrides: '' }]);
   };
+
+  const handleUpdateTargetNodeGroup = (index: number, field: string, value: string) => {
+    const nodeGroups = [...targetNodeGroups];
+    (nodeGroups as any)[index][field] = value;
+    setTargetNodeGroups(nodeGroups);
+  }
 
   const handleRemoveTargetNodeGroup = (index: number) => {
     setTargetNodeGroups(targetNodeGroups.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if (namespace && name) {
       const body: EdgeApplication = {
         apiVersion: 'apps.kubeedge.io/v1alpha1',
@@ -90,14 +126,22 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
         },
         spec: {
           workloadScope: {
-            targetNodeGroups,
+            targetNodeGroups: targetNodeGroups?.map((nodeGroup) => ({
+                name: nodeGroup.name,
+                overrides: parse(nodeGroup.overrides),
+            })),
           },
           workloadTemplate: {
-            manifests: workloadTemplates,
+            manifests: workloadTemplates?.map((template) => parse(template)),
           },
         }
       }
-      onSubmit?.(event, body);
+      try {
+        await onSubmit?.(event, body);
+        handleClose(event);
+      } catch (error: any) {
+        setErrorMessage(error?.response?.message || error?.message || 'Failed to create EdgeApplication');
+      }
     }
   };
 
@@ -143,10 +187,12 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
             >
               + Add WorkloadTemplate
             </Button>
-            {workloadTemplates.map((_, index) => (
+            {workloadTemplates.map((v, index) => (
               <WorkloadTemplateField
                 key={index}
                 index={index}
+                value={v}
+                onChange={handleChangeWorkloadTemplate}
                 onRemove={handleRemoveWorkloadTemplate}
               />
             ))}
@@ -159,11 +205,13 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
             >
               + Add TargetNodeGroup
             </Button>
-            {targetNodeGroups.map((_, index) => (
+            {targetNodeGroups.map((v, index) => (
               <TargetNodeGroupField
                 key={index}
                 index={index}
-                data={nodeGroupData?.items}
+                value={v}
+                onChange={handleUpdateTargetNodeGroup}
+                nodeGroups={nodeGroupData?.items}
                 onRemove={handleRemoveTargetNodeGroup}
               />
             ))}

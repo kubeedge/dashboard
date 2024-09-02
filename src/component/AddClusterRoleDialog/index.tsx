@@ -6,6 +6,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { ClusterRole, PolicyRule } from '@/types/clusterRole';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddClusterRoleDialogProps {
   open?: boolean;
@@ -17,6 +18,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
   const [name, setName] = useState<string>('');
   const [rules, setRules] = useState<PolicyRule[]>([]);
   const [selectors, setSelectors] = useState<{id:number, matchLabels: {key: string, value: string}[]}[]>([]);
+  const { setErrorMessage } = useAlert();
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setName(event.target.value);
@@ -80,7 +82,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
     setSelectors(selectors.filter(selector => selector.id !== selectorId));
   };
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const data: ClusterRole = {
       apiVersion: 'rbac.authorization.k8s.io/v1',
       kind: 'ClusterRole',
@@ -97,7 +99,13 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
       },
       rules,
     };
-    onSubmit?.(event, data);
+
+    try {
+      await onSubmit?.(event, data);
+      handleClose(event);
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create ClusterRole');
+    }
   }
 
   const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

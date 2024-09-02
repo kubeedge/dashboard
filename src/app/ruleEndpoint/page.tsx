@@ -52,13 +52,8 @@ export default function RuleEndpointPage() {
   };
 
   const handleFormSubmit = async (_: any, record: RuleEndpoint) => {
-    try {
-      await createRuleEndpoint(record?.metadata?.namespace || '', record);
-      mutate();
-      handleAddDialogClose();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create RuleEndpoint');
-    }
+    await createRuleEndpoint(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
   };
 
   const handleYamlClick = async (_: any, row: RuleEndpoint) => {

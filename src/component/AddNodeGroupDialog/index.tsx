@@ -5,6 +5,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { Select } from '@mui/material';
 import { useListNodes } from '@/api/node';
 import { NodeGroup } from '@/types/nodeGroup';
+import { useAlert } from '@/hook/useAlert';
 
 interface AddNodeGroupDialogProps {
   open?: boolean;
@@ -17,6 +18,7 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
   const [nodes, setNodes] = useState([]);
   const [matchLabels, setMatchLabels] = useState<Record<string, string>[]>([]);
   const { data } = useListNodes();
+  const { setErrorMessage } = useAlert();
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setName(event?.target?.value);
 
@@ -37,22 +39,28 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
     setMatchLabels(newMatchLabels);
   };
 
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     const labels: Record<string, string> = {};
     matchLabels?.forEach((matchLabel) => {
       labels[matchLabel.key] = matchLabel.value;
     });
-    onSubmit?.(event, {
-      apiVersion: 'apps.kubeedge.io/v1alpha1',
-      kind: 'NodeGroup',
-      metadata: {
-        name,
-      },
-      spec: {
-        nodes,
-        matchLabels: labels,
-      },
-    });
+
+    try {
+      await onSubmit?.(event, {
+        apiVersion: 'apps.kubeedge.io/v1alpha1',
+        kind: 'NodeGroup',
+        metadata: {
+          name,
+        },
+        spec: {
+          nodes,
+          matchLabels: labels,
+        },
+      });
+      handleClose(event);
+    } catch (error: any) {
+      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create NodeGroup');
+    }
   };
 
   const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

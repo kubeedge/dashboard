@@ -83,13 +83,8 @@ export default function EdgeApplicationPage() {
   };
 
   const handleAddEdgeApplication = async (_: any, record: EdgeApplication) => {
-    try {
-      await createEdgeApplication(record?.metadata?.namespace || namespace || 'default', record);
-      mutate();
-      handleAddDialogClose();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.message || error?.message || 'Failed to create EdgeApplication');
-    }
+    await createEdgeApplication(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
   };
 
   const handleDeleteClick = (_: any, row: EdgeApplication) => {

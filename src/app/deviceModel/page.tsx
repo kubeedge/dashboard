@@ -82,13 +82,8 @@ export default function DeviceModelPage() {
   };
 
   const handleAddDeviceModel = async (_: any, record: DeviceModel) => {
-    try {
-      await createDeviceModel(record?.metadata?.namespace || namespace || 'default', record);
-      mutate();
-      handleAddDialogClose();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create DeviceModel');
-    }
+    await createDeviceModel(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
   };
 
   const handleDetailDialogClose = () => {

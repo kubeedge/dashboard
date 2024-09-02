@@ -67,13 +67,8 @@ export default function SecretPage() {
   };
 
   const handleOnSubmit = async (_: any, record: Secret) => {
-    try {
-      await createSecret(record?.metadata?.namespace || namespace || 'default', record);
-      mutate()
-      setOpenAddDialog(false)
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Secret');
-    }
+    await createSecret(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
   }
 
   const handleDeleteClick = (_: any, row: Secret) => {

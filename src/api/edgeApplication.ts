@@ -5,7 +5,7 @@ import { EdgeApplication, EdgeApplicationList } from '@/types/edgeApplication';
 
 export function useListEdgeApplications(namespace?: string) {
   const url = namespace
-    ? `/apis/apps.kubeedge.io/v1alpha1/namespace/${namespace}/edgeapplications`
+    ? `/apis/apps.kubeedge.io/v1alpha1/namespaces/${namespace}/edgeapplications`
     : '/apis/apps.kubeedge.io/v1alpha1/edgeapplications'
   return useQuery<EdgeApplicationList>('listEdgeApplications', url, {
     method: 'GET',

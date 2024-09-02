@@ -91,13 +91,8 @@ export default function RulePage() {
   };
 
   const handleAddRule = async (_: any, record: Rule) => {
-    try {
-      await createRule(record?.metadata?.namespace || namespace || 'default', record);
-      mutate();
-      handleAddDialogClose();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Rule');
-    }
+    await createRule(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
   };
 
   const handleDeleteClick = (_: any, row: Rule) => {

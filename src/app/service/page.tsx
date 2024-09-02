@@ -66,13 +66,8 @@ export default function ServicePage() {
   };
 
   const handleSubmit = async (_: any, record: Service) => {
-    try {
-      await createService(record?.metadata?.namespace || 'default', record);
-      handleAddServiceDialogClose();
-      mutate();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create Service');
-    }
+    await createService(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
   }
 
   const handleDeleteClick = (_: any, row: Service) => {
