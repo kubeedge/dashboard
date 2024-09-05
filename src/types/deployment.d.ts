@@ -1,5 +1,5 @@
 import type { Condition, LabelSelector, Resource, ResourceList } from "./common";
-import { PodTemplateSepc } from "./podTemplate";
+import { PodTemplateSpec } from "./podTemplate";
 
 interface RollingUpdateDeployment {
   maxSurge?: number | string;
@@ -17,7 +17,7 @@ interface DeploymentCondition extends Condition {
 
 interface DeploymentSpec {
   selector: LabelSelector;
-  template: PodTemplateSepc;
+  template: PodTemplateSpec;
   replicas?: number;
   minReadySeconds?: number;
   strategy?: DeploymentStrategy;

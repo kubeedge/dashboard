@@ -10,7 +10,7 @@ import type {
 } from './common';
 import type { Volume } from './volume';
 
-interface ContainerPort {
+export interface ContainerPort {
   containerPort: number;
   hostIP?: string;
   hostPort?: number;
@@ -37,7 +37,7 @@ interface EnvVarSource {
   secretKeyRef?: SecretKeySelector;
 }
 
-interface EnvVar {
+export interface EnvVar {
   name: string;
   value?: string;
   valueFrom: EnvVarSource;
@@ -52,13 +52,13 @@ interface ConfigMapEnvSource extends EnvSource {}
 
 interface SecretEnvSource extends EnvSource {}
 
-interface EnvFromSource {
+export interface EnvFromSource {
   configMapRef?: ConfigMapEnvSource;
   prefix?: string;
   secretRef?: SecretEnvSource;
 }
 
-interface VolumeMount {
+export interface VolumeMount {
   mountPath: string;
   name: string;
   mountPropagation?: string;

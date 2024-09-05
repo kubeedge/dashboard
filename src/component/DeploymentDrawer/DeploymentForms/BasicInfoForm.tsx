@@ -1,46 +1,55 @@
-// src/component/DeploymentForms/BasicInfoForm
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, TextField, Button, MenuItem,Typography } from '@mui/material';
-import { Deployment } from '@/types/deployment';
 import { useListNamespaces } from '@/api/namespace';
+import { Namespace } from '@/types/namespace';
 
-export default function BasicInfoForm() {
-  const [namespace, setNamespace] = useState('');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [annotations, setAnnotations] = useState<{key:string, value: string}[]>([]);
-  const [labels, setLabels] = useState<{key:string, value: string}[]>([]);
-  const [replicas, setReplicas] = useState(1);
-  const namespaceData = useListNamespaces()?.data;
+interface KVPair {
+  key: string;
+  value: string;
+}
 
+interface BasicInfoFormProps {
+  data: {
+    name?: string;
+    namespace?: string;
+    description?: string;
+    annotations?: KVPair[];
+    labels?: KVPair[];
+    replicas?: number;
+  };
+  onChange: (field: string, value: any) => void;
+  namespaces?: Namespace[];
+}
+
+export default function BasicInfoForm({ data, onChange, namespaces }: BasicInfoFormProps) {
   const handleAddAnnotation = () => {
-    setAnnotations([...annotations, { key: '', value: '' }]);
+    onChange('annotations', [...(data?.annotations || []), { key: '', value: '' }]);
   };
 
   const handleAddLabel = () => {
-    setLabels([...labels, { key: '', value: '' }]);
+    onChange('labels', [...(data?.labels || []), { key: '', value: '' }]);
   };
 
   const handleAnnotationChange = (index: number, field: string, value: string) => {
-    const updatedAnnotations = [...annotations];
+    const updatedAnnotations = [...(data?.annotations || [])];
     (updatedAnnotations as any)[index][field] = value;
-    setAnnotations(updatedAnnotations);
+    onChange('annotations', updatedAnnotations);
   };
 
   const handleLabelChange = (index: number, field: string, value: string) => {
-    const updatedLabels = [...labels];
+    const updatedLabels = [...(data?.labels || [])];
     (updatedLabels as any)[index][field] = value;
-    setLabels(updatedLabels);
+    onChange('labels', updatedLabels);
   };
 
   const handleRemoveAnnotation = (index: number) => {
-    const updatedAnnotations = annotations.filter((_, i) => i !== index);
-    setAnnotations(updatedAnnotations);
+    const updatedAnnotations = (data?.annotations || []).filter((_, i) => i !== index);
+    onChange('annotations', updatedAnnotations);
   };
 
   const handleRemoveLabel = (index: number) => {
-    const updatedLabels = labels.filter((_, i) => i !== index);
-    setLabels(updatedLabels);
+    const updatedLabels = (data?.labels || []).filter((_, i) => i !== index);
+    onChange('labels', updatedLabels);
   };
 
   return (
@@ -50,13 +59,15 @@ export default function BasicInfoForm() {
         select
         required
         fullWidth
-        value={namespace}
-        onChange={(e) => setNamespace(e.target.value)}
-        helperText={!namespace && 'Miss namespace'}
+        value={data?.namespace || ''}
+        onChange={(e) => {
+          onChange('namespace', e.target.value);
+        }}
+        error={!data?.namespace}
         placeholder="Please select namespace"
         margin="normal"
       >
-        {namespaceData?.items?.map((item) => (
+        {namespaces?.map((item) => (
           <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
             {item?.metadata?.name}
           </MenuItem>
@@ -67,9 +78,9 @@ export default function BasicInfoForm() {
         label="Name"
         required
         fullWidth
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        helperText={!name && 'Miss name'}
+        value={data?.name || ''}
+        onChange={(e) => onChange('name', e.target.value)}
+        error={!data?.name}
         placeholder="Please enter name"
         margin="normal"
       />
@@ -77,8 +88,10 @@ export default function BasicInfoForm() {
       <TextField
         label="Description"
         fullWidth
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        value={data?.description || ''}
+        onChange={(e) => {
+          onChange('description', e.target.value);
+        }}
         placeholder="Please enter description"
         margin="normal"
       />
@@ -90,7 +103,7 @@ export default function BasicInfoForm() {
             + Add Annotation
           </Button>
         </Box>
-        {annotations.map((annotation, index) => (
+        {(data?.annotations || []).map((annotation, index) => (
           <Box key={index} sx={{ display: 'flex', gap: 2, marginBottom: 1 }}>
             <TextField
               placeholder="Please enter key"
@@ -118,7 +131,7 @@ export default function BasicInfoForm() {
             + Add Label
           </Button>
         </Box>
-        {labels.map((label, index) => (
+        {data?.labels?.map((label, index) => (
           <Box key={index} sx={{ display: 'flex', gap: 2, marginBottom: 1 }}>
             <TextField
               placeholder="Please enter key"
@@ -144,9 +157,12 @@ export default function BasicInfoForm() {
         required
         type="number"
         fullWidth
-        value={replicas}
-        onChange={(e) => setReplicas(parseInt(e.target.value, 10))}
-        helperText={!replicas && 'Please enter Replicas'}
+        value={data?.replicas || 1}
+        onChange={(e) => {
+          const num = parseInt(e.target.value, 10);
+          onChange('replicas', num);
+        }}
+        error={!(data?.replicas || 1)}
         placeholder="Please enter Replicas"
         margin="normal"
         inputProps={{ min: 1 }}
