@@ -1,14 +1,14 @@
 import type { ObjectMeta, ResourceList, TypeMeta } from './common';
 import type { PodSpec } from './pod';
 
-export interface PodTemplateSepc {
+export interface PodTemplateSpec {
   metadata?: ObjectMeta;
   spec?: PodSpec;
 }
 
 export interface PodTemplate extends TypeMeta {
   metadata?: ObjectMeta;
-  template?: PodTemplateSepc;
+  template?: PodTemplateSpec;
 }
 
 export interface PodTemplateList extends ResourceList<PodTemplate> {}

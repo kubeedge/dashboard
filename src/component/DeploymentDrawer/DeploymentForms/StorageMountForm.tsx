@@ -12,39 +12,62 @@ import {
   Radio,
   IconButton,
   Typography,
+  FormLabel,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { ConfigMap } from '@/types/configMap';
+import { Secret } from '@/types/secret';
 
-export default function StorageMountForm() {
-  const [volumes, setVolumes] = useState<{ id: number; type: string; data: any }[]>([]);
-  const [newVolumeId, setNewVolumeId] = useState(0);
+interface StorageMountFormProps {
+  data: any;
+  onChange: (field: string, value: any) => void;
+  configMaps: ConfigMap[];
+  secrets: Secret[];
+}
 
+export default function StorageMountForm({ data, onChange, configMaps, secrets }: StorageMountFormProps) {
   const handleAddVolume = () => {
-    setVolumes([...volumes, { id: newVolumeId, type: '', data: {} }]);
-    setNewVolumeId(newVolumeId + 1);
+    const updatedData = [...(data.volumes || []), { }];
+    onChange('volumes', updatedData);
+  }
+
+  const handleRemoveVolume = (index: number) => {
+    const updatedData = [...(data.volumes || [])];
+    updatedData.splice(index, 1);
+    onChange('volumes', updatedData);
+  }
+
+  const handleValueChange = (index: number, field: string, value: any) => {
+    const newData = [...(data.volumes || [])];
+    (newData[index] as any)[field] = value;
+    onChange('volumes', newData);
   };
 
-  const handleRemoveVolume = (id: number) => {
-    setVolumes(volumes.filter(volume => volume.id !== id));
+  const handleAddKeyToPath = (index: number) => {
+    const newData = [...(data.volumes || [])];
+    newData[index].keyToPaths = [...(newData[index].keyToPaths || []), {}];
+    onChange('volumes', newData);
   };
 
-  const handleVolumeTypeChange = (id: number, type: string) => {
-    const updatedVolumes = volumes.map(volume =>
-      volume.id === id ? { ...volume, type, data: {} } : volume
-    );
-    setVolumes(updatedVolumes);
+  const handleRemoveKeyToPath = (index: number, envIndex: number) => {
+    const newData = [...(data.volumes || [{}])];
+    newData[index].keyToPaths?.splice(envIndex, 1);
+    onChange('containers', newData);
+  }
+
+  const handleAddMountContainer = (index: number) => {
+    const newData = [...(data.volumes || [])];
+    newData[index].mountContainers = [...(newData[index].mountContainers || []), {}];
+    onChange('volumes', newData);
   };
 
-  const handleVolumeDataChange = (id: number, field: string, value: any) => {
-    const updatedVolumes = volumes.map(volume =>
-      volume.id === id
-        ? { ...volume, data: { ...volume.data, [field]: value } }
-        : volume
-    );
-    setVolumes(updatedVolumes);
-  };
+  const handleRemoveMountContainer = (index: number, conIndex: number) => {
+    const newData = [...(data.volumes || [{}])];
+    newData[index].mountContainers?.splice(conIndex, 1);
+    onChange('containers', newData);
+  }
 
-  const renderVolumeForm = (volume: { id: number; type: string; data: any }) => (
+  const renderVolumeForm = (volume: any, index: number) => (
     <Box key={volume.id} sx={{ display: 'flex', mb: 2 }}>
       <Box
         sx={{
@@ -53,18 +76,18 @@ export default function StorageMountForm() {
           width: '30%',
           position: 'relative',
           borderRadius: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
         }}
       >
-        <Typography variant="body1" color="white">
+        <Typography variant="h6" color="white">
           Volume
+        </Typography>
+        <Typography variant="subtitle1" color="white">
+          {volume?.name || ''}
         </Typography>
         <IconButton
           color="error"
           sx={{ position: 'absolute', top: 8, right: 8 }}
-          onClick={() => handleRemoveVolume(volume.id)}
+          onClick={() => handleRemoveVolume(index)}
         >
           <CloseIcon />
         </IconButton>
@@ -84,106 +107,109 @@ export default function StorageMountForm() {
           fullWidth
           margin="normal"
           placeholder="Please enter name"
-          onChange={(e) => handleVolumeDataChange(volume.id, 'name', e.target.value)}
-          error={!volume.data.name}
-          helperText={!volume.data.name ? 'Miss name' : ''}
+          value={volume.name}
+          onChange={(e) => handleValueChange(index, 'name', e.target.value)}
+          error={!volume.name}
+          helperText={!volume.name ? 'Miss name' : ''}
         />
 
         <FormControl component="fieldset" fullWidth margin="normal">
-          <FormControlLabel
-            control={
-              <RadioGroup
-                row
-                value={volume.type}
-                onChange={(e) => handleVolumeTypeChange(volume.id, e.target.value)}
-              >
-                <FormControlLabel value="EmptyDir" control={<Radio />} label="EmptyDir" />
-                <FormControlLabel value="HostPath" control={<Radio />} label="HostPath" />
-                <FormControlLabel value="ConfigMap" control={<Radio />} label="ConfigMap" />
-                <FormControlLabel value="Secret" control={<Radio />} label="Secret" />
-              </RadioGroup>
-            }
-            label="Type"
-          />
+          <FormLabel>Type</FormLabel>
+          <RadioGroup
+            row
+            value={volume?.type}
+            onChange={(e) => handleValueChange(index, 'type', e.target.value)}
+          >
+            <FormControlLabel value="EmptyDir" control={<Radio />} label="EmptyDir" />
+            <FormControlLabel value="HostPath" control={<Radio />} label="HostPath" />
+            <FormControlLabel value="ConfigMap" control={<Radio />} label="ConfigMap" />
+            <FormControlLabel value="Secret" control={<Radio />} label="Secret" />
+          </RadioGroup>
+        </FormControl>
 
-          {/* Conditional rendering for different types */}
-          {volume.type === 'HostPath' && (
-            <>
-              <TextField
-                label="Host Path"
-                required
-                fullWidth
-                margin="normal"
-                placeholder="Please enter"
-                onChange={(e) => handleVolumeDataChange(volume.id, 'hostPath', e.target.value)}
-                error={!volume.data.hostPath}
-                helperText={!volume.data.hostPath ? 'Missing path' : ''}
-              />
-              <FormControl fullWidth margin="normal">
-                <InputLabel>External IPs</InputLabel>
-                <Select
-                  value={volume.data.externalIP || ''}
-                  onChange={(e) => handleVolumeDataChange(volume.id, 'externalIP', e.target.value)}
-                >
-                  <MenuItem value="">Please select</MenuItem>
-                  <MenuItem value="EmptyStringDirectoryOrCreate">EmptyStringDirectoryOrCreate</MenuItem>
-                  <MenuItem value="Directory">Directory</MenuItem>
-                  <MenuItem value="FileOrCreate">FileOrCreate</MenuItem>
-                  <MenuItem value="File">File</MenuItem>
-                  <MenuItem value="Socket">Socket</MenuItem>
-                  <MenuItem value="CharDevice">CharDevice</MenuItem>
-                  <MenuItem value="BlockDevice">BlockDevice</MenuItem>
-                </Select>
-              </FormControl>
-            </>
-          )}
-          {volume.type === 'ConfigMap' && (
+        {/* Conditional rendering for different types */}
+        {volume.type === 'HostPath' && (
+          <>
+            <TextField
+              label="Host Path"
+              required
+              fullWidth
+              margin="normal"
+              placeholder="Please enter"
+              value={volume?.hostPath}
+              onChange={(e) => handleValueChange(index, 'hostPath', e.target.value)}
+              error={!volume?.hostPath}
+              helperText={!volume?.hostPath ? 'Missing path' : ''}
+            />
             <FormControl fullWidth margin="normal">
-              <InputLabel>ConfigMap</InputLabel>
+              <InputLabel>Host Path Type</InputLabel>
               <Select
-                value={volume.data.configMap || ''}
-                onChange={(e) => handleVolumeDataChange(volume.id, 'configMap', e.target.value)}
-                error={!volume.data.configMap}
-                // helperText={!volume.data.configMap ? 'Missing ConfigMap' : ''}
+                value={volume?.hostPathType || ''}
+                onChange={(e) => handleValueChange(index, 'hostPathType', e.target.value)}
               >
-                <MenuItem value="">Please select</MenuItem>
-                {/* Add ConfigMap options here */}
+                <MenuItem value="EmptyStringDirectoryOrCreate">EmptyStringDirectoryOrCreate</MenuItem>
+                <MenuItem value="Directory">Directory</MenuItem>
+                <MenuItem value="FileOrCreate">FileOrCreate</MenuItem>
+                <MenuItem value="File">File</MenuItem>
+                <MenuItem value="Socket">Socket</MenuItem>
+                <MenuItem value="CharDevice">CharDevice</MenuItem>
+                <MenuItem value="BlockDevice">BlockDevice</MenuItem>
               </Select>
             </FormControl>
-          )}
-          {volume.type === 'Secret' && (
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Secret Name</InputLabel>
-              <Select
-                value={volume.data.secretName || ''}
-                onChange={(e) => handleVolumeDataChange(volume.id, 'secretName', e.target.value)}
-                error={!volume.data.secretName}
-                // helperText={!volume.data.secretName ? 'Missing SecretName' : ''}
-              >
-                <MenuItem value="">Please select</MenuItem>
-                {/* Add Secret options here */}
-              </Select>
-            </FormControl>
-          )}
+          </>
+        )}
+        {volume.type === 'ConfigMap' && (
+          <FormControl fullWidth margin="normal">
+            <InputLabel>ConfigMap</InputLabel>
+            <Select
+              value={volume?.configMap || ''}
+              onChange={(e) => handleValueChange(index, 'configMap', e.target.value)}
+              error={!volume?.configMap}
+            >
+              {configMaps.map((configMap) => (
+                <MenuItem key={configMap?.metadata?.uid} value={configMap?.metadata?.name}>
+                  {configMap?.metadata?.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+        {volume.type === 'Secret' && (
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Secret Name</InputLabel>
+            <Select
+              value={volume.secret || ''}
+              onChange={(e) => handleValueChange(index, 'secret', e.target.value)}
+              error={!volume.secret}
+            >
+              {secrets.map((secret) => (
+                <MenuItem key={secret?.metadata?.uid} value={secret?.metadata?.name}>
+                  {secret?.metadata?.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
 
+        {(volume.type === 'ConfigMap' || volume.type === 'Secret') && (
           <Box sx={{ mt: 2 }}>
             <Button
               variant="outlined"
-              onClick={() => handleVolumeDataChange(volume.id, 'keyToPath', [...(volume.data.keyToPath || []), { key: '', value: '' }])}
+              onClick={() => handleAddKeyToPath(index)}
               fullWidth
             >
               + Add KeyToPath
             </Button>
-            {(volume.data.keyToPath || []).map((keyValue: any, index: number) => (
+            {(volume.keyToPaths || []).map((keyValue: any, keyIndex: number) => (
               <Box key={index} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                 <TextField
                   label="Key"
                   required
                   value={keyValue.key}
                   onChange={(e) => {
-                    const newKeyToPath = [...(volume.data.keyToPath || [])];
-                    newKeyToPath[index].key = e.target.value;
-                    handleVolumeDataChange(volume.id, 'keyToPath', newKeyToPath);
+                    const updatedKeyToPaths = [...(volume?.keyToPaths || [{}])];
+                    updatedKeyToPaths[keyIndex].key = e.target.value;
+                    handleValueChange(index, 'keyToPaths', updatedKeyToPaths);
                   }}
                   margin="normal"
                   placeholder="Please input key"
@@ -195,9 +221,9 @@ export default function StorageMountForm() {
                   required
                   value={keyValue.value}
                   onChange={(e) => {
-                    const newKeyToPath = [...(volume.data.keyToPath || [])];
-                    newKeyToPath[index].value = e.target.value;
-                    handleVolumeDataChange(volume.id, 'keyToPath', newKeyToPath);
+                    const updatedKeyToPaths = [...(volume?.keyToPaths || [{}])];
+                    updatedKeyToPaths[keyIndex].value = e.target.value;
+                    handleValueChange(index, 'keyToPaths', updatedKeyToPaths);
                   }}
                   margin="normal"
                   placeholder="Please input value"
@@ -206,70 +232,67 @@ export default function StorageMountForm() {
                 />
                 <IconButton
                   color="error"
-                  onClick={() => {
-                    const newKeyToPath = (volume.data.keyToPath || []).filter((_: any, i: number) => i !== index);
-                    handleVolumeDataChange(volume.id, 'keyToPath', newKeyToPath);
-                  }}
+                  onClick={() => handleRemoveKeyToPath(index, keyIndex)}
                 >
                   <CloseIcon />
                 </IconButton>
               </Box>
             ))}
           </Box>
+        )}
 
-          <Box sx={{ mt: 2 }}>
-            <Button
-              variant="outlined"
-              onClick={() => handleVolumeDataChange(volume.id, 'mountContainer', [...(volume.data.mountContainer || []), { container: '', mountPath: '' }])}
-              fullWidth
-            >
-              + Add Mount Container
-            </Button>
-            {(volume.data.mountContainer || []).map((mount: any, index: number) => (
-              <Box key={index} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                <FormControl fullWidth margin="normal">
-                  <InputLabel>Container</InputLabel>
-                  <Select
-                    value={mount.container}
-                    onChange={(e) => {
-                      const newMountContainer = [...(volume.data.mountContainer || [])];
-                      newMountContainer[index].container = e.target.value;
-                      handleVolumeDataChange(volume.id, 'mountContainer', newMountContainer);
-                    }}
-                    error={!mount.container}
-                    // helperText={!mount.container ? 'Missing container' : ''}
-                  >
-                    <MenuItem value="">Please select</MenuItem>
-                    {/* Add Container options here */}
-                  </Select>
-                </FormControl>
-                <TextField
-                  label="Mount Path"
-                  required
-                  value={mount.mountPath}
+
+        <Box sx={{ mt: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={() => handleAddMountContainer(index)}
+            fullWidth
+          >
+            + Add Mount Container
+          </Button>
+          {(volume?.mountContainers || []).map((container: any, conIndex: number) => (
+            <Box key={conIndex} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Container</InputLabel>
+                <Select
+                  value={container.container}
                   onChange={(e) => {
-                    const newMountContainer = [...(volume.data.mountContainer || [])];
-                    newMountContainer[index].mountPath = e.target.value;
-                    handleVolumeDataChange(volume.id, 'mountContainer', newMountContainer);
+                    const updatedContainers = [...(volume?.mountContainers || [{}])];
+                    updatedContainers[conIndex].container = e.target.value;
+                    handleValueChange(index, 'mountContainers', updatedContainers);
                   }}
-                  margin="normal"
-                  placeholder="Please input mountPath"
-                  error={!mount.mountPath}
-                  helperText={!mount.mountPath ? 'Missing mountPath' : ''}
-                />
-                <IconButton
-                  color="error"
-                  onClick={() => {
-                    const newMountContainer = (volume.data.mountContainer || []).filter((_: any, i: number) => i !== index);
-                    handleVolumeDataChange(volume.id, 'mountContainer', newMountContainer);
-                  }}
+                  error={!container.container}
                 >
-                  <CloseIcon />
-                </IconButton>
-              </Box>
-            ))}
-          </Box>
-        </FormControl>
+                  {data?.containers?.map((container: any) => (
+                    <MenuItem key={container.name} value={container.name}>
+                      {container.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                label="Mount Path"
+                required
+                value={container.mountPath}
+                onChange={(e) => {
+                  const updatedContainers = [...(volume?.mountContainers || [{}])];
+                    updatedContainers[conIndex].mountPath = e.target.value;
+                    handleValueChange(index, 'mountContainers', updatedContainers);
+                }}
+                margin="normal"
+                placeholder="Please input mountPath"
+                error={!container.mountPath}
+                helperText={!container.mountPath ? 'Missing mountPath' : ''}
+              />
+              <IconButton
+                color="error"
+                onClick={() => handleRemoveMountContainer(index, conIndex)}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+          ))}
+        </Box>
       </Box>
     </Box>
   );
@@ -279,12 +302,12 @@ export default function StorageMountForm() {
       <Button
         variant="contained"
         color="primary"
-        onClick={handleAddVolume}
+        onClick={() => handleAddVolume()}
         fullWidth
       >
         Add Volume
       </Button>
-      {volumes.map(renderVolumeForm)}
+      {data?.volumes?.map(renderVolumeForm)}
     </Box>
   );
 }

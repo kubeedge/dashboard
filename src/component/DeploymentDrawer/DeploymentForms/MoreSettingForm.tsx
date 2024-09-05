@@ -17,99 +17,71 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import CloseIcon from '@mui/icons-material/Close';
+import { Namespace } from '@/types/namespace';
 
-const MoreSettingForm: React.FC = () => {
-  const [nodeSelectors, setNodeSelectors] = useState([{ key: '', value: '' }]);
-  const [updateStrategy, setUpdateStrategy] = useState('');
-  const [nodeAffinity, setNodeAffinity] = useState(false);
-  const [podAffinity, setPodAffinity] = useState(false);
-  const [PodAntiAffinity, setPodAntiAffinity] = useState(false);
-  const [rollingUpdate, setRollingUpdate] = useState(false);
-  const [requiredConditions, setRequiredConditions] = useState([{ matchExpressions: [{}], matchFields: [{}] }]);
-  const [preferredConditions, setPreferredConditions] = useState([{ matchExpressions: [{}], matchFields: [{}], weight: 0 }]);
-  const [podRequiredConditions, setPodRequiredConditions] = useState([{ matchExpressions: [{}], matchFields: [{}], namespace: '', topologyKey: '' }]);
-  const [podPreferredConditions, setPodPreferredConditions] = useState([{ matchExpressions: [{}], matchFields: [{}], weight: 0, namespace: '', topologyKey: '' }]);
+interface MoreSettingFormProps {
+  data: any;
+  onChange: (field: string, value: any) => void;
+  namespaces?: Namespace[];
+}
 
-  const handleAddNodeSelector = () => setNodeSelectors([...nodeSelectors, { key: '', value: '' }]);
-  const handleRemoveNodeSelector = (index: number) => setNodeSelectors(nodeSelectors.filter((_, i) => i !== index));
+const ShowValueOperators = new Set([
+  'In',
+  'NotIn',
+  'Gt',
+  'Lt',
+]);
 
-  const handleAddRequiredCondition = () => setRequiredConditions([...requiredConditions, { matchExpressions: [{}], matchFields: [{}] }]);
-  const handleRemoveRequiredCondition = (index: number) => setRequiredConditions(requiredConditions.filter((_, i) => i !== index));
-
-  const handleAddMatchExpression = (conditionIndex: number) => {
-    const updatedConditions = [...requiredConditions];
-    updatedConditions[conditionIndex].matchExpressions.push({});
-    setRequiredConditions(updatedConditions);
+export default function MoreSettingForm({ data, onChange, namespaces }: MoreSettingFormProps) {
+  const handleAffinityValueChange = (affinity: string, index: number, field: string, value: any) => {
+    const newData = [...(data?.[affinity] || [])];
+    (newData[index] as any)[field] = value;
+    onChange(affinity, newData);
   };
 
-  const handleRemoveMatchExpression = (conditionIndex: number, expressionIndex: number) => {
-    const updatedConditions = [...requiredConditions];
-    updatedConditions[conditionIndex].matchExpressions.splice(expressionIndex, 1);
-    setRequiredConditions(updatedConditions);
+  const handleAddNodeSelector = () => {
+    const updatedData = [...(data.nodeSelectors || []), { }];
+    onChange('nodeSelectors', updatedData);
+  }
+
+  const handleRemoveNodeSelector = (index: number) => {
+    const updatedData = [...(data.nodeSelectors || [])];
+    updatedData.splice(index, 1);
+    onChange('nodeSelectors', updatedData);
+  }
+
+  const handleNodeSelectorChange = (index: number, field: string, value: any) => {
+    const newData = [...(data.nodeSelectors || [])];
+    (newData[index] as any)[field] = value;
+    onChange('nodeSelectors', newData);
   };
 
-  const handleAddMatchField = (conditionIndex: number) => {
-    const updatedConditions = [...requiredConditions];
-    updatedConditions[conditionIndex].matchFields.push({});
-    setRequiredConditions(updatedConditions);
-  };
+  const handleAddCondition = (affinity: string, initValue: any = {}) => {
+    const newData = data[affinity] || [];
+    newData.push(initValue);
+    onChange(affinity, newData);
+  }
 
-  const handleRemoveMatchField = (conditionIndex: number, fieldIndex: number) => {
-    const updatedConditions = [...requiredConditions];
-    updatedConditions[conditionIndex].matchFields.splice(fieldIndex, 1);
-    setRequiredConditions(updatedConditions);
-  };
+  const handleRemoveCondition = (affinity: string, index: number) => {
+    const newData = data[affinity] || [];
+    newData?.splice(index, 1);
+    onChange(affinity, newData);
+  }
 
-  const handleAddPreferredCondition = () => setPreferredConditions([...preferredConditions, { matchExpressions: [{}], matchFields: [{}], weight: 0 }]);
-  const handleRemovePreferredCondition = (index: number) => setPreferredConditions(preferredConditions.filter((_, i) => i !== index));
-
-  const handleAddPreferredMatchExpression = (conditionIndex: number) => {
-    const updatedConditions = [...preferredConditions];
-    updatedConditions[conditionIndex].matchExpressions.push({});
-    setPreferredConditions(updatedConditions);
-  };
-
-  const handleRemovePreferredMatchExpression = (conditionIndex: number, expressionIndex: number) => {
-    const updatedConditions = [...preferredConditions];
-    updatedConditions[conditionIndex].matchExpressions.splice(expressionIndex, 1);
-    setPreferredConditions(updatedConditions);
-  };
-
-  const handleAddPreferredMatchField = (conditionIndex: number) => {
-    const updatedConditions = [...preferredConditions];
-    updatedConditions[conditionIndex].matchFields.push({});
-    setPreferredConditions(updatedConditions);
-  };
-
-  const handleRemovePreferredMatchField = (conditionIndex: number, fieldIndex: number) => {
-    const updatedConditions = [...preferredConditions];
-    updatedConditions[conditionIndex].matchFields.splice(fieldIndex, 1);
-    setPreferredConditions(updatedConditions);
-  };
-
-  const handleWeightChange = (index: number, newValue: number) => {
-    const totalWeight = preferredConditions.reduce((sum, cond) => sum + cond.weight, 0);
-    if (totalWeight - preferredConditions[index].weight + newValue <= 100) {
-      const updatedConditions = [...preferredConditions];
-      updatedConditions[index].weight = newValue;
-      setPreferredConditions(updatedConditions);
+  const handleAddAffinityMatchCondition = (affinity: string, index: number, field: string) => {
+    const newData = [...(data?.[affinity] || [])];
+    if (!newData[index]) {
+      newData[index] = {};
     }
+    newData[index][field] = [...(newData[index]?.[field] || []), {}];
+    onChange(affinity, newData);
   };
 
-  const handleAddPodRequiredCondition = () => setPodRequiredConditions([...podRequiredConditions, { matchExpressions: [{}], matchFields: [{}], namespace: '', topologyKey: '' }]);
-  const handleRemovePodRequiredCondition = (index: number) => setPodRequiredConditions(podRequiredConditions.filter((_, i) => i !== index));
-
-  const handleAddPodPreferredCondition = () => setPodPreferredConditions([...podPreferredConditions, { matchExpressions: [{}], matchFields: [{}], weight: 0, namespace: '', topologyKey: '' }]);
-  const handleRemovePodPreferredCondition = (index: number) => setPodPreferredConditions(podPreferredConditions.filter((_, i) => i !== index));
-
-  const handlePodWeightChange = (index: number, newValue: number) => {
-    const totalWeight = podPreferredConditions.reduce((sum, cond) => sum + cond.weight, 0);
-    if (totalWeight - podPreferredConditions[index].weight + newValue <= 100) {
-      const updatedConditions = [...podPreferredConditions];
-      updatedConditions[index].weight = newValue;
-      setPodPreferredConditions(updatedConditions);
-    }
-  };
+  const handleRemoveAffinityMatchCondition = (affinity: string, index: number, field: string, condIndex: number) => {
+    const newData = [...(data[affinity] || [{}])];
+    newData[index]?.[field]?.splice(condIndex, 1);
+    onChange(affinity, newData);
+  }
 
   return (
     <Box padding={2}>
@@ -118,8 +90,8 @@ const MoreSettingForm: React.FC = () => {
       <TextField
         fullWidth
         placeholder="Please enter name"
-        error={false} // Add validation logic here
-        helperText="Miss name"
+        value={data?.nodeName}
+        onChange={(e) => onChange('nodeName', e.target.value)}
         margin="normal"
       />
 
@@ -135,20 +107,24 @@ const MoreSettingForm: React.FC = () => {
         >
           Add Node Selector
         </Button>
-        {nodeSelectors.map((_, index) => (
+        {(data?.nodeSelectors || []).map((selector: any, index: number) => (
           <Box key={index} marginTop={1} display="flex" alignItems="center">
             <TextField
               label="Key"
               placeholder="Please input key"
-              error={false} // Add validation logic here
-              helperText="Missing key"
+              value={selector?.key}
+              error={!selector?.key} // Add validation logic here
+              helperText={!selector?.key && "Missing key"}
+              onChange={(e) => handleNodeSelectorChange(index, 'key', e.target.value)}
               margin="normal"
             />
             <TextField
               label="Value"
               placeholder="Please input value"
-              error={false} // Add validation logic here
-              helperText="Missing value"
+              value={selector?.value}
+              error={!selector?.value} // Add validation logic here
+              helperText={!selector?.value && "Missing value"}
+              onChange={(e) => handleNodeSelectorChange(index, 'value', e.target.value)}
               margin="normal"
               style={{ marginLeft: 16 }}
             />
@@ -165,17 +141,19 @@ const MoreSettingForm: React.FC = () => {
 
       {/* Strategy */}
       <FormControlLabel
-        control={<Checkbox checked={updateStrategy !== ''} onChange={() => setUpdateStrategy(updateStrategy ? '' : 'RollingUpdate')} />}
+        control={<Checkbox checked={!!data?.setStrategy} onChange={(e) => onChange('setStrategy', e.target.checked)} />}
         label="Strategy"
         style={{ marginTop: 16 }}
       />
-      {updateStrategy && (
+      {data?.setStrategy && (
         <Box marginTop={2}>
           <Typography variant="h6">Set update strategy</Typography>
           <TextField
             label="Min Ready Seconds"
             type="number"
             inputProps={{ min: 1 }}
+            value={data?.minReadySeconds}
+            onChange={(e) => onChange('minReadySeconds', e.target.value)}
             placeholder="0"
             margin="normal"
             InputProps={{
@@ -188,6 +166,8 @@ const MoreSettingForm: React.FC = () => {
             inputProps={{ min: 1 }}
             placeholder="0"
             margin="normal"
+            value={data?.progressDeadlineSeconds}
+            onChange={(e) => onChange('progressDeadlineSeconds', e.target.value)}
             InputProps={{
               endAdornment: <Typography variant="caption">s</Typography>,
             }}
@@ -198,28 +178,38 @@ const MoreSettingForm: React.FC = () => {
             inputProps={{ min: 1 }}
             placeholder="0"
             margin="normal"
+            value={data?.revisionHistoryLimit}
+            onChange={(e) => onChange('revisionHistoryLimit', e.target.value)}
           />
           <FormGroup row>
             <FormControlLabel
-              control={<Checkbox checked={rollingUpdate} onChange={() => setRollingUpdate(!rollingUpdate)} />}
+              control={<Checkbox
+                checked={!data?.strategyType || data?.strategyType === 'RollingUpdate'}
+                onChange={(e) => onChange('strategyType', e.target.checked ? 'RollingUpdate' : 'Recreate')} />}
               label="Rolling Update"
             />
             <FormControlLabel
-              control={<Checkbox checked={!rollingUpdate} onChange={() => setRollingUpdate(false)} />}
+              control={<Checkbox
+                checked={data?.strategyType === 'Recreate'}
+                onChange={(e) => onChange('strategyType', e.target.checked ? 'Recreate' : 'RollingUpdate')} />}
               label="Recreate"
             />
           </FormGroup>
-          {rollingUpdate && (
+          {(!data?.strategyType || data?.strategyType === 'RollingUpdate') && (
             <Box marginTop={2}>
               <TextField
                 label="Max Unavailable"
                 placeholder="Please enter"
                 margin="normal"
+                value={data?.maxUnavailable}
+                onChange={(e) => onChange('maxUnavailable', e.target.value)}
               />
               <TextField
                 label="Max Surge"
                 placeholder="Please enter"
                 margin="normal"
+                value={data?.maxSurge}
+                onChange={(e) => onChange('maxSurge', e.target.value)}
               />
             </Box>
           )}
@@ -228,57 +218,86 @@ const MoreSettingForm: React.FC = () => {
 
       {/* Node Affinity */}
       <FormControlLabel
-        control={<Checkbox checked={nodeAffinity} onChange={() => setNodeAffinity(!nodeAffinity)} />}
+        control={<Checkbox checked={!!data?.setNodeAffinity} onChange={(e) => onChange('setNodeAffinity', e.target.checked)} />}
         label="Node Affinity"
         style={{ marginTop: 16 }}
       />
-      {nodeAffinity && (
+      {data?.setNodeAffinity && (
         <Box marginTop={2}>
-          <Typography variant="h6">Required Node Affinity</Typography>
           <Button
             variant="outlined"
             color="primary"
             startIcon={<AddIcon />}
             fullWidth
-            onClick={handleAddRequiredCondition}
+            onClick={() => handleAddCondition('nodeAffinityRequiredConditions')}
             style={{ marginTop: 16 }}
           >
-            Add Required Condition
+            Add condition which is required during scheduling and ignored during execution
           </Button>
-          {requiredConditions.map((condition, conditionIndex) => (
-            <Box key={conditionIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
-              <Typography variant="subtitle1">Condition {conditionIndex + 1}</Typography>
+          {(data?.nodeAffinityRequiredConditions || []).map((condition: any, condIndex: number) => (
+            <Box key={condIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
+              <Typography variant="subtitle1">Required Condition {condIndex + 1}</Typography>
               <IconButton
                 color="error"
-                onClick={() => handleRemoveRequiredCondition(conditionIndex)}
+                onClick={() => handleRemoveCondition('nodeAffinityRequiredConditions', condIndex)}
                 style={{ position: 'absolute', top: 8, right: 8 }}
               >
                 <CloseIcon />
               </IconButton>
 
               <Typography variant="body1" marginTop={2}>Match Expressions</Typography>
-              {condition.matchExpressions.map((_, expressionIndex) => (
-                <Box key={expressionIndex} marginTop={1} display="flex" alignItems="center">
+              {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
                     label="Key"
+                    fullWidth
                     placeholder="Please input key"
                     margin="normal"
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('nodeAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
                   />
                   <TextField
+                    select
+                    fullWidth
                     label="Operator"
                     placeholder="Please input operator"
                     margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <TextField
-                    label="Values"
-                    placeholder="Please input values"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
+                    value={expr?.operator || ''}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].operator = e.target.value;
+                      handleAffinityValueChange('nodeAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
+                    style={{ marginLeft: 16 }}>
+                    <MenuItem key="In" value="In">In</MenuItem>
+                    <MenuItem key="NotIn" value="NotIn">NotIn</MenuItem>
+                    <MenuItem key="Exists" value="Exists">Exists</MenuItem>
+                    <MenuItem key="DoesNotExist" value="DoesNotExist">DoesNotExist</MenuItem>
+                    <MenuItem key="Gt" value="Gt">Gt</MenuItem>
+                    <MenuItem key="Lt" value="Lt">Lt</MenuItem>
+                  </TextField>
+                  {ShowValueOperators.has(expr?.operator) && (
+                    <TextField
+                      label="Values"
+                      fullWidth
+                      placeholder="Please input values"
+                      margin="normal"
+                      value={expr?.values || []}
+                      onChange={(e) => {
+                        const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                        updatedExprs[exprIndex].values = e.target.value;
+                        handleAffinityValueChange('nodeAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
+                      }}
+                      style={{ marginLeft: 16 }}
+                      />
+                  )}
                   <IconButton
                     color="error"
-                    onClick={() => handleRemoveMatchExpression(conditionIndex, expressionIndex)}
+                    onClick={() => handleRemoveAffinityMatchCondition('nodeAffinityRequiredConditions', condIndex, 'matchExpressions', exprIndex)}
                     style={{ marginLeft: 16 }}
                   >
                     <RemoveIcon />
@@ -290,35 +309,65 @@ const MoreSettingForm: React.FC = () => {
                 color="primary"
                 startIcon={<AddIcon />}
                 fullWidth
-                onClick={() => handleAddMatchExpression(conditionIndex)}
+                onClick={() => handleAddAffinityMatchCondition('nodeAffinityRequiredConditions', condIndex, 'matchExpressions')}
                 style={{ marginTop: 8 }}
               >
                 Add Match Expression
               </Button>
 
               <Typography variant="body1" marginTop={2}>Match Fields</Typography>
-              {condition.matchFields.map((_, fieldIndex) => (
-                <Box key={fieldIndex} marginTop={1} display="flex" alignItems="center">
+              {(condition?.matchFields || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
                     label="Key"
+                    fullWidth
                     placeholder="Please input key"
                     margin="normal"
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchFields || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('nodeAffinityRequiredConditions', condIndex, 'matchFields', updatedExprs);
+                    }}
                   />
                   <TextField
+                    select
+                    fullWidth
                     label="Operator"
                     placeholder="Please input operator"
                     margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <TextField
-                    label="Values"
-                    placeholder="Please input values"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
+                    value={expr?.operator || ''}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchFields || [{}])];
+                      updatedExprs[exprIndex].operator = e.target.value;
+                      handleAffinityValueChange('nodeAffinityRequiredConditions', condIndex, 'matchFields', updatedExprs);
+                    }}
+                    style={{ marginLeft: 16 }}>
+                    <MenuItem key="In" value="In">In</MenuItem>
+                    <MenuItem key="NotIn" value="NotIn">NotIn</MenuItem>
+                    <MenuItem key="Exists" value="Exists">Exists</MenuItem>
+                    <MenuItem key="DoesNotExist" value="DoesNotExist">DoesNotExist</MenuItem>
+                    <MenuItem key="Gt" value="Gt">Gt</MenuItem>
+                    <MenuItem key="Lt" value="Lt">Lt</MenuItem>
+                  </TextField>
+                  {ShowValueOperators.has(expr?.operator) && (
+                    <TextField
+                      label="Values"
+                      fullWidth
+                      placeholder="Please input values"
+                      margin="normal"
+                      value={expr?.values || []}
+                      onChange={(e) => {
+                        const updatedExprs = [...(condition?.matchFields || [{}])];
+                        updatedExprs[exprIndex].values = e.target.value;
+                        handleAffinityValueChange('nodeAffinityRequiredConditions', condIndex, 'matchFields', updatedExprs);
+                      }}
+                      style={{ marginLeft: 16 }}
+                      />
+                  )}
                   <IconButton
                     color="error"
-                    onClick={() => handleRemoveMatchField(conditionIndex, fieldIndex)}
+                    onClick={() => handleRemoveAffinityMatchCondition('nodeAffinityRequiredConditions', condIndex, 'matchFields', exprIndex)}
                     style={{ marginLeft: 16 }}
                   >
                     <RemoveIcon />
@@ -330,7 +379,7 @@ const MoreSettingForm: React.FC = () => {
                 color="primary"
                 startIcon={<AddIcon />}
                 fullWidth
-                onClick={() => handleAddMatchField(conditionIndex)}
+                onClick={() => handleAddAffinityMatchCondition('nodeAffinityRequiredConditions', condIndex, 'matchFields')}
                 style={{ marginTop: 8 }}
               >
                 Add Match Field
@@ -338,63 +387,93 @@ const MoreSettingForm: React.FC = () => {
             </Box>
           ))}
 
-          <Typography variant="h6" marginTop={4}>Preferred Node Affinity</Typography>
           <Button
             variant="outlined"
             color="primary"
             startIcon={<AddIcon />}
             fullWidth
-            onClick={handleAddPreferredCondition}
+            onClick={() => handleAddCondition('nodeAffinityPreferredConditions', { weight: 50 })}
             style={{ marginTop: 16 }}
           >
-            Add Preferred Condition
+            Add condition which is preferred during scheduling and ignored during execution
           </Button>
-          {preferredConditions.map((condition, conditionIndex) => (
-            <Box key={conditionIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
-              <Typography variant="subtitle1">Preferred Condition {conditionIndex + 1}</Typography>
+          {(data?.nodeAffinityPreferredConditions || []).map((condition: any, condIndex: number) => (
+            <Box key={condIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
+              <Typography variant="subtitle1">Preferred Condition {condIndex + 1}</Typography>
               <IconButton
                 color="error"
-                onClick={() => handleRemovePreferredCondition(conditionIndex)}
+                onClick={() => handleRemoveCondition('nodeAffinityPreferredConditions', condIndex)}
                 style={{ position: 'absolute', top: 8, right: 8 }}
               >
                 <CloseIcon />
               </IconButton>
 
               <Slider
-                value={condition.weight}
-                onChange={(e, newValue) => handleWeightChange(conditionIndex, newValue as number)}
+                value={condition?.weight}
+                onChange={(e, newValue) => {
+                  handleAffinityValueChange('nodeAffinityPreferredConditions', condIndex, 'weight', Number(newValue));
+                }}
                 valueLabelDisplay="auto"
                 min={0}
                 max={100}
                 step={1}
                 marks
-                // margin="normal"
                 style={{ marginTop: 16 }}
               />
 
               <Typography variant="body1" marginTop={2}>Match Expressions</Typography>
-              {condition.matchExpressions.map((_, expressionIndex) => (
-                <Box key={expressionIndex} marginTop={1} display="flex" alignItems="center">
+              {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
                     label="Key"
+                    fullWidth
                     placeholder="Please input key"
                     margin="normal"
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('nodeAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
                   />
                   <TextField
+                    select
+                    fullWidth
                     label="Operator"
                     placeholder="Please input operator"
                     margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <TextField
-                    label="Values"
-                    placeholder="Please input values"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
+                    value={expr?.operator || ''}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].operator = e.target.value;
+                      handleAffinityValueChange('nodeAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
+                    style={{ marginLeft: 16 }}>
+                    <MenuItem key="In" value="In">In</MenuItem>
+                    <MenuItem key="NotIn" value="NotIn">NotIn</MenuItem>
+                    <MenuItem key="Exists" value="Exists">Exists</MenuItem>
+                    <MenuItem key="DoesNotExist" value="DoesNotExist">DoesNotExist</MenuItem>
+                    <MenuItem key="Gt" value="Gt">Gt</MenuItem>
+                    <MenuItem key="Lt" value="Lt">Lt</MenuItem>
+                  </TextField>
+                  {ShowValueOperators.has(expr?.operator) && (
+                    <TextField
+                      label="Values"
+                      fullWidth
+                      placeholder="Please input values"
+                      margin="normal"
+                      value={expr?.values || []}
+                      onChange={(e) => {
+                        const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                        updatedExprs[exprIndex].values = e.target.value;
+                        handleAffinityValueChange('nodeAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
+                      }}
+                      style={{ marginLeft: 16 }}
+                      />
+                  )}
                   <IconButton
                     color="error"
-                    onClick={() => handleRemovePreferredMatchExpression(conditionIndex, expressionIndex)}
+                    onClick={() => handleRemoveAffinityMatchCondition('nodeAffinityPreferredConditions', condIndex, 'matchExpressions', exprIndex)}
                     style={{ marginLeft: 16 }}
                   >
                     <RemoveIcon />
@@ -406,35 +485,65 @@ const MoreSettingForm: React.FC = () => {
                 color="primary"
                 startIcon={<AddIcon />}
                 fullWidth
-                onClick={() => handleAddPreferredMatchExpression(conditionIndex)}
+                onClick={() => handleAddAffinityMatchCondition('nodeAffinityPreferredConditions', condIndex, 'matchExpressions')}
                 style={{ marginTop: 8 }}
               >
                 Add Match Expression
               </Button>
 
               <Typography variant="body1" marginTop={2}>Match Fields</Typography>
-              {condition.matchFields.map((_, fieldIndex) => (
-                <Box key={fieldIndex} marginTop={1} display="flex" alignItems="center">
+              {(condition?.matchFields || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
                     label="Key"
+                    fullWidth
                     placeholder="Please input key"
                     margin="normal"
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchFields || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('nodeAffinityPreferredConditions', condIndex, 'matchFields', updatedExprs);
+                    }}
                   />
                   <TextField
+                    select
+                    fullWidth
                     label="Operator"
                     placeholder="Please input operator"
                     margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <TextField
-                    label="Values"
-                    placeholder="Please input values"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
+                    value={expr?.operator || ''}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchFields || [{}])];
+                      updatedExprs[exprIndex].operator = e.target.value;
+                      handleAffinityValueChange('nodeAffinityPreferredConditions', condIndex, 'matchFields', updatedExprs);
+                    }}
+                    style={{ marginLeft: 16 }}>
+                    <MenuItem key="In" value="In">In</MenuItem>
+                    <MenuItem key="NotIn" value="NotIn">NotIn</MenuItem>
+                    <MenuItem key="Exists" value="Exists">Exists</MenuItem>
+                    <MenuItem key="DoesNotExist" value="DoesNotExist">DoesNotExist</MenuItem>
+                    <MenuItem key="Gt" value="Gt">Gt</MenuItem>
+                    <MenuItem key="Lt" value="Lt">Lt</MenuItem>
+                  </TextField>
+                  {ShowValueOperators.has(expr?.operator) && (
+                    <TextField
+                      label="Values"
+                      fullWidth
+                      placeholder="Please input values"
+                      margin="normal"
+                      value={expr?.values || []}
+                      onChange={(e) => {
+                        const updatedExprs = [...(condition?.matchFields || [{}])];
+                        updatedExprs[exprIndex].values = e.target.value;
+                        handleAffinityValueChange('nodeAffinityPreferredConditions', condIndex, 'matchFields', updatedExprs);
+                      }}
+                      style={{ marginLeft: 16 }}
+                      />
+                  )}
                   <IconButton
                     color="error"
-                    onClick={() => handleRemovePreferredMatchField(conditionIndex, fieldIndex)}
+                    onClick={() => handleRemoveAffinityMatchCondition('nodeAffinityPreferredConditions', condIndex, 'matchFields', exprIndex)}
                     style={{ marginLeft: 16 }}
                   >
                     <RemoveIcon />
@@ -446,7 +555,7 @@ const MoreSettingForm: React.FC = () => {
                 color="primary"
                 startIcon={<AddIcon />}
                 fullWidth
-                onClick={() => handleAddPreferredMatchField(conditionIndex)}
+                onClick={() => handleAddAffinityMatchCondition('nodeAffinityPreferredConditions', condIndex, 'matchFields')}
                 style={{ marginTop: 8 }}
               >
                 Add Match Field
@@ -456,72 +565,65 @@ const MoreSettingForm: React.FC = () => {
         </Box>
       )}
 
-      {/* Pod Affinity */}
       <FormControlLabel
-        control={<Checkbox checked={podAffinity} onChange={() => setPodAffinity(!podAffinity)} />}
+        control={<Checkbox checked={!!data?.setPodAffinity} onChange={(e) => onChange('setPodAffinity', e.target.checked)} />}
         label="Pod Affinity"
         style={{ marginTop: 16 }}
       />
-      {podAffinity && (
+      {data?.setPodAffinity && (
         <Box marginTop={2}>
-          <Typography variant="h6">Required Pod Affinity</Typography>
           <Button
             variant="outlined"
             color="primary"
             startIcon={<AddIcon />}
             fullWidth
-            onClick={handleAddPodRequiredCondition}
+            onClick={() => handleAddCondition('podAffinityRequiredConditions')}
             style={{ marginTop: 16 }}
           >
-            Add Required Condition
+            Add condition which is required during scheduling and ignored during execution
           </Button>
-          {podRequiredConditions.map((condition, conditionIndex) => (
-            <Box key={conditionIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
-              <Typography variant="subtitle1">Condition {conditionIndex + 1}</Typography>
+          {(data?.podAffinityRequiredConditions || []).map((condition: any, condIndex: number) => (
+            <Box key={condIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
+              <Typography variant="subtitle1">Required Condition {condIndex + 1}</Typography>
               <IconButton
                 color="error"
-                onClick={() => handleRemovePodRequiredCondition(conditionIndex)}
+                onClick={() => handleRemoveCondition('podAffinityRequiredConditions', condIndex)}
                 style={{ position: 'absolute', top: 8, right: 8 }}
               >
                 <CloseIcon />
               </IconButton>
 
-              <TextField
-                label="Namespace"
-                placeholder="Please input namespace"
-                margin="normal"
-                fullWidth
-              />
-              <TextField
-                label="Topology Key"
-                placeholder="Please input topology key"
-                margin="normal"
-                fullWidth
-              />
-
-              <Typography variant="body1" marginTop={2}>Match Expressions</Typography>
-              {condition.matchExpressions.map((_, expressionIndex) => (
-                <Box key={expressionIndex} marginTop={1} display="flex" alignItems="center">
+              <Typography variant="body1" marginTop={2}>Match Fields</Typography>
+              {(condition?.matchLabels || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
                     label="Key"
+                    fullWidth
                     placeholder="Please input key"
                     margin="normal"
-                  />
-                  <TextField
-                    label="Operator"
-                    placeholder="Please input operator"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchLabels || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('podAffinityRequiredConditions', condIndex, 'matchLabels', updatedExprs);
+                    }}
                   />
                   <TextField
                     label="Values"
+                    fullWidth
                     placeholder="Please input values"
                     margin="normal"
+                    value={expr?.values || []}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchLabels || [{}])];
+                      updatedExprs[exprIndex].values = e.target.value;
+                      handleAffinityValueChange('podAffinityRequiredConditions', condIndex, 'matchLabels', updatedExprs);
+                    }}
                     style={{ marginLeft: 16 }}
-                  />
+                    />
                   <IconButton
                     color="error"
-                    onClick={() => handleRemoveMatchExpression(conditionIndex, expressionIndex)}
+                    onClick={() => handleRemoveAffinityMatchCondition('podAffinityRequiredConditions', condIndex, 'matchLabels', exprIndex)}
                     style={{ marginLeft: 16 }}
                   >
                     <RemoveIcon />
@@ -533,123 +635,172 @@ const MoreSettingForm: React.FC = () => {
                 color="primary"
                 startIcon={<AddIcon />}
                 fullWidth
-                onClick={() => handleAddMatchExpression(conditionIndex)}
+                onClick={() => handleAddAffinityMatchCondition('podAffinityRequiredConditions', condIndex, 'matchLabels')}
+                style={{ marginTop: 8 }}
+              >
+                Add Match Labels
+              </Button>
+
+              <Typography variant="body1" marginTop={2}>Match Expressions</Typography>
+              {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
+                  <TextField
+                    label="Key"
+                    fullWidth
+                    placeholder="Please input key"
+                    margin="normal"
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('podAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
+                  />
+                  <TextField
+                    select
+                    fullWidth
+                    label="Operator"
+                    placeholder="Please input operator"
+                    margin="normal"
+                    value={expr?.operator || ''}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].operator = e.target.value;
+                      handleAffinityValueChange('podAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
+                    style={{ marginLeft: 16 }}>
+                    <MenuItem key="In" value="In">In</MenuItem>
+                    <MenuItem key="NotIn" value="NotIn">NotIn</MenuItem>
+                    <MenuItem key="Exists" value="Exists">Exists</MenuItem>
+                    <MenuItem key="DoesNotExist" value="DoesNotExist">DoesNotExist</MenuItem>
+                  </TextField>
+                  {ShowValueOperators.has(expr?.operator) && (
+                    <TextField
+                      label="Values"
+                      fullWidth
+                      placeholder="Please input values"
+                      margin="normal"
+                      value={expr?.values || []}
+                      onChange={(e) => {
+                        const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                        updatedExprs[exprIndex].values = e.target.value;
+                        handleAffinityValueChange('podAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
+                      }}
+                      style={{ marginLeft: 16 }}
+                      />
+                  )}
+                  <IconButton
+                    color="error"
+                    onClick={() => handleRemoveAffinityMatchCondition('podAffinityRequiredConditions', condIndex, 'matchExpressions', exprIndex)}
+                    style={{ marginLeft: 16 }}
+                  >
+                    <RemoveIcon />
+                  </IconButton>
+                </Box>
+              ))}
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<AddIcon />}
+                fullWidth
+                onClick={() => handleAddAffinityMatchCondition('podAffinityRequiredConditions', condIndex, 'matchExpressions')}
                 style={{ marginTop: 8 }}
               >
                 Add Match Expression
               </Button>
 
-              <Typography variant="body1" marginTop={2}>Match Fields</Typography>
-              {condition.matchFields.map((_, fieldIndex) => (
-                <Box key={fieldIndex} marginTop={1} display="flex" alignItems="center">
-                  <TextField
-                    label="Key"
-                    placeholder="Please input key"
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Operator"
-                    placeholder="Please input operator"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <TextField
-                    label="Values"
-                    placeholder="Please input values"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <IconButton
-                    color="error"
-                    onClick={() => handleRemoveMatchField(conditionIndex, fieldIndex)}
-                    style={{ marginLeft: 16 }}
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                </Box>
-              ))}
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<AddIcon />}
-                fullWidth
-                onClick={() => handleAddMatchField(conditionIndex)}
-                style={{ marginTop: 8 }}
-              >
-                Add Match Field
-              </Button>
+              <Box marginTop={1} display="flex" alignItems="center">
+                <TextField
+                  select
+                  value={condition.namespace || ''}
+                  onChange={(e) => handleAffinityValueChange('podAffinityRequiredConditions', condIndex, 'namespace', e.target.value)}
+                  label="Namespace"
+                  placeholder="Please input namespace"
+                  margin="normal"
+                  fullWidth>
+                  {namespaces?.map((item) => (
+                    <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
+                      {item?.metadata?.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  value={condition.topology}
+                  onChange={(e) => handleAffinityValueChange('podAffinityRequiredConditions', condIndex, 'topology', e.target.value)}
+                  label="Topology Key"
+                  placeholder="Please input topology key"
+                  margin="normal"
+                  fullWidth
+                />
+              </Box>
             </Box>
           ))}
-          <Typography variant="h6" marginTop={4}>Preferred Pod Affinity</Typography>
+
           <Button
             variant="outlined"
             color="primary"
             startIcon={<AddIcon />}
             fullWidth
-            onClick={handleAddPreferredCondition}
+            onClick={() => handleAddCondition('podAffinityPreferredConditions', { weight: 50 })}
             style={{ marginTop: 16 }}
           >
-            Add Preferred Condition
+            Add condition which is preferred during scheduling and ignored during execution
           </Button>
-          {preferredConditions.map((condition, conditionIndex) => (
-            <Box key={conditionIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
-              <Typography variant="subtitle1">Preferred Condition {conditionIndex + 1}</Typography>
+          {(data?.podAffinityPreferredConditions || []).map((condition: any, condIndex: number) => (
+            <Box key={condIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
+              <Typography variant="subtitle1">Preferred Condition {condIndex + 1}</Typography>
               <IconButton
                 color="error"
-                onClick={() => handleRemovePreferredCondition(conditionIndex)}
+                onClick={() => handleRemoveCondition('podAffinityPreferredConditions', condIndex)}
                 style={{ position: 'absolute', top: 8, right: 8 }}
               >
                 <CloseIcon />
               </IconButton>
 
-              <TextField
-                label="Namespace"
-                placeholder="Please input namespace"
-                margin="normal"
-                fullWidth
-              />
-              <TextField
-                label="Topology Key"
-                placeholder="Please input topology key"
-                margin="normal"
-                fullWidth
-              />
-
               <Slider
-                value={condition.weight}
-                onChange={(e, newValue) => handleWeightChange(conditionIndex, newValue as number)}
+                value={condition?.weight}
+                onChange={(e, newValue) => {
+                  handleAffinityValueChange('podAffinityPreferredConditions', condIndex, 'weight', Number(newValue));
+                }}
                 valueLabelDisplay="auto"
                 min={0}
                 max={100}
                 step={1}
                 marks
-                // margin="normal"
                 style={{ marginTop: 16 }}
               />
 
-              <Typography variant="body1" marginTop={2}>Match Expressions</Typography>
-              {condition.matchExpressions.map((_, expressionIndex) => (
-                <Box key={expressionIndex} marginTop={1} display="flex" alignItems="center">
+              <Typography variant="body1" marginTop={2}>Match Fields</Typography>
+              {(condition?.matchLabels || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
                     label="Key"
+                    fullWidth
                     placeholder="Please input key"
                     margin="normal"
-                  />
-                  <TextField
-                    label="Operator"
-                    placeholder="Please input operator"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchLabels || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('podAffinityPreferredConditions', condIndex, 'matchLabels', updatedExprs);
+                    }}
                   />
                   <TextField
                     label="Values"
+                    fullWidth
                     placeholder="Please input values"
                     margin="normal"
+                    value={expr?.values || []}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchLabels || [{}])];
+                      updatedExprs[exprIndex].values = e.target.value;
+                      handleAffinityValueChange('podAffinityPreferredConditions', condIndex, 'matchLabels', updatedExprs);
+                    }}
                     style={{ marginLeft: 16 }}
-                  />
+                    />
                   <IconButton
                     color="error"
-                    onClick={() => handleRemovePreferredMatchExpression(conditionIndex, expressionIndex)}
+                    onClick={() => handleRemoveAffinityMatchCondition('podAffinityPreferredConditions', condIndex, 'matchLabels', exprIndex)}
                     style={{ marginLeft: 16 }}
                   >
                     <RemoveIcon />
@@ -661,122 +812,168 @@ const MoreSettingForm: React.FC = () => {
                 color="primary"
                 startIcon={<AddIcon />}
                 fullWidth
-                onClick={() => handleAddPreferredMatchExpression(conditionIndex)}
+                onClick={() => handleAddAffinityMatchCondition('podAffinityPreferredConditions', condIndex, 'matchLabels')}
+                style={{ marginTop: 8 }}
+              >
+                Add Match Labels
+              </Button>
+
+              <Typography variant="body1" marginTop={2}>Match Expressions</Typography>
+              {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
+                  <TextField
+                    label="Key"
+                    fullWidth
+                    placeholder="Please input key"
+                    margin="normal"
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('podAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
+                  />
+                  <TextField
+                    select
+                    fullWidth
+                    label="Operator"
+                    placeholder="Please input operator"
+                    margin="normal"
+                    value={expr?.operator || ''}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].operator = e.target.value;
+                      handleAffinityValueChange('podAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
+                    style={{ marginLeft: 16 }}>
+                    <MenuItem key="In" value="In">In</MenuItem>
+                    <MenuItem key="NotIn" value="NotIn">NotIn</MenuItem>
+                    <MenuItem key="Exists" value="Exists">Exists</MenuItem>
+                    <MenuItem key="DoesNotExist" value="DoesNotExist">DoesNotExist</MenuItem>
+                  </TextField>
+                  {ShowValueOperators.has(expr?.operator) && (
+                    <TextField
+                      label="Values"
+                      fullWidth
+                      placeholder="Please input values"
+                      margin="normal"
+                      value={expr?.values || []}
+                      onChange={(e) => {
+                        const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                        updatedExprs[exprIndex].values = e.target.value;
+                        handleAffinityValueChange('podAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
+                      }}
+                      style={{ marginLeft: 16 }}
+                      />
+                  )}
+                  <IconButton
+                    color="error"
+                    onClick={() => handleRemoveAffinityMatchCondition('podAffinityPreferredConditions', condIndex, 'matchExpressions', exprIndex)}
+                    style={{ marginLeft: 16 }}
+                  >
+                    <RemoveIcon />
+                  </IconButton>
+                </Box>
+              ))}
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<AddIcon />}
+                fullWidth
+                onClick={() => handleAddAffinityMatchCondition('podAffinityPreferredConditions', condIndex, 'matchExpressions')}
                 style={{ marginTop: 8 }}
               >
                 Add Match Expression
               </Button>
 
-              <Typography variant="body1" marginTop={2}>Match Fields</Typography>
-              {condition.matchFields.map((_, fieldIndex) => (
-                <Box key={fieldIndex} marginTop={1} display="flex" alignItems="center">
-                  <TextField
-                    label="Key"
-                    placeholder="Please input key"
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Operator"
-                    placeholder="Please input operator"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <TextField
-                    label="Values"
-                    placeholder="Please input values"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <IconButton
-                    color="error"
-                    onClick={() => handleRemovePreferredMatchField(conditionIndex, fieldIndex)}
-                    style={{ marginLeft: 16 }}
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                </Box>
-              ))}
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<AddIcon />}
-                fullWidth
-                onClick={() => handleAddPreferredMatchField(conditionIndex)}
-                style={{ marginTop: 8 }}
-              >
-                Add Match Field
-              </Button>
+              <Box marginTop={1} display="flex" alignItems="center">
+                <TextField
+                  select
+                  value={condition.namespace || ''}
+                  onChange={(e) => handleAffinityValueChange('podAffinityPreferredConditions', condIndex, 'namespace', e.target.value)}
+                  label="Namespace"
+                  placeholder="Please input namespace"
+                  margin="normal"
+                  fullWidth>
+                  {namespaces?.map((item) => (
+                    <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
+                      {item?.metadata?.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  value={condition.topology}
+                  onChange={(e) => handleAffinityValueChange('podAffinityPreferredConditions', condIndex, 'topology', e.target.value)}
+                  label="Topology Key"
+                  placeholder="Please input topology key"
+                  margin="normal"
+                  fullWidth
+                />
+              </Box>
             </Box>
           ))}
         </Box>
       )}
 
-      {/* Pod Anti Affinity */}
       <FormControlLabel
-        control={<Checkbox checked={PodAntiAffinity} onChange={() => setPodAntiAffinity(!PodAntiAffinity)} />}
+        control={<Checkbox checked={!!data?.setPodAntiAffinity} onChange={(e) => onChange('setPodAntiAffinity', e.target.checked)} />}
         label="Pod Anti Affinity"
         style={{ marginTop: 16 }}
       />
-      {PodAntiAffinity && (
+      {data?.setPodAntiAffinity && (
         <Box marginTop={2}>
-          <Typography variant="h6">Required Pod Anti Affinity</Typography>
           <Button
             variant="outlined"
             color="primary"
             startIcon={<AddIcon />}
             fullWidth
-            onClick={handleAddPodRequiredCondition}
+            onClick={() => handleAddCondition('podAntiAffinityRequiredConditions')}
             style={{ marginTop: 16 }}
           >
-            Add Required Condition
+            Add condition which is required during scheduling and ignored during execution
           </Button>
-          {podRequiredConditions.map((condition, conditionIndex) => (
-            <Box key={conditionIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
-              <Typography variant="subtitle1">Condition {conditionIndex + 1}</Typography>
+          {(data?.podAntiAffinityRequiredConditions || []).map((condition: any, condIndex: number) => (
+            <Box key={condIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
+              <Typography variant="subtitle1">Required Condition {condIndex + 1}</Typography>
               <IconButton
                 color="error"
-                onClick={() => handleRemovePodRequiredCondition(conditionIndex)}
+                onClick={() => handleRemoveCondition('podAntiAffinityRequiredConditions', condIndex)}
                 style={{ position: 'absolute', top: 8, right: 8 }}
               >
                 <CloseIcon />
               </IconButton>
 
-              <TextField
-                label="Namespace"
-                placeholder="Please input namespace"
-                margin="normal"
-                fullWidth
-              />
-              <TextField
-                label="Topology Key"
-                placeholder="Please input topology key"
-                margin="normal"
-                fullWidth
-              />
-
-              <Typography variant="body1" marginTop={2}>Match Expressions</Typography>
-              {condition.matchExpressions.map((_, expressionIndex) => (
-                <Box key={expressionIndex} marginTop={1} display="flex" alignItems="center">
+              <Typography variant="body1" marginTop={2}>Match Fields</Typography>
+              {(condition?.matchLabels || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
                     label="Key"
+                    fullWidth
                     placeholder="Please input key"
                     margin="normal"
-                  />
-                  <TextField
-                    label="Operator"
-                    placeholder="Please input operator"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchLabels || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('podAntiAffinityRequiredConditions', condIndex, 'matchLabels', updatedExprs);
+                    }}
                   />
                   <TextField
                     label="Values"
+                    fullWidth
                     placeholder="Please input values"
                     margin="normal"
+                    value={expr?.values || []}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchLabels || [{}])];
+                      updatedExprs[exprIndex].values = e.target.value;
+                      handleAffinityValueChange('podAntiAffinityRequiredConditions', condIndex, 'matchLabels', updatedExprs);
+                    }}
                     style={{ marginLeft: 16 }}
-                  />
+                    />
                   <IconButton
                     color="error"
-                    onClick={() => handleRemoveMatchExpression(conditionIndex, expressionIndex)}
+                    onClick={() => handleRemoveAffinityMatchCondition('podAntiAffinityRequiredConditions', condIndex, 'matchLabels', exprIndex)}
                     style={{ marginLeft: 16 }}
                   >
                     <RemoveIcon />
@@ -788,123 +985,172 @@ const MoreSettingForm: React.FC = () => {
                 color="primary"
                 startIcon={<AddIcon />}
                 fullWidth
-                onClick={() => handleAddMatchExpression(conditionIndex)}
+                onClick={() => handleAddAffinityMatchCondition('podAntiAffinityRequiredConditions', condIndex, 'matchLabels')}
+                style={{ marginTop: 8 }}
+              >
+                Add Match Labels
+              </Button>
+
+              <Typography variant="body1" marginTop={2}>Match Expressions</Typography>
+              {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
+                  <TextField
+                    label="Key"
+                    fullWidth
+                    placeholder="Please input key"
+                    margin="normal"
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('podAntiAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
+                  />
+                  <TextField
+                    select
+                    fullWidth
+                    label="Operator"
+                    placeholder="Please input operator"
+                    margin="normal"
+                    value={expr?.operator || ''}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].operator = e.target.value;
+                      handleAffinityValueChange('podAntiAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
+                    style={{ marginLeft: 16 }}>
+                    <MenuItem key="In" value="In">In</MenuItem>
+                    <MenuItem key="NotIn" value="NotIn">NotIn</MenuItem>
+                    <MenuItem key="Exists" value="Exists">Exists</MenuItem>
+                    <MenuItem key="DoesNotExist" value="DoesNotExist">DoesNotExist</MenuItem>
+                  </TextField>
+                  {ShowValueOperators.has(expr?.operator) && (
+                    <TextField
+                      label="Values"
+                      fullWidth
+                      placeholder="Please input values"
+                      margin="normal"
+                      value={expr?.values || []}
+                      onChange={(e) => {
+                        const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                        updatedExprs[exprIndex].values = e.target.value;
+                        handleAffinityValueChange('podAntiAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
+                      }}
+                      style={{ marginLeft: 16 }}
+                      />
+                  )}
+                  <IconButton
+                    color="error"
+                    onClick={() => handleRemoveAffinityMatchCondition('podAntiAffinityRequiredConditions', condIndex, 'matchExpressions', exprIndex)}
+                    style={{ marginLeft: 16 }}
+                  >
+                    <RemoveIcon />
+                  </IconButton>
+                </Box>
+              ))}
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<AddIcon />}
+                fullWidth
+                onClick={() => handleAddAffinityMatchCondition('podAntiAffinityRequiredConditions', condIndex, 'matchExpressions')}
                 style={{ marginTop: 8 }}
               >
                 Add Match Expression
               </Button>
 
-              <Typography variant="body1" marginTop={2}>Match Fields</Typography>
-              {condition.matchFields.map((_, fieldIndex) => (
-                <Box key={fieldIndex} marginTop={1} display="flex" alignItems="center">
-                  <TextField
-                    label="Key"
-                    placeholder="Please input key"
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Operator"
-                    placeholder="Please input operator"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <TextField
-                    label="Values"
-                    placeholder="Please input values"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <IconButton
-                    color="error"
-                    onClick={() => handleRemoveMatchField(conditionIndex, fieldIndex)}
-                    style={{ marginLeft: 16 }}
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                </Box>
-              ))}
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<AddIcon />}
-                fullWidth
-                onClick={() => handleAddMatchField(conditionIndex)}
-                style={{ marginTop: 8 }}
-              >
-                Add Match Field
-              </Button>
+              <Box marginTop={1} display="flex" alignItems="center">
+                <TextField
+                  select
+                  value={condition.namespace || ''}
+                  onChange={(e) => handleAffinityValueChange('podAntiAffinityRequiredConditions', condIndex, 'namespace', e.target.value)}
+                  label="Namespace"
+                  placeholder="Please input namespace"
+                  margin="normal"
+                  fullWidth>
+                  {namespaces?.map((item) => (
+                    <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
+                      {item?.metadata?.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  value={condition.topology}
+                  onChange={(e) => handleAffinityValueChange('podAntiAffinityRequiredConditions', condIndex, 'topology', e.target.value)}
+                  label="Topology Key"
+                  placeholder="Please input topology key"
+                  margin="normal"
+                  fullWidth
+                />
+              </Box>
             </Box>
           ))}
-          <Typography variant="h6" marginTop={4}>Preferred Pod Anti Affinity</Typography>
+
           <Button
             variant="outlined"
             color="primary"
             startIcon={<AddIcon />}
             fullWidth
-            onClick={handleAddPreferredCondition}
+            onClick={() => handleAddCondition('podAntiAffinityPreferredConditions', { weight: 50 })}
             style={{ marginTop: 16 }}
           >
-            Add Preferred Condition
+            Add condition which is preferred during scheduling and ignored during execution
           </Button>
-          {preferredConditions.map((condition, conditionIndex) => (
-            <Box key={conditionIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
-              <Typography variant="subtitle1">Preferred Condition {conditionIndex + 1}</Typography>
+          {(data?.podAntiAffinityPreferredConditions || []).map((condition: any, condIndex: number) => (
+            <Box key={condIndex} marginTop={2} padding={2} border={1} borderColor="grey.300" position="relative">
+              <Typography variant="subtitle1">Preferred Condition {condIndex + 1}</Typography>
               <IconButton
                 color="error"
-                onClick={() => handleRemovePreferredCondition(conditionIndex)}
+                onClick={() => handleRemoveCondition('podAntiAffinityPreferredConditions', condIndex)}
                 style={{ position: 'absolute', top: 8, right: 8 }}
               >
                 <CloseIcon />
               </IconButton>
 
-              <TextField
-                label="Namespace"
-                placeholder="Please input namespace"
-                margin="normal"
-                fullWidth
-              />
-              <TextField
-                label="Topology Key"
-                placeholder="Please input topology key"
-                margin="normal"
-                fullWidth
-              />
-              
               <Slider
-                value={condition.weight}
-                onChange={(e, newValue) => handleWeightChange(conditionIndex, newValue as number)}
+                value={condition?.weight}
+                onChange={(e, newValue) => {
+                  handleAffinityValueChange('podAntiAffinityPreferredConditions', condIndex, 'weight', Number(newValue));
+                }}
                 valueLabelDisplay="auto"
                 min={0}
                 max={100}
                 step={1}
                 marks
-                // margin="normal"
                 style={{ marginTop: 16 }}
               />
 
-              <Typography variant="body1" marginTop={2}>Match Expressions</Typography>
-              {condition.matchExpressions.map((_, expressionIndex) => (
-                <Box key={expressionIndex} marginTop={1} display="flex" alignItems="center">
+              <Typography variant="body1" marginTop={2}>Match Fields</Typography>
+              {(condition?.matchLabels || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
                     label="Key"
+                    fullWidth
                     placeholder="Please input key"
                     margin="normal"
-                  />
-                  <TextField
-                    label="Operator"
-                    placeholder="Please input operator"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchLabels || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('podAntiAffinityPreferredConditions', condIndex, 'matchLabels', updatedExprs);
+                    }}
                   />
                   <TextField
                     label="Values"
+                    fullWidth
                     placeholder="Please input values"
                     margin="normal"
+                    value={expr?.values || []}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchLabels || [{}])];
+                      updatedExprs[exprIndex].values = e.target.value;
+                      handleAffinityValueChange('podAntiAffinityPreferredConditions', condIndex, 'matchLabels', updatedExprs);
+                    }}
                     style={{ marginLeft: 16 }}
-                  />
+                    />
                   <IconButton
                     color="error"
-                    onClick={() => handleRemovePreferredMatchExpression(conditionIndex, expressionIndex)}
+                    onClick={() => handleRemoveAffinityMatchCondition('podAntiAffinityPreferredConditions', condIndex, 'matchLabels', exprIndex)}
                     style={{ marginLeft: 16 }}
                   >
                     <RemoveIcon />
@@ -916,51 +1162,104 @@ const MoreSettingForm: React.FC = () => {
                 color="primary"
                 startIcon={<AddIcon />}
                 fullWidth
-                onClick={() => handleAddPreferredMatchExpression(conditionIndex)}
+                onClick={() => handleAddAffinityMatchCondition('podAntiAffinityPreferredConditions', condIndex, 'matchLabels')}
+                style={{ marginTop: 8 }}
+              >
+                Add Match Labels
+              </Button>
+
+              <Typography variant="body1" marginTop={2}>Match Expressions</Typography>
+              {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
+                <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
+                  <TextField
+                    label="Key"
+                    fullWidth
+                    placeholder="Please input key"
+                    margin="normal"
+                    value={expr?.key}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].key = e.target.value;
+                      handleAffinityValueChange('podAntiAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
+                  />
+                  <TextField
+                    select
+                    fullWidth
+                    label="Operator"
+                    placeholder="Please input operator"
+                    margin="normal"
+                    value={expr?.operator || ''}
+                    onChange={(e) => {
+                      const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                      updatedExprs[exprIndex].operator = e.target.value;
+                      handleAffinityValueChange('podAntiAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
+                    }}
+                    style={{ marginLeft: 16 }}>
+                    <MenuItem key="In" value="In">In</MenuItem>
+                    <MenuItem key="NotIn" value="NotIn">NotIn</MenuItem>
+                    <MenuItem key="Exists" value="Exists">Exists</MenuItem>
+                    <MenuItem key="DoesNotExist" value="DoesNotExist">DoesNotExist</MenuItem>
+                  </TextField>
+                  {ShowValueOperators.has(expr?.operator) && (
+                    <TextField
+                      label="Values"
+                      fullWidth
+                      placeholder="Please input values"
+                      margin="normal"
+                      value={expr?.values || []}
+                      onChange={(e) => {
+                        const updatedExprs = [...(condition?.matchExpressions || [{}])];
+                        updatedExprs[exprIndex].values = e.target.value;
+                        handleAffinityValueChange('podAntiAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
+                      }}
+                      style={{ marginLeft: 16 }}
+                      />
+                  )}
+                  <IconButton
+                    color="error"
+                    onClick={() => handleRemoveAffinityMatchCondition('podAntiAffinityPreferredConditions', condIndex, 'matchExpressions', exprIndex)}
+                    style={{ marginLeft: 16 }}
+                  >
+                    <RemoveIcon />
+                  </IconButton>
+                </Box>
+              ))}
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<AddIcon />}
+                fullWidth
+                onClick={() => handleAddAffinityMatchCondition('podAntiAffinityPreferredConditions', condIndex, 'matchExpressions')}
                 style={{ marginTop: 8 }}
               >
                 Add Match Expression
               </Button>
 
-              <Typography variant="body1" marginTop={2}>Match Fields</Typography>
-              {condition.matchFields.map((_, fieldIndex) => (
-                <Box key={fieldIndex} marginTop={1} display="flex" alignItems="center">
-                  <TextField
-                    label="Key"
-                    placeholder="Please input key"
-                    margin="normal"
-                  />
-                  <TextField
-                    label="Operator"
-                    placeholder="Please input operator"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <TextField
-                    label="Values"
-                    placeholder="Please input values"
-                    margin="normal"
-                    style={{ marginLeft: 16 }}
-                  />
-                  <IconButton
-                    color="error"
-                    onClick={() => handleRemovePreferredMatchField(conditionIndex, fieldIndex)}
-                    style={{ marginLeft: 16 }}
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                </Box>
-              ))}
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<AddIcon />}
-                fullWidth
-                onClick={() => handleAddPreferredMatchField(conditionIndex)}
-                style={{ marginTop: 8 }}
-              >
-                Add Match Field
-              </Button>
+              <Box marginTop={1} display="flex" alignItems="center">
+                <TextField
+                  select
+                  value={condition.namespace || ''}
+                  onChange={(e) => handleAffinityValueChange('podAntiAffinityPreferredConditions', condIndex, 'namespace', e.target.value)}
+                  label="Namespace"
+                  placeholder="Please input namespace"
+                  margin="normal"
+                  fullWidth>
+                  {namespaces?.map((item) => (
+                    <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
+                      {item?.metadata?.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  value={condition.topology}
+                  onChange={(e) => handleAffinityValueChange('podAntiAffinityPreferredConditions', condIndex, 'topology', e.target.value)}
+                  label="Topology Key"
+                  placeholder="Please input topology key"
+                  margin="normal"
+                  fullWidth
+                />
+              </Box>
             </Box>
           ))}
         </Box>
@@ -968,5 +1267,3 @@ const MoreSettingForm: React.FC = () => {
     </Box>
   );
 }
-
-export default MoreSettingForm;
