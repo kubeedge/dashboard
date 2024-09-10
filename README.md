@@ -31,19 +31,22 @@ pnpm install
 ### Start project
 
 ```bash with npm
-npm run dev --apiserver={proxy address}
+npm run build
+API_SERVER={proxy address} npm run start
 Example: npm run dev --apiserver=https://192.168.33.129:6443
 ```
 or
 
 ```bash with yarn
-yarn dev --apiserver={proxy address}
+yarn build
+API_SERVER={proxy address} yarn start
 Example: yarn dev --apiserver=https://192.168.33.129:6443
 ```
 or
 
 ```bash with pnpm
-pnpm dev --apiserver={proxy address}
+pnpm run build
+API_SERVER={proxy address} pnpm run start
 Example: pnpm dev --apiserver=https://192.168.33.129:6443
 ```
 
