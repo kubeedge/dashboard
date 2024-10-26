@@ -33,28 +33,39 @@ pnpm install
 ```bash with npm
 npm run build
 API_SERVER={proxy address} npm run start
-Example: npm run dev --apiserver=https://192.168.33.129:6443
+Example: API_SERVER=https://192.168.33.129:6443 npm run dev
 ```
 or
 
 ```bash with yarn
 yarn build
 API_SERVER={proxy address} yarn start
-Example: yarn dev --apiserver=https://192.168.33.129:6443
+Example: API_SERVER=https://192.168.33.129:6443 yarn dev
 ```
 or
 
 ```bash with pnpm
 pnpm run build
 API_SERVER={proxy address} pnpm run start
-Example: pnpm dev --apiserver=https://192.168.33.129:6443
+Example: API_SERVER=https://192.168.33.129:6443 pnpm run dev
+```
+
+If your API server is running with self-signed certificate, you can set `NODE_TLS_REJECT_UNAUTHORIZED=0` to ignore the certificate verification.
+
+```bash with npm
+NODE_TLS_REJECT_UNAUTHORIZED=0 API_SERVER=https://192.168.33.129:6443 npm run dev
 ```
 
 ### Login with token
+
 ```bash
 kubectl create serviceaccount curl-user -n kube-system
 kubectl create clusterrolebinding curl-user-binding --clusterrole=cluster-admin --serviceaccount=kube-system:curl-user -n kube-system
+
+# For Kubernetes 1.23 and earlier:
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep curl-user | awk '{print $1}')
+# For Kubernetes 1.24 and later:
+kubectl create token curl-user -n kube-system
 ```
 
 ## Contributing
