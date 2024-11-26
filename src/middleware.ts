@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import { cookies } from 'next/headers';
 
 import { NextResponse } from 'next/server';
@@ -44,7 +45,13 @@ async function handleApiProxy(req: NextRequest) {
       status: resp.status,
       headers: resp.headers,
     });
-  } catch (error: any) {
+  } catch (error: AxiosError | any) {
+    if (error instanceof AxiosError) {
+      console.error(error?.cause || error?.message || error);
+    } else {
+      console.error(error);
+    }
+
     return NextResponse.json({
       message: error?.message || error || 'Something went wrong',
     }, {
