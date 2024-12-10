@@ -27,12 +27,18 @@ const protectedPaths = new Set([
 
 async function handleApiProxy(req: NextRequest) {
   try {
+    const baseUrl = process.env.API_SERVER;
+    if (!baseUrl) {
+      throw new Error('The API server is not configured, please check API_SERVER environment variable');
+    }
+
+    const path = req.nextUrl.pathname.replace('/api/', '/')
+    const url = new URL(path, baseUrl);
+
     const headers: Record<string, string> = {};
     req.headers.forEach((value, key) => {
       headers[key] = value
     });
-    const path = req.nextUrl.pathname.replace('/api/', '/')
-    const url = new URL(path, process.env.API_SERVER);
 
     const resp = await fetch(url, {
       method: req.method,
