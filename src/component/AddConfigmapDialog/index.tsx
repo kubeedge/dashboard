@@ -83,8 +83,8 @@ const AddConfigmapDialog = ({ open, onClose, onSubmit }: AddConfigmapDialogProps
     <Dialog open={!!open} onClose={handleClose}>
       <DialogTitle>Add Configmap</DialogTitle>
       <DialogContent>
-        <Box sx={{ width: '500px' }}>
-          <FormControl fullWidth sx={{ marginBottom: '16px' }}>
+        <Box sx={{ width: '500px', gap: '16px' }}>
+          <FormControl fullWidth margin="dense">
             <InputLabel id="namespace-label">Namespace</InputLabel>
             <Select
               labelId="namespace-label"

@@ -49,6 +49,8 @@ const TargetNodeGroupField = ({ index, onRemove, nodeGroups, value, onChange }: 
       fullWidth
       select
       placeholder="name"
+      label="Name"
+      margin="dense"
       value={value?.name}
       onChange={(event) => onChange(index, 'name', event.target.value)}
       sx={{ marginBottom: '8px' }}
@@ -162,6 +164,7 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
             fullWidth
             select
             label="Namespace"
+            margin="dense"
             value={namespace}
             onChange={(e) => setNamespace(e.target.value)}
             required

@@ -71,6 +71,7 @@ const AddRoleDialog = ({ open, onClose, onSubmit }: AddRoleDialogProps) => {
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <TextField
+            margin="dense"
             label="Namespace"
             placeholder="Please select namespace"
             variant="outlined"
@@ -156,7 +157,7 @@ const AddRoleDialog = ({ open, onClose, onSubmit }: AddRoleDialogProps) => {
             </Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '16px' }}>
-            <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleClose}>Cancel</Button>
             <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
           </Box>
         </Box>

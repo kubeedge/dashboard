@@ -15,7 +15,7 @@ interface AddServiceAccountDialogProps {
 const AddServiceAccountDialog = ({ open, onClose, onSubmit }: AddServiceAccountDialogProps) => {
   const [namespace, setNamespace] = React.useState('');
   const [name, setName] = React.useState('');
-  const [secrets, setSecrets] = React.useState([]);
+  const [secrets, setSecrets] = React.useState<string[]>([]);
   const [formErrors, setFormErrors] = React.useState<any>({});
   const namespaceData = useListNamespaces()?.data;
   const { data, mutate } = useListSecrets(namespace);
@@ -67,6 +67,7 @@ const AddServiceAccountDialog = ({ open, onClose, onSubmit }: AddServiceAccountD
           <FormControl fullWidth margin="normal" error={Boolean(formErrors.namespace)}>
             <InputLabel required>Namespace</InputLabel>
             <Select
+              label="Namespace"
               value={namespace}
               onChange={(event) => setNamespace(event.target.value)}
               placeholder="Namespace"
@@ -98,11 +99,10 @@ const AddServiceAccountDialog = ({ open, onClose, onSubmit }: AddServiceAccountD
           <FormControl fullWidth margin="normal" error={Boolean(formErrors.secrets)}>
             <InputLabel required>Secrets</InputLabel>
             <Select<string[]>
+              label="Secrets"
               multiple
               value={secrets}
-              // TODO: remove it
-              // @ts-ignore
-              onChange={(event) => setSecrets(event.target.value)}
+              onChange={(event) => setSecrets(typeof event.target.value === 'string' ? [event.target.value] : event.target.value)}
               placeholder="Secrets"
             >
               {data?.items?.map((secret) => (

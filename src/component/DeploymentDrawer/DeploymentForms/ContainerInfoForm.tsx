@@ -122,8 +122,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                   mr: 2,
                   position: 'relative',
                   borderRadius: 1,
-                  // display: 'flex',
-                  }}>
+                }}>
                   <Typography variant="h6">{container.type === 'init' ? 'Initial Container' : 'Work Container'}</Typography>
                   <Typography variant="subtitle1">{container.name}</Typography>
                   <IconButton
@@ -162,6 +161,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                   <FormControl fullWidth sx={{ mb: 2 }}>
                     <InputLabel>Method</InputLabel>
                     <Select
+                      label="Method"
                       value={container?.method || ''}
                       onChange={(e) => handleFormChange(index, 'method', e.target.value)}
                     >
@@ -217,7 +217,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                     }
                     label="Environment variables"
                   />
-                  {container?.showEnvVars&& (
+                  {container?.showEnvVars && (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', mb: 2 }}>
                       {(container?.envVars || []).map((env: any, envIndex: number) => (
                         <Box key={index} sx={{ display: 'flex', gap: '10px' }}>
@@ -237,6 +237,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                           <FormControl fullWidth>
                             <InputLabel>Key-value pair type</InputLabel>
                             <Select
+                              label="Key-value pair type"
                               value={env.valueType}
                               onChange={(e) => {
                                 const updatedEnvVars = [...(container?.envVars || [{}])];
@@ -254,18 +255,18 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                           </FormControl>
                           {env.valueType === 'value' && (
                             <FormControl fullWidth>
-                            <InputLabel>Value</InputLabel>
-                            <TextField
-                              label="Value"
-                              variant="outlined"
-                              value={env.value}
-                              onChange={(e) => {
-                                const updatedEnvVars = [...(container?.envVars || [{}])];
-                                updatedEnvVars[envIndex].value = e.target.value;
-                                handleFormChange(index, 'envVars', updatedEnvVars);
-                              }}
-                            />
-                          </FormControl>
+                              <InputLabel>Value</InputLabel>
+                              <TextField
+                                label="Value"
+                                variant="outlined"
+                                value={env.value}
+                                onChange={(e) => {
+                                  const updatedEnvVars = [...(container?.envVars || [{}])];
+                                  updatedEnvVars[envIndex].value = e.target.value;
+                                  handleFormChange(index, 'envVars', updatedEnvVars);
+                                }}
+                              />
+                            </FormControl>
                           )}
                           {(env.valueType === 'fieldRef' || env.valueType === 'resourceFieldRef') && (
                             <FormControl fullWidth>
@@ -340,6 +341,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                           <FormControl fullWidth>
                             <InputLabel>Configuration type</InputLabel>
                             <Select
+                              label="Configuration type"
                               value={config?.configType || ''}
                               onChange={(e) => {
                                 const updatedConfigs = [...(container?.configs || [{}])];
@@ -460,6 +462,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                           <FormControl fullWidth>
                             <InputLabel>Protocol</InputLabel>
                             <Select
+                              label="Protocol"
                               value={port.protocol}
                               onChange={(e) => {
                                 const updatedPorts = [...(container?.ports || [{}])];
@@ -538,6 +541,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                       <FormControl fullWidth>
                         <InputLabel>Privileged</InputLabel>
                         <Select
+                          label="Privileged"
                           value={container?.privileged || ''}
                           onChange={(e) => handleFormChange(index, 'privileged', e.target.value)}
                         >
@@ -548,6 +552,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                       <FormControl fullWidth>
                         <InputLabel>Allow Privilege Escalation</InputLabel>
                         <Select
+                          label="Allow Privilege Escalation"
                           value={container?.allowPrivilegeEscalation || ''}
                           onChange={(e) => handleFormChange(index, 'allowPrivilegeEscalation', e.target.value)}
                         >
@@ -558,6 +563,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                       <FormControl fullWidth>
                         <InputLabel>Read Only Root Filesystem</InputLabel>
                         <Select
+                          label="Read Only Root Filesystem"
                           value={container?.readOnlyRootFilesystem || ''}
                           onChange={(e) => handleFormChange(index, 'readOnlyRootFilesystem', e.target.value)}
                         >
@@ -568,6 +574,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                       <FormControl fullWidth>
                         <InputLabel>Run As Non Root</InputLabel>
                         <Select
+                          label="Run As Non Root"
                           value={container?.runAsNonRoot || ''}
                           onChange={(e) => handleFormChange(index, 'runAsNonRoot', e.target.value)}
                         >

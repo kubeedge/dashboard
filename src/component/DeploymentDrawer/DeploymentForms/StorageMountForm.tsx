@@ -144,6 +144,7 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
             <FormControl fullWidth margin="normal">
               <InputLabel>Host Path Type</InputLabel>
               <Select
+                label="Host Path Type"
                 value={volume?.hostPathType || ''}
                 onChange={(e) => handleValueChange(index, 'hostPathType', e.target.value)}
               >
@@ -162,6 +163,7 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
           <FormControl fullWidth margin="normal">
             <InputLabel>ConfigMap</InputLabel>
             <Select
+              label="ConfigMap"
               value={volume?.configMap || ''}
               onChange={(e) => handleValueChange(index, 'configMap', e.target.value)}
               error={!volume?.configMap}
@@ -178,6 +180,7 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
           <FormControl fullWidth margin="normal">
             <InputLabel>Secret Name</InputLabel>
             <Select
+              label="Secret Name"
               value={volume.secret || ''}
               onChange={(e) => handleValueChange(index, 'secret', e.target.value)}
               error={!volume.secret}
@@ -255,6 +258,7 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
               <FormControl fullWidth margin="normal">
                 <InputLabel>Container</InputLabel>
                 <Select
+                  label="Container"
                   value={container.container}
                   onChange={(e) => {
                     const updatedContainers = [...(volume?.mountContainers || [{}])];
