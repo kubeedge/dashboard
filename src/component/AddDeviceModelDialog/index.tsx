@@ -121,6 +121,7 @@ const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogP
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <TextField
+            margin="dense"
             label="Name"
             variant="outlined"
             value={name}
@@ -167,6 +168,7 @@ const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogP
           <FormControl fullWidth>
             <InputLabel>Attribute Type</InputLabel>
             <Select
+              label="Attribute Type"
               value={attributeType}
               onChange={(e) => setAttributeType(e.target.value)}
               displayEmpty

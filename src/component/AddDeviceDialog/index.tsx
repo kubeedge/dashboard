@@ -113,6 +113,7 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
               render={({ field }) => (
                 <TextField
                   {...field}
+                  margin="dense"
                   label="Name"
                   placeholder="name"
                   variant="outlined"
@@ -278,7 +279,7 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
             </TableContainer>
           </Box>
           <DialogActions>
-            <Button onClick={handleClose} variant="outlined">
+            <Button onClick={handleClose}>
               Cancel
             </Button>
             <Button type="submit" variant="contained">
