@@ -145,7 +145,7 @@ const LoginPage = () => {
           </Link>
         </Typography>
         <Typography variant="body2" sx={{ marginTop: '10px' }}>
-          © 2024 KubeEdge Community
+          © {new Date().getFullYear()} KubeEdge Community
         </Typography>
       </Box>
     </Box>
