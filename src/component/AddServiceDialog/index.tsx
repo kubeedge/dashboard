@@ -177,24 +177,26 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
   }
 
   return (
-    <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="md">
       <DialogTitle>Add Service</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Namespace */}
-          <Select
-              value={namespace}
-              onChange={(event) => setNamespace(event.target.value)}
-              placeholder="Namespace"
-            >
-            {namespaceData?.items?.map((item) => (
-              <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
-                {item?.metadata?.name}
-              </MenuItem>
-            ))}
-          </Select>
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Namespace</InputLabel>
+            <Select
+                label="Namespace"
+                value={namespace}
+                onChange={(event) => setNamespace(event.target.value)}
+                placeholder="Namespace"
+              >
+              {namespaceData?.items?.map((item) => (
+                <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
+                  {item?.metadata?.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-          {/* Name */}
           <TextField
             label="Name"
             placeholder="name"

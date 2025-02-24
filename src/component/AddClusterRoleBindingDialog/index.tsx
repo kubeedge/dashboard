@@ -61,6 +61,7 @@ const AddClusterRoleBindingDialog = ({ open, onClose, onSubmit }: AddClusterRole
           <TextField
             label="Name"
             placeholder="name"
+            margin="dense"
             variant="outlined"
             required
             error={!name}

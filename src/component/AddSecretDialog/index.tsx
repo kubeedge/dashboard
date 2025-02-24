@@ -101,6 +101,7 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
         <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <TextField
             select
+            margin="dense"
             label="Namespace"
             value={namespace}
             onChange={handleNamespaceChange}
@@ -217,7 +218,7 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
           )}
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-            <Button onClick={handleClose} color="secondary" variant="outlined">
+            <Button onClick={handleClose}>
               Cancel
             </Button>
             <Button onClick={handleSave} color="primary" variant="contained" sx={{ marginLeft: '16px' }}>

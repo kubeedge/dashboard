@@ -74,6 +74,7 @@ const AddRuleEndpointDialog = ({ open, onClose, onSubmit }: AddRuleEndpointDialo
           <FormControl fullWidth margin="normal" error={!!errors.newNamespace}>
             <InputLabel required>Namespace</InputLabel>
             <Select
+              label="Namespace"
               value={namespace}
               onChange={(e) => setNamespace(e.target.value)}
               placeholder="Namespace"
@@ -102,6 +103,7 @@ const AddRuleEndpointDialog = ({ open, onClose, onSubmit }: AddRuleEndpointDialo
           <FormControl fullWidth margin="normal" error={!!errors.ruleEndpointType}>
             <InputLabel required>RuleEndpointType</InputLabel>
             <Select
+              label="RuleEndpointType"
               value={endpointType}
               onChange={(event) => setEndpointType(event.target.value)}
               placeholder="RuleEndpointType"
