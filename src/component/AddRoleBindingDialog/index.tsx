@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, Button, Box, Typography, IconButton, MenuItem, Select } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, Button, Box, Typography, IconButton, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { RoleBinding, RoleRef, Subject } from '@/types/roleBinding';
@@ -73,20 +73,23 @@ const AddRoleBindingDialog = ({ open, onClose, onSubmit }: AddRoleBindingDialogP
       <DialogTitle>Add RoleBinding</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <Select
-            label="Namespace"
-            value={namespace}
-            onChange={(event) => setNamespace(event.target.value)}
-            sx={{ marginBottom: '16px' }}
-            required
-            placeholder="Namespace"
-          >
-            {data?.items?.map((item) => (
-              <MenuItem key={item.metadata?.uid} value={item?.metadata?.name}>
-                {item?.metadata?.name}
-              </MenuItem>
-            ))}
-            </Select>
+          <FormControl fullWidth margin="dense">
+            <InputLabel>Namespace</InputLabel>
+            <Select
+              label="Namespace"
+              value={namespace}
+              onChange={(event) => setNamespace(event.target.value)}
+              sx={{ marginBottom: '16px' }}
+              required
+              placeholder="Namespace"
+            >
+              {data?.items?.map((item) => (
+                <MenuItem key={item.metadata?.uid} value={item?.metadata?.name}>
+                  {item?.metadata?.name}
+                </MenuItem>
+              ))}
+              </Select>
+          </FormControl>
           <TextField
             label="Name"
             variant="outlined"
@@ -172,7 +175,7 @@ const AddRoleBindingDialog = ({ open, onClose, onSubmit }: AddRoleBindingDialogP
             </Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
-            <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleClose}>Cancel</Button>
             <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
           </Box>
         </Box>

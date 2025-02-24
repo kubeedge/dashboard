@@ -71,6 +71,7 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
             error={!!formErrors.cloudMasterIP}
             helperText={formErrors.cloudMasterIP}
             placeholder="192.168.30.300:3000"
+            margin="dense"
             required
             fullWidth
           />
@@ -82,15 +83,18 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
             error={!!formErrors.kubeedgeVersion}
             helperText={formErrors.kubeedgeVersion}
             placeholder="1.12.1"
+            margin="dense"
             required
             fullWidth
           />
           <FormControl error={!!formErrors.runtimeType} fullWidth required>
-            <InputLabel>Runtime type</InputLabel>
+            <InputLabel id="runtime-type-select-label">Runtime type</InputLabel>
             <Select
+              labelId="runtime-type-select-label"
               name="runtimeType"
               value={formValues.runtimeType}
               onChange={handleInputChange}
+              label="Runtime type"
               placeholder="Please select a runtime type"
             >
               <MenuItem value="docker">Docker</MenuItem>
@@ -106,6 +110,7 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
             error={!!formErrors.token}
             helperText={formErrors.token}
             placeholder="Please enter Token"
+            margin="dense"
             required
             fullWidth
           />
@@ -117,6 +122,7 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
             multiline
             rows={4}
             placeholder="Please enter command"
+            margin="dense"
           />
         </Box>
       </DialogContent>

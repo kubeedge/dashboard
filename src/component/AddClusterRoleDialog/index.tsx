@@ -121,6 +121,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
       <DialogContent>
         <Box sx={{ marginBottom: '16px' }}>
           <TextField
+            margin="dense"
             label="Name"
             placeholder="name"
             fullWidth
@@ -260,7 +261,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} variant="outlined">Cancel</Button>
+        <Button onClick={handleClose}>Cancel</Button>
         <Button onClick={handleSubmit} variant="contained">Submit</Button>
       </DialogActions>
     </Dialog>

@@ -103,12 +103,12 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
       <DialogTitle>Add Rule</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <FormControl fullWidth>
+          <FormControl fullWidth margin="dense">
             <InputLabel>Namespace</InputLabel>
             <Select
+              label="Namespace"
               value={namespace}
               onChange={(e) => setNamespace(e.target.value)}
-              displayEmpty
             >
               {namespaceData?.items?.map(item => (
                 <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
@@ -133,6 +133,7 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
           <FormControl fullWidth>
             <InputLabel>Source</InputLabel>
             <Select
+              label="Source"
               value={source}
               onChange={(e) => setSource(e.target.value)}
               displayEmpty
@@ -160,6 +161,7 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
           <FormControl fullWidth>
             <InputLabel>Target</InputLabel>
             <Select
+              label="Target"
               value={target}
               onChange={(e) => setTarget(e.target.value)}
               displayEmpty

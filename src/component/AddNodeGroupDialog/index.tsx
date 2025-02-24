@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, MenuItem, Button, IconButton, Box, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, MenuItem, Button, IconButton, Box, Typography, FormControl, InputLabel } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { Select } from '@mui/material';
@@ -82,24 +82,29 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
             value={name}
             onChange={handleNameChange}
             required
+            margin="dense"
             helperText={!name && 'Miss name'}
           />
-          <Select
-            multiple
-            value={nodes}
-            onChange={handleNodesChange}
-            renderValue={(selected) => selected.join(', ')}
-            displayEmpty
-            required
-            placeholder="nodes"
-            sx={{ minWidth: 300 }}
-          >
-            {data?.items?.map((node) => (
-              <MenuItem key={node?.metadata?.uid} value={node?.metadata?.name || ''}>
-                {node?.metadata?.name || ''}
-              </MenuItem>
-            ))}
-          </Select>
+          <FormControl fullWidth>
+            <InputLabel id="nodes-select-label">Nodes</InputLabel>
+            <Select
+              multiple
+              labelId="nodes-select-label"
+              value={nodes}
+              onChange={handleNodesChange}
+              renderValue={(selected) => selected.join(', ')}
+              required
+              label="Nodes"
+              placeholder="nodes"
+              sx={{ minWidth: 300 }}
+            >
+              {data?.items?.map((node) => (
+                <MenuItem key={node?.metadata?.uid} value={node?.metadata?.name || ''}>
+                  {node?.metadata?.name || ''}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Box>
             <Typography variant="subtitle1" sx={{ marginBottom: '8px' }}>MatchLabels</Typography>
             {matchLabels.map((matchLabel, index) => (
@@ -108,6 +113,7 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
                   label="Key"
                   placeholder="Please input key"
                   variant="outlined"
+                  margin="dense"
                   value={matchLabel.key}
                   onChange={(e) => handleMatchLabelChange(index, 'key', e.target.value)}
                   sx={{ flex: 1 }}
@@ -118,6 +124,7 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
                   label="Value"
                   placeholder="Please input value"
                   variant="outlined"
+                  margin="dense"
                   value={matchLabel.value}
                   onChange={(e) => handleMatchLabelChange(index, 'value', e.target.value)}
                   sx={{ flex: 1 }}
@@ -141,7 +148,7 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
             </Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
-            <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleClose}>Cancel</Button>
             <Button variant="contained" onClick={handleSubmit}>Submit</Button>
           </Box>
         </Box>
