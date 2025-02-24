@@ -14,46 +14,63 @@ nodejs, npm/yarn/pnpm is needed, pnpm is recommended
 
 ## Install packages
 
-```bash with npm
+```bash
+# Using npm
 npm install
-```
 
-```bash with yarn
+# Using yarn
 yarn install
-```
 
-or
-
-```bash with pnpm
+# Using pnpm
 pnpm install
 ```
 
-### Start project
+## Start project
 
-```bash with npm
+### Linux/macOS
+
+```bash
+# Using npm
 npm run build
 API_SERVER={proxy address} npm run start
 Example: API_SERVER=https://192.168.33.129:6443 npm run dev
-```
-or
 
-```bash with yarn
+# Using yarn
 yarn build
 API_SERVER={proxy address} yarn start
 Example: API_SERVER=https://192.168.33.129:6443 yarn dev
-```
-or
 
-```bash with pnpm
+# Using pnpm
 pnpm run build
 API_SERVER={proxy address} pnpm run start
 Example: API_SERVER=https://192.168.33.129:6443 pnpm run dev
 ```
 
-If your API server is running with self-signed certificate, you can set `NODE_TLS_REJECT_UNAUTHORIZED=0` to ignore the certificate verification.
+### Windows
 
-```bash with npm
-NODE_TLS_REJECT_UNAUTHORIZED=0 API_SERVER=https://192.168.33.129:6443 npm run dev
+For Windows users, use the following commands in **Command Prompt (cmd)** or **PowerShell**:
+
+```powershell
+# Using npm (Command Prompt or PowerShell)
+npm run build
+$env:API_SERVER="https://192.168.33.129:6443"; npm run start
+
+# Using yarn (PowerShell)
+yarn build
+$env:API_SERVER="https://192.168.33.129:6443"; yarn start
+
+# Using pnpm (PowerShell)
+pnpm run build
+$env:API_SERVER="https://192.168.33.129:6443"; pnpm run start
+```
+
+If your API server is running with a self-signed certificate, you can set `NODE_TLS_REJECT_UNAUTHORIZED=0` to ignore certificate verification:
+
+```powershell
+# Disable TLS verification (PowerShell)
+$env:NODE_TLS_REJECT_UNAUTHORIZED=0
+$env:API_SERVER="https://192.168.33.129:6443"
+npm run dev
 ```
 
 ### Login with token
@@ -64,6 +81,7 @@ kubectl create clusterrolebinding curl-user-binding --clusterrole=cluster-admin 
 
 # For Kubernetes 1.23 and earlier:
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep curl-user | awk '{print $1}')
+
 # For Kubernetes 1.24 and later:
 kubectl create token curl-user -n kube-system
 ```
@@ -73,3 +91,4 @@ If you're interested in being a contributor and want to get involved in developi
 
 ## License
 KubeEdge is under Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
+
