@@ -12,7 +12,8 @@ const useCookie = (cookieName: string): [string | undefined, (value: string, opt
   const [cookieValue, setCookieValue] = useState<string | undefined>(undefined);
 
   const setCookie = (value: string, options?: CookieOptions) => {
-    if (!value) {
+    if (value === undefined || value === null) {
+      // If value is undefined or null, delete the cookie
       document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
       setCookieValue(undefined);
       return;
