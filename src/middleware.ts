@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import { cookies } from 'next/headers';
 
 import { NextResponse } from 'next/server';
@@ -26,12 +27,18 @@ const protectedPaths = new Set([
 
 async function handleApiProxy(req: NextRequest) {
   try {
+    const baseUrl = process.env.API_SERVER;
+    if (!baseUrl) {
+      throw new Error('The API server is not configured, please check API_SERVER environment variable');
+    }
+
+    const path = req.nextUrl.pathname.replace('/api/', '/')
+    const url = new URL(path, baseUrl);
+
     const headers: Record<string, string> = {};
     req.headers.forEach((value, key) => {
       headers[key] = value
     });
-    const path = req.nextUrl.pathname.replace('/api/', '/')
-    const url = new URL(path, process.env.API_SERVER);
 
     const resp = await fetch(url, {
       method: req.method,
@@ -44,7 +51,13 @@ async function handleApiProxy(req: NextRequest) {
       status: resp.status,
       headers: resp.headers,
     });
-  } catch (error: any) {
+  } catch (error: AxiosError | any) {
+    if (error instanceof AxiosError) {
+      console.error(error?.cause || error?.message || error);
+    } else {
+      console.error(error);
+    }
+
     return NextResponse.json({
       message: error?.message || error || 'Something went wrong',
     }, {
