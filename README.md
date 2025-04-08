@@ -56,6 +56,13 @@ If your API server is running with self-signed certificate, you can set `NODE_TL
 NODE_TLS_REJECT_UNAUTHORIZED=0 API_SERVER=https://192.168.33.129:6443 npm run dev
 ```
 
+If you need to build the image locally for testing, you can refer to the following example.
+
+```bash with npm
+docker build -t kubeedge-dashboard .
+docker run -p 3000:3000 -e API_SERVER=https://192.168.33.129:6443 kubeedge-dashboard
+```
+
 ### Login with token
 
 ```bash
