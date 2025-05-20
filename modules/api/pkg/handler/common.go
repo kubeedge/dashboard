@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 	"k8s.io/apimachinery/pkg/version"
 )
 
@@ -21,13 +22,13 @@ func (apiHandler *APIHandler) addCommonRoutes(apiV1Ws *restful.WebService) *APIH
 func (apiHandler *APIHandler) getVersion(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	versionInfo, err := common.GetVersion(k8sClient)
 	if err != nil {
-		response.WriteErrorString(http.StatusInternalServerError, "Failed to get Kubernetes version")
+		errors.HandleInternalError(response, err)
 		return
 	}
 

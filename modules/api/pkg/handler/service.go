@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/kubeedge/dashboard/api/pkg/resource/service"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -49,14 +50,14 @@ func (apiHandler *APIHandler) addServiceRoutes(apiV1Ws *restful.WebService) *API
 func (apiHandler *APIHandler) getServiceList(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	result, err := service.GetServiceList(k8sClient, namespace)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -65,7 +66,7 @@ func (apiHandler *APIHandler) getServiceList(request *restful.Request, response 
 func (apiHandler *APIHandler) getService(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -73,7 +74,7 @@ func (apiHandler *APIHandler) getService(request *restful.Request, response *res
 	name := request.PathParameter("name")
 	result, err := service.GetService(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -82,7 +83,7 @@ func (apiHandler *APIHandler) getService(request *restful.Request, response *res
 func (apiHandler *APIHandler) createService(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -90,13 +91,13 @@ func (apiHandler *APIHandler) createService(request *restful.Request, response *
 	data := new(corev1.Service)
 	err = request.ReadEntity(data)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := service.CreateService(k8sClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, result)
@@ -105,7 +106,7 @@ func (apiHandler *APIHandler) createService(request *restful.Request, response *
 func (apiHandler *APIHandler) updateService(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -113,13 +114,13 @@ func (apiHandler *APIHandler) updateService(request *restful.Request, response *
 	data := new(corev1.Service)
 	err = request.ReadEntity(data)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := service.UpdateService(k8sClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -128,7 +129,7 @@ func (apiHandler *APIHandler) updateService(request *restful.Request, response *
 func (apiHandler *APIHandler) deleteService(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -136,7 +137,7 @@ func (apiHandler *APIHandler) deleteService(request *restful.Request, response *
 	name := request.PathParameter("name")
 	err = service.DeleteService(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeader(http.StatusNoContent)

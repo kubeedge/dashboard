@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/kubeedge/dashboard/api/pkg/resource/pod"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -26,14 +27,14 @@ func (apiHandler *APIHandler) addPodRoutes(apiV1Ws *restful.WebService) *APIHand
 func (apiHandler *APIHandler) handleGetPods(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	result, err := pod.GetPodList(k8sClient, namespace)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)

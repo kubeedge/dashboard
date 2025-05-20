@@ -43,3 +43,22 @@ func CreateHTTPAPIHandler() (*restful.Container, error) {
 
 	return wsContainer, nil
 }
+
+func CreateKeinkAPIHandler() (*restful.Container, error) {
+	apiHandler := APIHandler{}
+
+	wsContainer := restful.NewContainer()
+
+	keinkWs := new(restful.WebService)
+
+	keinkWs.Route(
+		keinkWs.GET("/keink/run").
+			To(apiHandler.runKubeEdgeByKeink).Produces("text/event-stream"))
+	keinkWs.Route(
+		keinkWs.GET("/keink/check").
+			To(apiHandler.checkIsAbleToRunKeink).Produces(restful.MIME_JSON).Returns(200, "OK", nil))
+
+	wsContainer.Add(keinkWs)
+
+	return wsContainer, nil
+}

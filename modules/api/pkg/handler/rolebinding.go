@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/kubeedge/dashboard/api/pkg/resource/rolebinding"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
@@ -49,14 +50,14 @@ func (apiHandler *APIHandler) addRoleBindingRoutes(apiV1Ws *restful.WebService) 
 func (apiHandler *APIHandler) handleGetRoleBindings(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	result, err := rolebinding.GetRoleBindingList(k8sClient, namespace)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -66,7 +67,7 @@ func (apiHandler *APIHandler) handleGetRoleBindings(request *restful.Request, re
 func (apiHandler *APIHandler) handleGetRoleBinding(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -74,7 +75,7 @@ func (apiHandler *APIHandler) handleGetRoleBinding(request *restful.Request, res
 	name := request.PathParameter("name")
 	result, err := rolebinding.GetRoleBinding(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -84,7 +85,7 @@ func (apiHandler *APIHandler) handleGetRoleBinding(request *restful.Request, res
 func (apiHandler *APIHandler) handleCreateRoleBinding(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -92,13 +93,13 @@ func (apiHandler *APIHandler) handleCreateRoleBinding(request *restful.Request, 
 	data := new(rbacv1.RoleBinding)
 	err = request.ReadEntity(data)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := rolebinding.CreateRoleBinding(k8sClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -108,7 +109,7 @@ func (apiHandler *APIHandler) handleCreateRoleBinding(request *restful.Request, 
 func (apiHandler *APIHandler) handleUpdateRoleBinding(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -116,13 +117,13 @@ func (apiHandler *APIHandler) handleUpdateRoleBinding(request *restful.Request, 
 	data := new(rbacv1.RoleBinding)
 	err = request.ReadEntity(data)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := rolebinding.UpdateRoleBinding(k8sClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -132,7 +133,7 @@ func (apiHandler *APIHandler) handleUpdateRoleBinding(request *restful.Request, 
 func (apiHandler *APIHandler) handleDeleteRoleBinding(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -140,7 +141,7 @@ func (apiHandler *APIHandler) handleDeleteRoleBinding(request *restful.Request, 
 	name := request.PathParameter("name")
 	err = rolebinding.DeleteRoleBinding(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 

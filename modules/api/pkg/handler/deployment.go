@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/kubeedge/dashboard/api/pkg/resource/deployment"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 	appsv1 "k8s.io/api/apps/v1"
 )
 
@@ -50,14 +51,14 @@ func (apiHandler *APIHandler) addDeploymentRoutes(apiV1Ws *restful.WebService) *
 func (apiHandler *APIHandler) handleGetDeployments(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	result, err := deployment.GetDeploymentList(k8sClient, namespace)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -66,7 +67,7 @@ func (apiHandler *APIHandler) handleGetDeployments(request *restful.Request, res
 func (apiHandler *APIHandler) handleGetDeployment(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -74,7 +75,7 @@ func (apiHandler *APIHandler) handleGetDeployment(request *restful.Request, resp
 	name := request.PathParameter("name")
 	result, err := deployment.GetDeployment(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -83,20 +84,20 @@ func (apiHandler *APIHandler) handleGetDeployment(request *restful.Request, resp
 func (apiHandler *APIHandler) handleCreateDeployment(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	data := new(appsv1.Deployment)
 	if err := request.ReadEntity(data); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := deployment.CreateDeployment(k8sClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, result)
@@ -105,20 +106,20 @@ func (apiHandler *APIHandler) handleCreateDeployment(request *restful.Request, r
 func (apiHandler *APIHandler) handleUpdateDeployment(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	data := new(appsv1.Deployment)
 	if err := request.ReadEntity(data); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := deployment.UpdateDeployment(k8sClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -127,7 +128,7 @@ func (apiHandler *APIHandler) handleUpdateDeployment(request *restful.Request, r
 func (apiHandler *APIHandler) handleDeleteDeployment(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -136,7 +137,7 @@ func (apiHandler *APIHandler) handleDeleteDeployment(request *restful.Request, r
 
 	err = deployment.DeleteDeployment(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeader(http.StatusNoContent)

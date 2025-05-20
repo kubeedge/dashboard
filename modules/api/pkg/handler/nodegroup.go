@@ -7,6 +7,7 @@ import (
 	appsv1alpha1 "github.com/kubeedge/api/apis/apps/v1alpha1"
 	"github.com/kubeedge/dashboard/api/pkg/resource/nodegroup"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 )
 
 func (apiHandler *APIHandler) addNodeGroupRoutes(apiV1Ws *restful.WebService) *APIHandler {
@@ -41,13 +42,13 @@ func (apiHandler *APIHandler) addNodeGroupRoutes(apiV1Ws *restful.WebService) *A
 func (apiHandler *APIHandler) handleGetNodeGroups(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := nodegroup.GetNodeGroupList(kubeedgeClient)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -57,14 +58,14 @@ func (apiHandler *APIHandler) handleGetNodeGroups(request *restful.Request, resp
 func (apiHandler *APIHandler) handleGetNodeGroup(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	name := request.PathParameter("name")
 	result, err := nodegroup.GetNodeGroup(kubeedgeClient, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -74,19 +75,19 @@ func (apiHandler *APIHandler) handleGetNodeGroup(request *restful.Request, respo
 func (apiHandler *APIHandler) handleCreateNodeGroup(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	data := new(appsv1alpha1.NodeGroup)
 	if err := request.ReadEntity(data); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := nodegroup.CreateNodeGroup(kubeedgeClient, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -96,19 +97,19 @@ func (apiHandler *APIHandler) handleCreateNodeGroup(request *restful.Request, re
 func (apiHandler *APIHandler) handleUpdateNodeGroup(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	data := new(appsv1alpha1.NodeGroup)
 	if err := request.ReadEntity(data); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := nodegroup.UpdateNodeGroup(kubeedgeClient, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -118,14 +119,14 @@ func (apiHandler *APIHandler) handleUpdateNodeGroup(request *restful.Request, re
 func (apiHandler *APIHandler) handleDeleteNodeGroup(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	name := request.PathParameter("name")
 	err = nodegroup.DeleteNodeGroup(kubeedgeClient, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 

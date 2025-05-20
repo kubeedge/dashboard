@@ -7,6 +7,7 @@ import (
 	appsv1alpha1 "github.com/kubeedge/api/apis/apps/v1alpha1"
 	"github.com/kubeedge/dashboard/api/pkg/resource/edgeapplication"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 )
 
 func (apiHandler *APIHandler) addEdgeApplicationRoutes(apiV1Ws *restful.WebService) *APIHandler {
@@ -50,14 +51,14 @@ func (apiHandler *APIHandler) addEdgeApplicationRoutes(apiV1Ws *restful.WebServi
 func (apiHandler *APIHandler) handleGetEdgeApplications(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	result, err := edgeapplication.GetEdgeApplicationList(kubeedgeClient, namespace)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -67,7 +68,7 @@ func (apiHandler *APIHandler) handleGetEdgeApplications(request *restful.Request
 func (apiHandler *APIHandler) handleGetEdgeApplication(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -75,7 +76,7 @@ func (apiHandler *APIHandler) handleGetEdgeApplication(request *restful.Request,
 	name := request.PathParameter("name")
 	result, err := edgeapplication.GetEdgeApplication(kubeedgeClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -85,20 +86,20 @@ func (apiHandler *APIHandler) handleGetEdgeApplication(request *restful.Request,
 func (apiHandler *APIHandler) handleCreateEdgeApplication(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	data := new(appsv1alpha1.EdgeApplication)
 	if err := request.ReadEntity(data); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := edgeapplication.CreateEdgeApplication(kubeedgeClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -108,20 +109,20 @@ func (apiHandler *APIHandler) handleCreateEdgeApplication(request *restful.Reque
 func (apiHandler *APIHandler) handleUpdateEdgeApplication(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	data := new(appsv1alpha1.EdgeApplication)
 	if err := request.ReadEntity(data); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := edgeapplication.UpdateEdgeApplication(kubeedgeClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -131,7 +132,7 @@ func (apiHandler *APIHandler) handleUpdateEdgeApplication(request *restful.Reque
 func (apiHandler *APIHandler) handleDeleteEdgeApplication(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -139,7 +140,7 @@ func (apiHandler *APIHandler) handleDeleteEdgeApplication(request *restful.Reque
 	name := request.PathParameter("name")
 	err = edgeapplication.DeleteEdgeApplication(kubeedgeClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 

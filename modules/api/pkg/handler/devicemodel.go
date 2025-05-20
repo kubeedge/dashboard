@@ -7,6 +7,7 @@ import (
 	devicev1beta1 "github.com/kubeedge/api/apis/devices/v1beta1"
 	"github.com/kubeedge/dashboard/api/pkg/resource/devicemodel"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 )
 
 func (apiHandler *APIHandler) addDeviceModelRoutes(apiV1Ws *restful.WebService) *APIHandler {
@@ -50,14 +51,14 @@ func (apiHandler *APIHandler) addDeviceModelRoutes(apiV1Ws *restful.WebService) 
 func (apiHandler *APIHandler) handleGetDeviceModels(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	result, err := devicemodel.GetDeviceModelList(kubeedgeClient, namespace)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -67,7 +68,7 @@ func (apiHandler *APIHandler) handleGetDeviceModels(request *restful.Request, re
 func (apiHandler *APIHandler) handleGetDeviceModel(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -75,7 +76,7 @@ func (apiHandler *APIHandler) handleGetDeviceModel(request *restful.Request, res
 	name := request.PathParameter("name")
 	result, err := devicemodel.GetDeviceModel(kubeedgeClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -85,7 +86,7 @@ func (apiHandler *APIHandler) handleGetDeviceModel(request *restful.Request, res
 func (apiHandler *APIHandler) handleCreateDeviceModel(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -93,13 +94,13 @@ func (apiHandler *APIHandler) handleCreateDeviceModel(request *restful.Request, 
 	deviceModel := &devicev1beta1.DeviceModel{}
 	err = request.ReadEntity(deviceModel)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := devicemodel.CreateDeviceModel(kubeedgeClient, namespace, deviceModel)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -109,7 +110,7 @@ func (apiHandler *APIHandler) handleCreateDeviceModel(request *restful.Request, 
 func (apiHandler *APIHandler) handleUpdateDeviceModel(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -117,13 +118,13 @@ func (apiHandler *APIHandler) handleUpdateDeviceModel(request *restful.Request, 
 	deviceModel := &devicev1beta1.DeviceModel{}
 	err = request.ReadEntity(deviceModel)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := devicemodel.UpdateDeviceModel(kubeedgeClient, namespace, deviceModel)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -133,7 +134,7 @@ func (apiHandler *APIHandler) handleUpdateDeviceModel(request *restful.Request, 
 func (apiHandler *APIHandler) handleDeleteDeviceModel(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -141,7 +142,7 @@ func (apiHandler *APIHandler) handleDeleteDeviceModel(request *restful.Request, 
 	name := request.PathParameter("name")
 	err = devicemodel.DeleteDeviceModel(kubeedgeClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 

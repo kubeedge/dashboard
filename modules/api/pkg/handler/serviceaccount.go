@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/kubeedge/dashboard/api/pkg/resource/serviceaccount"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -49,14 +50,14 @@ func (apiHandler *APIHandler) addServiceAccountRoutes(apiV1Ws *restful.WebServic
 func (apiHandler *APIHandler) getServiceAccountList(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	result, err := serviceaccount.GetServiceAccountList(k8sClient, namespace)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -66,7 +67,7 @@ func (apiHandler *APIHandler) getServiceAccountList(request *restful.Request, re
 func (apiHandler *APIHandler) getServiceAccount(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -74,7 +75,7 @@ func (apiHandler *APIHandler) getServiceAccount(request *restful.Request, respon
 	name := request.PathParameter("name")
 	result, err := serviceaccount.GetServiceAccount(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -84,20 +85,20 @@ func (apiHandler *APIHandler) getServiceAccount(request *restful.Request, respon
 func (apiHandler *APIHandler) createServiceAccount(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	data := new(corev1.ServiceAccount)
 	if err := request.ReadEntity(data); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := serviceaccount.CreateServiceAccount(k8sClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -107,20 +108,20 @@ func (apiHandler *APIHandler) createServiceAccount(request *restful.Request, res
 func (apiHandler *APIHandler) updateServiceAccount(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	data := new(corev1.ServiceAccount)
 	if err := request.ReadEntity(data); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := serviceaccount.UpdateServiceAccount(k8sClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -130,7 +131,7 @@ func (apiHandler *APIHandler) updateServiceAccount(request *restful.Request, res
 func (apiHandler *APIHandler) deleteServiceAccount(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -138,7 +139,7 @@ func (apiHandler *APIHandler) deleteServiceAccount(request *restful.Request, res
 	name := request.PathParameter("name")
 	err = serviceaccount.DeleteServiceAccount(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 

@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/kubeedge/dashboard/api/pkg/resource/clusterrolebinding"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
@@ -40,13 +41,13 @@ func (apiHandler *APIHandler) addClusterRoleBindingRoutes(apiV1Ws *restful.WebSe
 func (apiHandler *APIHandler) handleGetClusterRoleBindings(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := clusterrolebinding.GetClusterRoleBindingList(k8sClient)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -55,14 +56,14 @@ func (apiHandler *APIHandler) handleGetClusterRoleBindings(request *restful.Requ
 func (apiHandler *APIHandler) handleGetClusterRoleBinding(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	name := request.PathParameter("name")
 	result, err := clusterrolebinding.GetClusterRoleBinding(k8sClient, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -71,20 +72,20 @@ func (apiHandler *APIHandler) handleGetClusterRoleBinding(request *restful.Reque
 func (apiHandler *APIHandler) handleCreateClusterRoleBinding(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	clusterRoleBinding := new(rbacv1.ClusterRoleBinding)
 	err = request.ReadEntity(&clusterRoleBinding)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := clusterrolebinding.CreateClusterRoleBinding(k8sClient, clusterRoleBinding)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, result)
@@ -93,20 +94,20 @@ func (apiHandler *APIHandler) handleCreateClusterRoleBinding(request *restful.Re
 func (apiHandler *APIHandler) handleUpdateClusterRoleBinding(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	clusterRoleBinding := new(rbacv1.ClusterRoleBinding)
 	err = request.ReadEntity(&clusterRoleBinding)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := clusterrolebinding.UpdateClusterRoleBinding(k8sClient, clusterRoleBinding)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -115,14 +116,14 @@ func (apiHandler *APIHandler) handleUpdateClusterRoleBinding(request *restful.Re
 func (apiHandler *APIHandler) handleDeleteClusterRoleBinding(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	name := request.PathParameter("name")
 	err = clusterrolebinding.DeleteClusterRoleBinding(k8sClient, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeader(http.StatusNoContent)

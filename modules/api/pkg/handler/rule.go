@@ -7,6 +7,7 @@ import (
 	rulev1 "github.com/kubeedge/api/apis/rules/v1"
 	"github.com/kubeedge/dashboard/api/pkg/resource/rule"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 )
 
 func (apiHandler *APIHandler) addRuleRoutes(apiV1Ws *restful.WebService) *APIHandler {
@@ -49,14 +50,14 @@ func (apiHandler *APIHandler) addRuleRoutes(apiV1Ws *restful.WebService) *APIHan
 func (apiHandler *APIHandler) handleGetRules(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	result, err := rule.GetRuleList(kubeedgeClient, namespace)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -66,7 +67,7 @@ func (apiHandler *APIHandler) handleGetRules(request *restful.Request, response 
 func (apiHandler *APIHandler) handleGetRule(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -74,7 +75,7 @@ func (apiHandler *APIHandler) handleGetRule(request *restful.Request, response *
 	name := request.PathParameter("name")
 	result, err := rule.GetRule(kubeedgeClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -84,7 +85,7 @@ func (apiHandler *APIHandler) handleGetRule(request *restful.Request, response *
 func (apiHandler *APIHandler) handleCreateRule(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -92,13 +93,13 @@ func (apiHandler *APIHandler) handleCreateRule(request *restful.Request, respons
 	data := new(rulev1.Rule)
 	err = request.ReadEntity(data)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := rule.CreateRule(kubeedgeClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -108,7 +109,7 @@ func (apiHandler *APIHandler) handleCreateRule(request *restful.Request, respons
 func (apiHandler *APIHandler) handleUpdateRule(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -116,13 +117,13 @@ func (apiHandler *APIHandler) handleUpdateRule(request *restful.Request, respons
 	data := new(rulev1.Rule)
 	err = request.ReadEntity(data)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := rule.UpdateRule(kubeedgeClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -132,7 +133,7 @@ func (apiHandler *APIHandler) handleUpdateRule(request *restful.Request, respons
 func (apiHandler *APIHandler) handleDeleteRule(request *restful.Request, response *restful.Response) {
 	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -140,7 +141,7 @@ func (apiHandler *APIHandler) handleDeleteRule(request *restful.Request, respons
 	name := request.PathParameter("name")
 	err = rule.DeleteRule(kubeedgeClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
