@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/kubeedge/dashboard/api/pkg/resource/role"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
@@ -49,14 +50,14 @@ func (apiHandler *APIHandler) addRoleRoutes(apiV1Ws *restful.WebService) *APIHan
 func (apiHandler *APIHandler) handleGetRoles(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	result, err := role.GetRoleList(k8sClient, namespace)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -65,7 +66,7 @@ func (apiHandler *APIHandler) handleGetRoles(request *restful.Request, response 
 func (apiHandler *APIHandler) handleGetRole(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -73,7 +74,7 @@ func (apiHandler *APIHandler) handleGetRole(request *restful.Request, response *
 	name := request.PathParameter("name")
 	result, err := role.GetRole(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -82,19 +83,19 @@ func (apiHandler *APIHandler) handleGetRole(request *restful.Request, response *
 func (apiHandler *APIHandler) handleCreateRole(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	data := new(rbacv1.Role)
 	if err := request.ReadEntity(data); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	result, err := role.CreateRole(k8sClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, result)
@@ -103,19 +104,19 @@ func (apiHandler *APIHandler) handleCreateRole(request *restful.Request, respons
 func (apiHandler *APIHandler) handleUpdateRole(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	data := new(rbacv1.Role)
 	if err := request.ReadEntity(data); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	result, err := role.UpdateRole(k8sClient, namespace, data)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -124,7 +125,7 @@ func (apiHandler *APIHandler) handleUpdateRole(request *restful.Request, respons
 func (apiHandler *APIHandler) handleDeleteRole(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -132,7 +133,7 @@ func (apiHandler *APIHandler) handleDeleteRole(request *restful.Request, respons
 	name := request.PathParameter("name")
 	err = role.DeleteRole(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusNoContent, nil)

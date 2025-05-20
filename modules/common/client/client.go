@@ -63,8 +63,10 @@ func buildConfigFromAuthInfo(authInfo *api.AuthInfo) (*rest.Config, error) {
 	cmdCfg := api.NewConfig()
 
 	cmdCfg.Clusters["kubernetes"] = &api.Cluster{
-		Server:                baseConfig.Host,
-		InsecureSkipTLSVerify: baseConfig.TLSClientConfig.Insecure,
+		Server:                   baseConfig.Host,
+		CertificateAuthority:     baseConfig.TLSClientConfig.CAFile,
+		CertificateAuthorityData: baseConfig.TLSClientConfig.CAData,
+		InsecureSkipTLSVerify:    baseConfig.TLSClientConfig.Insecure,
 	}
 
 	cmdCfg.AuthInfos["kubernetes"] = authInfo

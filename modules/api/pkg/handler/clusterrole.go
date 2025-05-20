@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/kubeedge/dashboard/api/pkg/resource/clusterrole"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
@@ -40,13 +41,13 @@ func (apiHandler *APIHandler) addClusterRoleRoutes(apiV1Ws *restful.WebService) 
 func (apiHandler *APIHandler) handleGetClusterRoles(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := clusterrole.GetClusterRoleList(k8sClient)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -55,14 +56,14 @@ func (apiHandler *APIHandler) handleGetClusterRoles(request *restful.Request, re
 func (apiHandler *APIHandler) handleGetClusterRole(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	name := request.PathParameter("name")
 	result, err := clusterrole.GetClusterRole(k8sClient, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -71,20 +72,20 @@ func (apiHandler *APIHandler) handleGetClusterRole(request *restful.Request, res
 func (apiHandler *APIHandler) handleCreateClusterRole(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	clusterRole := new(rbacv1.ClusterRole)
 	err = request.ReadEntity(&clusterRole)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := clusterrole.CreateClusterRole(k8sClient, clusterRole)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, result)
@@ -93,20 +94,20 @@ func (apiHandler *APIHandler) handleCreateClusterRole(request *restful.Request, 
 func (apiHandler *APIHandler) handleUpdateClusterRole(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	clusterRole := new(rbacv1.ClusterRole)
 	err = request.ReadEntity(&clusterRole)
 	if err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := clusterrole.UpdateClusterRole(k8sClient, clusterRole)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -115,14 +116,14 @@ func (apiHandler *APIHandler) handleUpdateClusterRole(request *restful.Request, 
 func (apiHandler *APIHandler) handleDeleteClusterRole(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	name := request.PathParameter("name")
 	err = clusterrole.DeleteClusterRole(k8sClient, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeader(http.StatusNoContent)

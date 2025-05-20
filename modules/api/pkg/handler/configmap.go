@@ -6,6 +6,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/kubeedge/dashboard/api/pkg/resource/configmap"
 	"github.com/kubeedge/dashboard/client"
+	"github.com/kubeedge/dashboard/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -50,13 +51,13 @@ func (apiHandler *APIHandler) addConfigMapRoutes(apiV1Ws *restful.WebService) *A
 func (apiHandler *APIHandler) handleGetConfigMaps(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := configmap.GetConfigMapList(k8sClient, request.PathParameter("namespace"))
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -65,7 +66,7 @@ func (apiHandler *APIHandler) handleGetConfigMaps(request *restful.Request, resp
 func (apiHandler *APIHandler) handleGetConfigMap(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -74,7 +75,7 @@ func (apiHandler *APIHandler) handleGetConfigMap(request *restful.Request, respo
 
 	result, err := configmap.GetConfigMap(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -83,20 +84,20 @@ func (apiHandler *APIHandler) handleGetConfigMap(request *restful.Request, respo
 func (apiHandler *APIHandler) handleCreateConfigMap(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	configMap := new(corev1.ConfigMap)
 	if err := request.ReadEntity(configMap); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := configmap.CreateConfigMap(k8sClient, namespace, configMap)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusCreated, result)
@@ -105,20 +106,20 @@ func (apiHandler *APIHandler) handleCreateConfigMap(request *restful.Request, re
 func (apiHandler *APIHandler) handleUpdateConfigMap(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
 	configMap := new(corev1.ConfigMap)
 	if err := request.ReadEntity(configMap); err != nil {
-		response.WriteError(http.StatusBadRequest, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
 	result, err := configmap.UpdateConfigMap(k8sClient, namespace, configMap)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, result)
@@ -127,7 +128,7 @@ func (apiHandler *APIHandler) handleUpdateConfigMap(request *restful.Request, re
 func (apiHandler *APIHandler) handleDeleteConfigMap(request *restful.Request, response *restful.Response) {
 	k8sClient, err := client.Client(request.Request)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -136,7 +137,7 @@ func (apiHandler *APIHandler) handleDeleteConfigMap(request *restful.Request, re
 
 	err = configmap.DeleteConfigMap(k8sClient, namespace, name)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		errors.HandleInternalError(response, err)
 		return
 	}
 	response.WriteHeader(http.StatusNoContent)

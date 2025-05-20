@@ -15,8 +15,11 @@ var (
 type Option func(*configBuilder)
 
 type configBuilder struct {
-	apiServer string
-	insecure  bool
+	apiServer      string
+	cartFile       string
+	keyFile        string
+	kubeConfigPath string
+	insecure       bool
 }
 
 func newConfigBuilder(opts ...Option) *configBuilder {
@@ -30,7 +33,7 @@ func newConfigBuilder(opts ...Option) *configBuilder {
 }
 
 func (c *configBuilder) buildConfig() (*rest.Config, error) {
-	if c.apiServer == "" {
+	if c.apiServer == "" && c.kubeConfigPath == "" {
 		klog.Info("Using in-cluster config")
 		config, err := rest.InClusterConfig()
 		if err != nil {
@@ -39,9 +42,15 @@ func (c *configBuilder) buildConfig() (*rest.Config, error) {
 		return config, nil
 	}
 
-	klog.Infof("Using API server: %s", c.apiServer)
+	if len(c.kubeConfigPath) > 0 {
+		klog.InfoS("Using kubeconfig file", "kubeconfig", c.kubeConfigPath)
+	}
 
-	config, err := clientcmd.BuildConfigFromFlags(c.apiServer, "")
+	if len(c.apiServer) > 0 {
+		klog.InfoS("Using API server", "apiServer", c.apiServer)
+	}
+
+	config, err := clientcmd.BuildConfigFromFlags(c.apiServer, c.kubeConfigPath)
 	if err != nil {
 		klog.Errorf("Failed to build config from flags: %v", err)
 		return nil, err
@@ -61,6 +70,12 @@ func WithAPIServer(apiServer string) Option {
 func WithInsecure(insecure bool) Option {
 	return func(c *configBuilder) {
 		c.insecure = insecure
+	}
+}
+
+func WithKubeConfigPath(kubeConfigPath string) Option {
+	return func(c *configBuilder) {
+		c.kubeConfigPath = kubeConfigPath
 	}
 }
 

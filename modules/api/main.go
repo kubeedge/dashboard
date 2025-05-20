@@ -15,6 +15,7 @@ func main() {
 	client.Init(
 		client.WithAPIServer(args.APIServerHost()),
 		client.WithInsecure(args.APIServerSkipTLSVerify()),
+		client.WithKubeConfigPath(args.KubeConfigFile()),
 	)
 
 	apiHandler, err := handler.CreateHTTPAPIHandler()
@@ -23,12 +24,24 @@ func main() {
 		return
 	}
 
-	http.Handle("/", apiHandler)
+	keinkHandler, err := handler.CreateKeinkAPIHandler()
+	if err != nil {
+		klog.ErrorS(err, "Failed to create Keink API handler")
+		return
+	}
 
-	klog.InfoS("Listening and serving HTTP on :8080") // TODO
-	go func() {
-		http.ListenAndServe(":8080", nil)
-	}()
+	http.Handle("/", apiHandler)
+	http.Handle("/keink/", keinkHandler)
+
+	serve()
 
 	select {}
+}
+
+func serve() {
+	addr := args.InsecureAddress()
+	klog.Infof("Listening and serving HTTP on %s", addr)
+	go func() {
+		klog.Fatal(http.ListenAndServe(addr, nil))
+	}()
 }
