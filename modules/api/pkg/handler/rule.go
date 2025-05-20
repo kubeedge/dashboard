@@ -145,5 +145,5 @@ func (apiHandler *APIHandler) handleDeleteRule(request *restful.Request, respons
 		return
 	}
 
-	response.WriteHeaderAndEntity(http.StatusNoContent, nil)
+	response.WriteHeader(http.StatusNoContent)
 }

@@ -12,7 +12,7 @@ import (
 
 func (apiHandler *APIHandler) addNodeRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
-		apiV1Ws.GET("/node").To(apiHandler.handleGetNamespaces).
+		apiV1Ws.GET("/node").To(apiHandler.handleGetNodes).
 			Writes(corev1.NamespaceList{}).
 			Returns(http.StatusOK, "OK", corev1.NamespaceList{}))
 	apiV1Ws.Route(
@@ -100,5 +100,5 @@ func (apiHandler *APIHandler) handleDeleteNode(request *restful.Request, respons
 		return
 	}
 
-	response.WriteHeaderAndEntity(http.StatusNoContent, nil)
+	response.WriteHeader(http.StatusNoContent)
 }

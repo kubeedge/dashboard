@@ -146,5 +146,5 @@ func (apiHandler *APIHandler) handleDeleteDeviceModel(request *restful.Request, 
 		return
 	}
 
-	response.WriteHeaderAndEntity(http.StatusNoContent, nil)
+	response.WriteHeader(http.StatusNoContent)
 }

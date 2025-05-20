@@ -143,5 +143,5 @@ func (apiHandler *APIHandler) deleteServiceAccount(request *restful.Request, res
 		return
 	}
 
-	response.WriteHeaderAndEntity(http.StatusNoContent, nil)
+	response.WriteHeader(http.StatusNoContent)
 }
