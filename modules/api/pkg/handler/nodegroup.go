@@ -130,5 +130,5 @@ func (apiHandler *APIHandler) handleDeleteNodeGroup(request *restful.Request, re
 		return
 	}
 
-	response.WriteEntity(nil)
+	response.WriteHeader(http.StatusNoContent)
 }

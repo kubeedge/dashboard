@@ -4,34 +4,34 @@ import { Role, RoleList } from '@/types/role';
 import { request } from '@/helper/request';
 
 export function useListRoles(namespace?: string) {
-  const url = namespace ? `/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/roles` : '/apis/rbac.authorization.k8s.io/v1/roles';
+  const url = namespace ? `/role/${namespace}` : '/role';
   return useQuery<RoleList>('listRoles', url, {
     method: 'GET',
   });
 }
 
 export function getRole(namespace: string, name: string) {
-  return request<Role>(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/roles/${name}`, {
+  return request<Role>(`/role/${namespace}/${name}`, {
     method: 'GET',
   });
 }
 
 export function createRole(namespace: string, data: Role) {
-  return request<Role>(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/roles`, {
+  return request<Role>(`/role/${namespace}`, {
     method: 'POST',
     data,
   });
 }
 
 export function updateRole(namespace: string, name: string, data: Role) {
-  return request<Role>(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/roles/${name}`, {
+  return request<Role>(`/role/${namespace}`, {
     method: 'PUT',
     data,
   });
 }
 
 export function deleteRole(namespace: string, name: string) {
-  return request<Status>(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/roles/${name}`, {
+  return request<Status>(`/role/${namespace}/${name}`, {
     method: 'DELETE',
   });
 }

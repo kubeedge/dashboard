@@ -108,7 +108,7 @@ const AddRuleEndpointDialog = ({ open, onClose, onSubmit }: AddRuleEndpointDialo
               onChange={(event) => setEndpointType(event.target.value)}
               placeholder="RuleEndpointType"
             >
-              <MenuItem value="reset">reset</MenuItem>
+              <MenuItem value="rest">rest</MenuItem>
               <MenuItem value="eventbus">eventbus</MenuItem>
               <MenuItem value="servicebus">servicebus</MenuItem>
             </Select>

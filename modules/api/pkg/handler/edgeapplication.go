@@ -144,5 +144,5 @@ func (apiHandler *APIHandler) handleDeleteEdgeApplication(request *restful.Reque
 		return
 	}
 
-	response.WriteHeaderAndEntity(http.StatusNoContent, nil)
+	response.WriteHeader(http.StatusNoContent)
 }

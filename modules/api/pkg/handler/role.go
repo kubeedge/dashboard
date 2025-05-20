@@ -136,5 +136,5 @@ func (apiHandler *APIHandler) handleDeleteRole(request *restful.Request, respons
 		errors.HandleInternalError(response, err)
 		return
 	}
-	response.WriteHeaderAndEntity(http.StatusNoContent, nil)
+	response.WriteHeader(http.StatusNoContent)
 }
