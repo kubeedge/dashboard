@@ -5,34 +5,34 @@ import { request } from '@/helper/request';
 
 
 export function useListDeployments(namespace?: string) {
-  const url = namespace ? `/apis/apps/v1/namespaces/${namespace}/deployments` : '/apis/apps/v1/deployments'
+  const url = namespace ? `/deployment/${namespace}` : '/deployment';
   return useQuery<DeploymentList>('listDeployments', url, {
     method: 'GET',
   });
 }
 
 export function getDeployment(namespace: string, name: string) {
-  return request<Deployment>(`/apis/apps/v1/namespaces/${namespace}/deployments/${name}`, {
+  return request<Deployment>(`/deployment/${namespace}/${name}`, {
     method: 'GET',
   });
 }
 
 export function createDeployment(namespace: string, data: Deployment) {
-  return request<Deployment>(`/apis/apps/v1/namespaces/${namespace}/deployments`, {
+  return request<Deployment>(`/deployment/${namespace}`, {
     method: 'POST',
     data,
   });
 }
 
 export function updateDeployment(namespace: string, name: string, data: Deployment) {
-  return request<Deployment>(`/apis/apps/v1/namespaces/${namespace}/deployments/${name}`, {
+  return request<Deployment>(`/deployment/${namespace}`, {
     method: 'PUT',
     data,
   });
 }
 
 export function deleteDeployment(namespace: string, name: string) {
-  return request<Status>(`apis/apps/v1/namespaces/${namespace}/deployments/${name}`, {
+  return request<Status>(`/deployment/${namespace}/${name}`, {
     method: 'DELETE',
   });
 }

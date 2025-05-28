@@ -5,34 +5,34 @@ import { request } from '@/helper/request';
 
 
 export function useListConfigMaps(namespace?: string) {
-  const url = namespace ? `/api/v1/namespaces/${namespace}/configmaps` : '/api/v1/configmaps'
+  const url = namespace ? `/configmap/${namespace}` : '/configmap';
   return useQuery<ConfigMapList>('listConfigMaps', url, {
     method: 'GET',
   });
 }
 
 export function getConfigMap(namespace: string, name: string) {
-  return request<ConfigMap>(`/api/v1/namespaces/${namespace}/configmaps/${name}`, {
+  return request<ConfigMap>(`/configmap/${namespace}/${name}`, {
     method: 'GET',
   });
 }
 
 export function createConfigMap(namespace: string, data: ConfigMap) {
-  return request<ConfigMap>(`/api/v1/namespaces/${namespace}/configmaps`, {
+  return request<ConfigMap>(`/configmap/${namespace}`, {
     method: 'POST',
     data,
   });
 }
 
 export function updateConfigMap(namespace: string, name: string, data: ConfigMap) {
-  return request<ConfigMap>(`/api/v1/namespaces/${namespace}/configmaps/${name}`, {
+  return request<ConfigMap>(`/configmap/${namespace}`, {
     method: 'PUT',
     data,
   });
 }
 
 export function deleteConfigMap(namespace: string, name: string) {
-  return request<Status>(`/api/v1/namespaces/${namespace}/configmaps/${name}`, {
+  return request<Status>(`/configmap/${namespace}/${name}`, {
     method: 'DELETE',
   });
 }

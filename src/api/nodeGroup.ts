@@ -4,33 +4,33 @@ import { NodeGroup, NodeGroupList } from '@/types/nodeGroup';
 import { request } from '@/helper/request';
 
 export function useListNodeGroups() {
-  return useQuery<NodeGroupList>('listNodeGroups', '/apis/apps.kubeedge.io/v1alpha1/nodegroups', {
+  return useQuery<NodeGroupList>('listNodeGroups', '/nodegroup', {
     method: 'GET',
   });
 }
 
 export function getNodeGroup(name: string) {
-  return request<NodeGroup>(`/apis/apps.kubeedge.io/v1alpha1/nodegroups/${name}`, {
+  return request<NodeGroup>(`/nodegroup/${name}`, {
     method: 'GET',
   });
 }
 
 export function createNodeGroup(data: NodeGroup) {
-  return request<NodeGroup>(`/apis/apps.kubeedge.io/v1alpha1/nodegroups`, {
+  return request<NodeGroup>(`/nodegroup`, {
     method: 'POST',
     data,
   });
 }
 
 export function updateNodeGroup(name: string, data: NodeGroup) {
-  return request<NodeGroup>(`/apis/apps.kubeedge.io/v1alpha1/nodegroups/${name}`, {
+  return request<NodeGroup>(`/nodegroup`, {
     method: 'PUT',
     data,
   });
 }
 
 export function deleteNodeGroup(name: string) {
-  return request<Status>(`/apis/apps.kubeedge.io/v1alpha1/nodegroups/${name}`, {
+  return request<Status>(`/nodegroup/${name}`, {
     method: 'DELETE',
   });
 }
