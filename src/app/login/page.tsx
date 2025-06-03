@@ -9,6 +9,9 @@ import { useStorage } from '@/hook/useStorage';
 import { getServiceAccountName } from '@/helper/token';
 import useCookie from '@/hook/useCookie';
 import { useAlert } from '@/hook/useAlert';
+import { useKeinkRunnable } from '@/api/keink';
+import useConfirmDialog from '@/hook/useConfirmDialog';
+import KeinkDialog from '@/component/KeinkDialog';
 
 const LoginPage = () => {
   const [token, setToken] = useState('');
@@ -16,6 +19,9 @@ const LoginPage = () => {
   const [storedToken, setStoredToken] = useStorage('token');
   const [cookie, setCookie] = useCookie('dashboard_user');
   const { setErrorMessage } = useAlert();
+  const { data: keinkRes } = useKeinkRunnable();
+  const [showKeinkDialog, setShowKeinkDialog] = useState(false);
+  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
 
   useEffect(() => {
     if (cookie && storedToken) {
@@ -48,6 +54,17 @@ const LoginPage = () => {
       setTokenError('Invalid token');
     }
   };
+
+  const handleRunKeink = () => {
+    showConfirmDialog({
+      title: "Run KubeEdge by Keink",
+      content: "Are you sure you want to run KubeEdge installation using Keink? This will start the installation process, and it might take some time to complete.",
+      onConfirm: () => {
+        setShowKeinkDialog(true);
+      },
+      onCancel: () => {},
+    })
+  }
 
   return (
     <Box
@@ -121,6 +138,25 @@ const LoginPage = () => {
         Login
       </Button>
 
+      {keinkRes?.ok && (
+        <Button
+          variant="contained"
+          onClick={handleRunKeink}
+          sx={{
+            backgroundColor: '#3e75c3',
+            color: 'white',
+            width: '400px',
+            position: 'absolute',
+            top: '340px', // Position below the input field
+            '&:hover': {
+              backgroundColor: '#335d9c',
+            },
+          }}
+        >
+          Install KubeEdge By Keink
+        </Button>
+      )}
+
       <Box
         sx={{
           position: 'absolute',
@@ -148,6 +184,11 @@ const LoginPage = () => {
           © {new Date().getFullYear()} KubeEdge Community
         </Typography>
       </Box>
+      <KeinkDialog
+        open={showKeinkDialog}
+        onClose={() => setShowKeinkDialog(false)}
+      ></KeinkDialog>
+      {ConfirmDialogComponent}
     </Box>
   );
 };

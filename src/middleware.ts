@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 
 const protectedPaths = new Set([
   '/',
@@ -30,7 +30,7 @@ async function handleApiProxy(req: NextRequest) {
     req.headers.forEach((value, key) => {
       headers[key] = value
     });
-    const path = req.nextUrl.pathname.replace('/api/', '/')
+    const path = req.nextUrl.pathname.replace('/api/', '/api/v1/')
     const url = new URL(path, process.env.API_SERVER);
 
     const resp = await fetch(url, {
@@ -38,8 +38,18 @@ async function handleApiProxy(req: NextRequest) {
       headers,
       body: req.body,
     })
-    const body = await resp.json();
 
+    if (req.method === 'DELETE' ||  resp.status >= 400) {
+      const msg = await resp.text();
+      return NextResponse.json({
+        message: msg,
+      }, {
+        status: resp.status === 204 ? 200 : resp.status,
+        headers: resp.headers,
+      });
+    }
+
+    const body = await resp.json();
     return NextResponse.json(body, {
       status: resp.status,
       headers: resp.headers,
@@ -54,7 +64,7 @@ async function handleApiProxy(req: NextRequest) {
 }
 
 export async function middleware(req: NextRequest) {
-  if (req.nextUrl.pathname.startsWith('/api/')) {
+  if (req.nextUrl.pathname.startsWith('/api/') || req.nextUrl.pathname.startsWith('/keink/')) {
     return handleApiProxy(req);
   }
 
