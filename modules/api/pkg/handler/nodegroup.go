@@ -23,7 +23,6 @@ import (
 	appsv1alpha1 "github.com/kubeedge/api/apis/apps/v1alpha1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/nodegroup"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -57,9 +56,8 @@ func (apiHandler *APIHandler) addNodeGroupRoutes(apiV1Ws *restful.WebService) *A
 }
 
 func (apiHandler *APIHandler) handleGetNodeGroups(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -73,9 +71,8 @@ func (apiHandler *APIHandler) handleGetNodeGroups(request *restful.Request, resp
 }
 
 func (apiHandler *APIHandler) handleGetNodeGroup(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -90,9 +87,8 @@ func (apiHandler *APIHandler) handleGetNodeGroup(request *restful.Request, respo
 }
 
 func (apiHandler *APIHandler) handleCreateNodeGroup(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -112,9 +108,8 @@ func (apiHandler *APIHandler) handleCreateNodeGroup(request *restful.Request, re
 }
 
 func (apiHandler *APIHandler) handleUpdateNodeGroup(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -134,9 +129,8 @@ func (apiHandler *APIHandler) handleUpdateNodeGroup(request *restful.Request, re
 }
 
 func (apiHandler *APIHandler) handleDeleteNodeGroup(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 

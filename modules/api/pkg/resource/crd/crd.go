@@ -26,7 +26,7 @@ import (
 )
 
 func GetCRDList(client apiextensionsclientset.Interface) (*apiextensionsv1.CustomResourceDefinitionList, error) {
-	klog.V(4).Infof("Getting CRD list")
+	klog.V(4).Info("Getting CRD list")
 
 	list, err := client.ApiextensionsV1().CustomResourceDefinitions().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

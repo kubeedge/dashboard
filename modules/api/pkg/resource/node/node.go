@@ -26,7 +26,7 @@ import (
 )
 
 func GetNodeList(client k8sClient.Interface) (*corev1.NodeList, error) {
-	klog.V(4).Infof("Getting node list")
+	klog.V(4).Info("Getting node list")
 
 	list, err := client.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

@@ -23,7 +23,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/secret"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -65,9 +64,8 @@ func (apiHandler *APIHandler) addSecretRoutes(apiV1Ws *restful.WebService) *APIH
 }
 
 func (apiHandler *APIHandler) handleGetSecrets(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -82,9 +80,8 @@ func (apiHandler *APIHandler) handleGetSecrets(request *restful.Request, respons
 }
 
 func (apiHandler *APIHandler) handleGetSecret(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -100,9 +97,8 @@ func (apiHandler *APIHandler) handleGetSecret(request *restful.Request, response
 }
 
 func (apiHandler *APIHandler) handleCreateSecret(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -124,9 +120,8 @@ func (apiHandler *APIHandler) handleCreateSecret(request *restful.Request, respo
 }
 
 func (apiHandler *APIHandler) handleUpdateSecret(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -148,9 +143,8 @@ func (apiHandler *APIHandler) handleUpdateSecret(request *restful.Request, respo
 }
 
 func (apiHandler *APIHandler) handleDeleteSecret(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 

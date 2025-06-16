@@ -26,7 +26,7 @@ import (
 )
 
 func GetRoleList(client k8sClient.Interface, namespace string) (*rbacv1.RoleList, error) {
-	klog.V(4).Infof("Getting role list")
+	klog.V(4).Info("Getting role list")
 
 	list, err := client.RbacV1().Roles(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

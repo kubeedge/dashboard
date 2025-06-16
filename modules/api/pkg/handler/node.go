@@ -23,7 +23,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/node"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -52,9 +51,8 @@ func (apiHandler *APIHandler) addNodeRoutes(apiV1Ws *restful.WebService) *APIHan
 }
 
 func (apiHandler *APIHandler) handleGetNodes(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -67,9 +65,8 @@ func (apiHandler *APIHandler) handleGetNodes(request *restful.Request, response 
 }
 
 func (apiHandler *APIHandler) handleGetNode(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -83,9 +80,8 @@ func (apiHandler *APIHandler) handleGetNode(request *restful.Request, response *
 }
 
 func (apiHandler *APIHandler) handleUpdateNode(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -104,9 +100,8 @@ func (apiHandler *APIHandler) handleUpdateNode(request *restful.Request, respons
 }
 
 func (apiHandler *APIHandler) handleDeleteNode(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 

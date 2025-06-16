@@ -26,7 +26,7 @@ import (
 )
 
 func GetClusterRoleBindingList(client k8sClient.Interface) (*rbacv1.ClusterRoleBindingList, error) {
-	klog.V(4).Infof("Getting cluster role binding list")
+	klog.V(4).Info("Getting cluster role binding list")
 
 	list, err := client.RbacV1().ClusterRoleBindings().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

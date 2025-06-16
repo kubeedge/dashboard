@@ -23,7 +23,7 @@ import (
 )
 
 func GetVersion(client k8sClient.Interface) (*version.Info, error) {
-	klog.V(4).Infof("Getting kubernetes version")
+	klog.V(4).Info("Getting kubernetes version")
 
 	version, err := client.Discovery().ServerVersion()
 	if err != nil {

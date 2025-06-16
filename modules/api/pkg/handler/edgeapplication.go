@@ -23,7 +23,6 @@ import (
 	appsv1alpha1 "github.com/kubeedge/api/apis/apps/v1alpha1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/edgeapplication"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -66,9 +65,8 @@ func (apiHandler *APIHandler) addEdgeApplicationRoutes(apiV1Ws *restful.WebServi
 }
 
 func (apiHandler *APIHandler) handleGetEdgeApplications(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -83,9 +81,8 @@ func (apiHandler *APIHandler) handleGetEdgeApplications(request *restful.Request
 }
 
 func (apiHandler *APIHandler) handleGetEdgeApplication(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -101,9 +98,8 @@ func (apiHandler *APIHandler) handleGetEdgeApplication(request *restful.Request,
 }
 
 func (apiHandler *APIHandler) handleCreateEdgeApplication(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -124,9 +120,8 @@ func (apiHandler *APIHandler) handleCreateEdgeApplication(request *restful.Reque
 }
 
 func (apiHandler *APIHandler) handleUpdateEdgeApplication(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -147,9 +142,8 @@ func (apiHandler *APIHandler) handleUpdateEdgeApplication(request *restful.Reque
 }
 
 func (apiHandler *APIHandler) handleDeleteEdgeApplication(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 

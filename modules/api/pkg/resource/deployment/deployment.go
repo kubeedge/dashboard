@@ -26,7 +26,7 @@ import (
 )
 
 func GetDeploymentList(client k8sClient.Interface, namespace string) (*appsv1.DeploymentList, error) {
-	klog.V(4).Infof("Getting deployment list")
+	klog.V(4).Info("Getting deployment list")
 
 	list, err := client.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

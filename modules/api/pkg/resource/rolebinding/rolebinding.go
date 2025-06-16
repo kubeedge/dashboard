@@ -26,7 +26,7 @@ import (
 )
 
 func GetRoleBindingList(client k8sClient.Interface, namespace string) (*rbacv1.RoleBindingList, error) {
-	klog.V(4).Infof("Getting role binding list")
+	klog.V(4).Info("Getting role binding list")
 
 	list, err := client.RbacV1().RoleBindings(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

@@ -23,7 +23,6 @@ import (
 	"k8s.io/apimachinery/pkg/version"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/common"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -37,9 +36,8 @@ func (apiHandler *APIHandler) addCommonRoutes(apiV1Ws *restful.WebService) *APIH
 }
 
 func (apiHandler *APIHandler) getVersion(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 

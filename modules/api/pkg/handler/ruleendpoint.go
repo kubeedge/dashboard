@@ -23,7 +23,6 @@ import (
 	rulev1 "github.com/kubeedge/api/apis/rules/v1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/ruleendpoint"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -65,9 +64,8 @@ func (apiHandler *APIHandler) addRuleEndpointRoutes(apiV1Ws *restful.WebService)
 }
 
 func (apiHandler *APIHandler) handleGetRuleEndpoints(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -82,9 +80,8 @@ func (apiHandler *APIHandler) handleGetRuleEndpoints(request *restful.Request, r
 }
 
 func (apiHandler *APIHandler) handleGetRuleEndpoint(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -100,9 +97,8 @@ func (apiHandler *APIHandler) handleGetRuleEndpoint(request *restful.Request, re
 }
 
 func (apiHandler *APIHandler) handleCreateRuleEndpoint(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -124,9 +120,8 @@ func (apiHandler *APIHandler) handleCreateRuleEndpoint(request *restful.Request,
 }
 
 func (apiHandler *APIHandler) handleUpdateRuleEndpoint(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -148,9 +143,8 @@ func (apiHandler *APIHandler) handleUpdateRuleEndpoint(request *restful.Request,
 }
 
 func (apiHandler *APIHandler) handleDeleteRuleEndpoint(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
