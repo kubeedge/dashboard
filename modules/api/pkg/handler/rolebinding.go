@@ -23,7 +23,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/rolebinding"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -65,9 +64,8 @@ func (apiHandler *APIHandler) addRoleBindingRoutes(apiV1Ws *restful.WebService) 
 }
 
 func (apiHandler *APIHandler) handleGetRoleBindings(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -82,9 +80,8 @@ func (apiHandler *APIHandler) handleGetRoleBindings(request *restful.Request, re
 }
 
 func (apiHandler *APIHandler) handleGetRoleBinding(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -100,9 +97,8 @@ func (apiHandler *APIHandler) handleGetRoleBinding(request *restful.Request, res
 }
 
 func (apiHandler *APIHandler) handleCreateRoleBinding(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -124,9 +120,8 @@ func (apiHandler *APIHandler) handleCreateRoleBinding(request *restful.Request, 
 }
 
 func (apiHandler *APIHandler) handleUpdateRoleBinding(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -148,9 +143,8 @@ func (apiHandler *APIHandler) handleUpdateRoleBinding(request *restful.Request, 
 }
 
 func (apiHandler *APIHandler) handleDeleteRoleBinding(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 

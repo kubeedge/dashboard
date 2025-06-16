@@ -23,7 +23,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/clusterrolebinding"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -56,9 +55,8 @@ func (apiHandler *APIHandler) addClusterRoleBindingRoutes(apiV1Ws *restful.WebSe
 }
 
 func (apiHandler *APIHandler) handleGetClusterRoleBindings(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -71,9 +69,8 @@ func (apiHandler *APIHandler) handleGetClusterRoleBindings(request *restful.Requ
 }
 
 func (apiHandler *APIHandler) handleGetClusterRoleBinding(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -87,9 +84,8 @@ func (apiHandler *APIHandler) handleGetClusterRoleBinding(request *restful.Reque
 }
 
 func (apiHandler *APIHandler) handleCreateClusterRoleBinding(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -109,9 +105,8 @@ func (apiHandler *APIHandler) handleCreateClusterRoleBinding(request *restful.Re
 }
 
 func (apiHandler *APIHandler) handleUpdateClusterRoleBinding(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -131,9 +126,8 @@ func (apiHandler *APIHandler) handleUpdateClusterRoleBinding(request *restful.Re
 }
 
 func (apiHandler *APIHandler) handleDeleteClusterRoleBinding(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 

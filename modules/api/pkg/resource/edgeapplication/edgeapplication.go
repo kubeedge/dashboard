@@ -26,7 +26,7 @@ import (
 )
 
 func GetEdgeApplicationList(client kubeedgeClient.Interface, namespace string) (*appsv1alpha1.EdgeApplicationList, error) {
-	klog.V(4).Infof("Getting edge application list")
+	klog.V(4).Info("Getting edge application list")
 
 	list, err := client.AppsV1alpha1().EdgeApplications(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

@@ -23,7 +23,6 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/crd"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -42,9 +41,8 @@ func (apiHandler *APIHandler) addCRDRoutes(apiV1Ws *restful.WebService) *APIHand
 }
 
 func (apiHandler *APIHandler) getCRDs(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.APIExtensionClient(request.Request)
+	k8sClient, err := apiHandler.getAPIExtensionClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -57,9 +55,8 @@ func (apiHandler *APIHandler) getCRDs(request *restful.Request, response *restfu
 }
 
 func (apiHandler *APIHandler) getCRD(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.APIExtensionClient(request.Request)
+	k8sClient, err := apiHandler.getAPIExtensionClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 

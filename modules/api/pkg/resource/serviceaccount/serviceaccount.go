@@ -26,7 +26,7 @@ import (
 )
 
 func GetServiceAccountList(client k8sClient.Interface, namespace string) (*corev1.ServiceAccountList, error) {
-	klog.V(4).Infof("Getting service account list")
+	klog.V(4).Info("Getting service account list")
 
 	list, err := client.CoreV1().ServiceAccounts(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

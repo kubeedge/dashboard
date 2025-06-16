@@ -26,7 +26,7 @@ import (
 )
 
 func GetRuleEndpointList(client kubeedgeClient.Interface, namespace string) (*rulev1.RuleEndpointList, error) {
-	klog.V(4).Infof("Getting rule endpoint list")
+	klog.V(4).Info("Getting rule endpoint list")
 
 	list, err := client.RulesV1().RuleEndpoints(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

@@ -26,7 +26,7 @@ import (
 )
 
 func GetSecretList(client k8sClient.Interface, namespace string) (*corev1.SecretList, error) {
-	klog.V(4).Infof("Getting secret list")
+	klog.V(4).Info("Getting secret list")
 
 	list, err := client.CoreV1().Secrets(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

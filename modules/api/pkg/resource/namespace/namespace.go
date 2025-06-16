@@ -26,7 +26,7 @@ import (
 )
 
 func GetNamespaceList(client k8sClient.Interface) (*corev1.NamespaceList, error) {
-	klog.V(4).Infof("Getting namespace list")
+	klog.V(4).Info("Getting namespace list")
 
 	list, err := client.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

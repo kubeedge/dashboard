@@ -26,7 +26,7 @@ import (
 )
 
 func GetConfigMapList(client k8sClient.Interface, namespace string) (*corev1.ConfigMapList, error) {
-	klog.V(4).Infof("Getting config map list")
+	klog.V(4).Info("Getting config map list")
 
 	list, err := client.CoreV1().ConfigMaps(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

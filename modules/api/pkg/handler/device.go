@@ -23,7 +23,6 @@ import (
 	devicev1beta1 "github.com/kubeedge/api/apis/devices/v1beta1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/device"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -66,9 +65,8 @@ func (apiHandler *APIHandler) addDeviceRoutes(apiV1Ws *restful.WebService) *APIH
 }
 
 func (apiHandler *APIHandler) handleGetDevices(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -82,9 +80,8 @@ func (apiHandler *APIHandler) handleGetDevices(request *restful.Request, respons
 }
 
 func (apiHandler *APIHandler) handleGetDevice(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -99,9 +96,8 @@ func (apiHandler *APIHandler) handleGetDevice(request *restful.Request, response
 }
 
 func (apiHandler *APIHandler) handleCreateDevice(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -120,9 +116,8 @@ func (apiHandler *APIHandler) handleCreateDevice(request *restful.Request, respo
 }
 
 func (apiHandler *APIHandler) handleUpdateDevice(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -141,9 +136,8 @@ func (apiHandler *APIHandler) handleUpdateDevice(request *restful.Request, respo
 }
 
 func (apiHandler *APIHandler) handleDeleteDevice(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := client.KubeEdgeClient(request.Request)
+	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 

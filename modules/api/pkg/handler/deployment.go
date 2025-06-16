@@ -23,7 +23,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/deployment"
-	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
 
@@ -66,9 +65,8 @@ func (apiHandler *APIHandler) addDeploymentRoutes(apiV1Ws *restful.WebService) *
 }
 
 func (apiHandler *APIHandler) handleGetDeployments(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -82,9 +80,8 @@ func (apiHandler *APIHandler) handleGetDeployments(request *restful.Request, res
 }
 
 func (apiHandler *APIHandler) handleGetDeployment(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -99,9 +96,8 @@ func (apiHandler *APIHandler) handleGetDeployment(request *restful.Request, resp
 }
 
 func (apiHandler *APIHandler) handleCreateDeployment(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -121,9 +117,8 @@ func (apiHandler *APIHandler) handleCreateDeployment(request *restful.Request, r
 }
 
 func (apiHandler *APIHandler) handleUpdateDeployment(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 
@@ -143,9 +138,8 @@ func (apiHandler *APIHandler) handleUpdateDeployment(request *restful.Request, r
 }
 
 func (apiHandler *APIHandler) handleDeleteDeployment(request *restful.Request, response *restful.Response) {
-	k8sClient, err := client.Client(request.Request)
+	k8sClient, err := apiHandler.getK8sClient(request, response)
 	if err != nil {
-		errors.HandleInternalError(response, err)
 		return
 	}
 

@@ -26,7 +26,7 @@ import (
 )
 
 func GetNodeGroupList(client kubeedgeClient.Interface) (*appsv1alpha1.NodeGroupList, error) {
-	klog.V(4).Infof("Getting node group list")
+	klog.V(4).Info("Getting node group list")
 
 	list, err := client.AppsV1alpha1().NodeGroups().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

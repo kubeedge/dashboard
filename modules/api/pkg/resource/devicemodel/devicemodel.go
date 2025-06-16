@@ -26,7 +26,7 @@ import (
 )
 
 func GetDeviceModelList(client kubeedgeClient.Interface, namespace string) (*devicev1beta1.DeviceModelList, error) {
-	klog.V(4).Infof("Getting device model list")
+	klog.V(4).Info("Getting device model list")
 
 	list, err := client.DevicesV1beta1().DeviceModels(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

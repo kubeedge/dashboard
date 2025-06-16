@@ -26,7 +26,7 @@ import (
 )
 
 func GetPodList(client k8sClient.Interface, namespace string) (*corev1.PodList, error) {
-	klog.V(4).Infof("Getting pod list")
+	klog.V(4).Info("Getting pod list")
 
 	list, err := client.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {

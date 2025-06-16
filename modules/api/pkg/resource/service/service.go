@@ -26,7 +26,7 @@ import (
 )
 
 func GetServiceList(client k8sClient.Interface, namespace string) (*corev1.ServiceList, error) {
-	klog.V(4).Infof("Getting service list")
+	klog.V(4).Info("Getting service list")
 
 	list, err := client.CoreV1().Services(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
