@@ -1,0 +1,7 @@
+go 1.23.0
+
+use (
+  ./api // github.com/kubeedge/dashboard/api
+  ./common/client // github.com/kubeedge/dashboard/client
+  ./common/errors // github.com/kubeedge/dashboard/errors
+)
