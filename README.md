@@ -10,9 +10,27 @@ If you have any questions, feel free to reach out to us in the following ways:
 * [Slack #dashboard](https://kubeedge.io/docs/community/slack/)
 
 ## Prepare environment
-nodejs, npm/yarn/pnpm is needed, pnpm is recommended
+
+The KubeEdge dashboard consists of two modules: backend and frontend. The backend module is responsible for providing APIs to the frontend, while the frontend module is responsible for rendering the user interface.
+
+For backend module, golang is needed.
+
+For frontend module, nodejs, npm/yarn/pnpm is needed, pnpm is recommended.
 
 ## Install packages
+
+### Backend
+
+To install the backend dependencies, you need to have Go installed. You can use the following command to install the dependencies:
+
+```bash
+cd module
+go mod download
+```
+
+### Frontend
+
+To install the frontend dependencies, you can use npm, yarn, or pnpm. Choose one of the following commands based on your preference:
 
 ```bash with npm
 npm install
@@ -30,37 +48,37 @@ pnpm install
 
 ### Start project
 
+### Backend
+
+You can start the backend server by running the following command:
+
+```bash
+cd module/api
+go run main.go --apiserver-host=https://192.168.33.129:6443
+```
+
+If your API server is running with self-signed certificate, you can set `--apiserver-skip-tls-verify true` option to ignore the certificate verification.
+
+### Frontend
+
 ```bash with npm
 npm run build
-API_SERVER={proxy address} npm run start
-Example: API_SERVER=https://192.168.33.129:6443 npm run dev
+API_SERVER={api module address} npm run start
+Example: API_SERVER=http://127.0.0.1:8080 npm run dev
 ```
 or
 
 ```bash with yarn
 yarn build
-API_SERVER={proxy address} yarn start
-Example: API_SERVER=https://192.168.33.129:6443 yarn dev
+API_SERVER={api module address} yarn start
+Example: API_SERVER=http://127.0.0.1:8080 yarn dev
 ```
 or
 
 ```bash with pnpm
 pnpm run build
-API_SERVER={proxy address} pnpm run start
-Example: API_SERVER=https://192.168.33.129:6443 pnpm run dev
-```
-
-If your API server is running with self-signed certificate, you can set `NODE_TLS_REJECT_UNAUTHORIZED=0` to ignore the certificate verification.
-
-```bash with npm
-NODE_TLS_REJECT_UNAUTHORIZED=0 API_SERVER=https://192.168.33.129:6443 npm run dev
-```
-
-If you need to build the image locally for testing, you can refer to the following example.
-
-```bash with npm
-docker build -t kubeedge-dashboard .
-docker run -p 3000:3000 -e API_SERVER=https://192.168.33.129:6443 kubeedge-dashboard
+API_SERVER={api module address} pnpm run start
+Example: API_SERVER=http://127.0.0.1:8080 pnpm run dev
 ```
 
 ### Login with token
