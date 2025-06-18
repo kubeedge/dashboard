@@ -69,7 +69,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const user = cookies().get('dashboard_user')?.value;
-  if (!user && protectedPaths.has(req.nextUrl.pathname)) {
+  if (user === undefined && protectedPaths.has(req.nextUrl.pathname)) {
     return NextResponse.redirect(new URL('/login', req.nextUrl))
   }
 
