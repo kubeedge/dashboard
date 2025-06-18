@@ -9,7 +9,7 @@ export const getServiceAccountName = async (token: string) => {
   const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
 
   // Extract the 'sub' field
-  const sub = decodedPayload['kubernetes.io/serviceaccount/service-account.name'];
-
+  const sub = decodedPayload['kubernetes.io/serviceaccount/service-account.name'] || 
+    decodedPayload["kubernetes.io"].serviceaccount.name;
   return sub || null;
 };
