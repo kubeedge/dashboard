@@ -11,5 +11,6 @@ export const getServiceAccountName = async (token: string) => {
   // Extract the 'sub' field
   const sub = decodedPayload['kubernetes.io/serviceaccount/service-account.name'];
 
-  return sub || null;
+  // Make the default username as 'admin'
+  return sub || 'admin';
 };
