@@ -33,16 +33,19 @@ go mod download
 To install the frontend dependencies, you can use npm, yarn, or pnpm. Choose one of the following commands based on your preference:
 
 ```bash with npm
+cd module/web
 npm install
 ```
 
 ```bash with yarn
+cd module/web
 yarn install
 ```
 
 or
 
 ```bash with pnpm
+cd module/web
 pnpm install
 ```
 
@@ -62,6 +65,7 @@ If your API server is running with self-signed certificate, you can set `--apise
 ### Frontend
 
 ```bash with npm
+cd module/web
 npm run build
 API_SERVER={api module address} npm run start
 Example: API_SERVER=http://127.0.0.1:8080 npm run dev
@@ -69,6 +73,7 @@ Example: API_SERVER=http://127.0.0.1:8080 npm run dev
 or
 
 ```bash with yarn
+cd module/web
 yarn build
 API_SERVER={api module address} yarn start
 Example: API_SERVER=http://127.0.0.1:8080 yarn dev
@@ -76,6 +81,7 @@ Example: API_SERVER=http://127.0.0.1:8080 yarn dev
 or
 
 ```bash with pnpm
+cd module/web
 pnpm run build
 API_SERVER={api module address} pnpm run start
 Example: API_SERVER=http://127.0.0.1:8080 pnpm run dev
