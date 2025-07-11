@@ -1,33 +1,38 @@
+---
+title: Dashboard Data Processing Optimization via BFF Layer
+status: implementable
+authors:
+  - "@ellie604"
+approvers:
+  - "@ghosind"
+  - "@Shelley-BaoYue"
+creation-date: 2025-07-06
+last-updated: 2025-07-06
+---
+
 # Dashboard Data Processing Optimization via BFF Layer
 
-## Title
-Dashboard Data Processing Optimization via BFF (Backend-for-Frontend) Layer
+| title | status | authors | approvers | creation-date | last-updated |
+| ----- | ------ | ------- | --------- | ------------- | ------------ |
+| Dashboard Data Processing Optimization via BFF Layer | implementable | @ellie604 | @ghosind @Shelley-BaoYue | 2025-07-06 | 2025-07-06 |
 
-## Status
-Implementable
-
-## Authors
-- Xinyi Luo (罗馨怡), Master’s Student, Carnegie Mellon University, [@ellie604](https://github.com/ellie604)
-
-## Approvers
-- [@ghosind](https://github.com/ghosind)
-- [@Shelley-BaoYue](https://github.com/Shelley-BaoYue)
-
-## Creation Date
-2025-07-06
-
-## Last Updated
-2025-07-06
-
----
+- [Dashboard Data Processing Optimization via BFF Layer](#dashboard-data-processing-optimization-via-bff-layer)
+  - [Motivation / Background](#motivation--background)
+  - [Use Cases](#use-cases)
+  - [Proposal Design](#proposal-design)
+    - [1. Backend (Golang BFF Layer)](#1-backend-golang-bff-layer)
+    - [2. Frontend Enhancements (React + MUI)](#2-frontend-enhancements-react--mui)
+    - [3. Modules and File Mapping](#3-modules-and-file-mapping)
+    - [4. Development Scope and Detailed Structure](#4-development-scope-and-detailed-structure)
+  - [Design Timeline](#design-timeline)
+  - [Architecture Diagram](#architecture-diagram)
+  - [Appendix](#appendix)
 
 ## Motivation / Background
 
 The KubeEdge Dashboard, in its current form, lacks efficient support for handling large-scale edge resource data. This can lead to slow response times, heavy front-end processing, and poor user experience in production environments.
 
 To address these issues, this proposal introduces a **Backend-for-Frontend (BFF)** architecture to process data at the server-side before forwarding it to the front-end. The key features include pagination, filtering, sorting, field validation, and API structure compression, all implemented within a Golang-based BFF layer.
-
----
 
 ## Use Cases
 
@@ -36,8 +41,6 @@ To address these issues, this proposal introduces a **Backend-for-Frontend (BFF)
 - Simplified and decoupled front-end logic.
 - Increased system robustness with input validation.
 - Improved API response time in large-scale deployment scenarios.
-
----
 
 ## Proposal Design
 
@@ -54,8 +57,10 @@ To address these issues, this proposal introduces a **Backend-for-Frontend (BFF)
 
 ### 3. Modules and File Mapping
 
+The following table maps the development modules to specific files and their descriptions:
+
 | Module | Files | Description |
-|--------|-------|-------------|
+| ------ | ----- | ----------- |
 | Data Handler | `pkg/handlers/resources.go` | Pagination, filtering, sorting, compression, validation |
 | API Integration | `src/services/edgeNodes.ts` | Connect BFF API to frontend |
 | Table UI | `src/components/CustomTable.tsx` | Add props for pagination and filtering |
@@ -93,12 +98,12 @@ To address these issues, this proposal introduces a **Backend-for-Frontend (BFF)
 - `src/app/deployment/page.tsx`: Updated deployment resource page
 - `src/app/node/page.tsx`: Updated node resource page
 
----
-
 ## Design Timeline
 
+The implementation will follow this timeline structure:
+
 | Phase | Week | Time Range | Key Task |
-|-------|------|------------|----------|
+| ----- | ---- | ---------- | -------- |
 | Requirement Review & Setup | Week 1 | Jul 1 – Jul 5 | Study architecture, define task scope |
 | Backend Data Module | Week 2–4 | Jul 6 – Jul 26 | Add pagination/filter/sort/compression |
 | Frontend Components | Week 5–6 | Jul 27 – Aug 9 | Build UI controls, link to backend |
@@ -107,23 +112,9 @@ To address these issues, this proposal introduces a **Backend-for-Frontend (BFF)
 | Testing & Patches | Week 9–10 | Aug 24 – Sep 6 | Write tests, polish UX |
 | Documentation & PR | Week 11–13 | Sep 7 – Sep 30 | Write doc, submit PR, respond to feedback |
 
----
-
 ## Architecture Diagram
 
-![Data Flow Diagram](dataflow-bff-dashboard.png)
-
----
-
-## Related Work and Experience
-
-The design draws on the author's experience building intermediate-layer systems at Xiaomi, handling massive test data pipelines. The author also has extensive Go development experience from building LSP protocol stacks, Bitcoin mining systems, and Raft-based consensus modules in CMU courses.
-
-Front-end experience includes React + Express-based micro-frontends and complex UI state management.
-
-The architectural idea is inspired by the academic paper: "Dynamic Collaborative Visualization Ecosystem to Support the Analysis of Large-Scale Disparate Data".
-
----
+![Data Flow Diagram](./dataflow-bff-dashboard.png)
 
 ## Appendix
 
