@@ -12,10 +12,6 @@ last-updated: 2025-07-06
 
 # Dashboard Data Processing Optimization via BFF Layer
 
-| title | status | authors | approvers | creation-date | last-updated |
-| ----- | ------ | ------- | --------- | ------------- | ------------ |
-| Dashboard Data Processing Optimization via BFF Layer | implementable | @ellie604 | @ghosind @Shelley-BaoYue | 2025-07-06 | 2025-07-06 |
-
 - [Dashboard Data Processing Optimization via BFF Layer](#dashboard-data-processing-optimization-via-bff-layer)
   - [Motivation / Background](#motivation--background)
   - [Use Cases](#use-cases)
