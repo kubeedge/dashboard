@@ -29,6 +29,7 @@ interface SideNavProps {
 interface ListItemLinkProps extends ListItemProps {
   open?: boolean;
   item?: NavMenuItem;
+  onToggle?: () => void;
 }
 
 function ListItemLink(props: ListItemLinkProps) {
@@ -39,17 +40,16 @@ function ListItemLink(props: ListItemLinkProps) {
 
   if (props.item?.link) {
     return (
-      <Link href={props.item.link}>
+      <ListItemButton component={Link as any} href={props.item.link}>
         <ListItemText primary={props.item?.name} />
-        {icon}
-      </Link>
+      </ListItemButton>
     );
   } else {
     return (
-      <>
+      <ListItemButton onClick={props.onToggle}>
         <ListItemText primary={props.item?.name} />
         {icon}
-      </>
+      </ListItemButton>
     );
   }
 }
@@ -79,9 +79,7 @@ export default function SideNav(props: SideNavProps) {
             {props?.items?.map((item, index) => {
               let elem = [(
                 <ListItem key={index} disablePadding>
-                  <ListItemButton onClick={() => toggleExpand(index)}>
-                    <ListItemLink item={item} open={expandedItems.includes(index)} />
-                  </ListItemButton>
+                  <ListItemLink item={item} open={expandedItems.includes(index)} onToggle={() => toggleExpand(index)} />
                 </ListItem>
               )];
 
@@ -91,9 +89,7 @@ export default function SideNav(props: SideNavProps) {
                     <List disablePadding>
                       {item.items.map((subItem, subIndex) => (
                         <ListItem key={`${index}-${subIndex}`}>
-                          <ListItemButton>
-                            <ListItemLink item={subItem} />
-                          </ListItemButton>
+                          <ListItemLink item={subItem} />
                         </ListItem>
                       ))}
                     </List>
