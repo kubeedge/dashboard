@@ -40,7 +40,7 @@ function ListItemLink(props: ListItemLinkProps) {
 
   if (props.item?.link) {
     return (
-      <ListItemButton component={Link as any} href={props.item.link}>
+      <ListItemButton component={Link as React.ElementType} href={props.item.link}>
         <ListItemText primary={props.item?.name} />
       </ListItemButton>
     );
