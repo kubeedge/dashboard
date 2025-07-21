@@ -58,10 +58,10 @@
 
   ```
   src/
-  ├── app/         
+  ├── app/
+  ├── design/      # Figma-exported Design Tokens (colors.json, spacing.json)         
   ├── locale/      # Language files: en.json, zh.json
   ├── component/   # Atoms / Molecules / Organisms
-  ├── page/        # Page containers
   ├── hook/        # Custom hooks (useI18n, useTokenSync)
   └── util/        # Utility functions (copy loading, formatting)
   ```
