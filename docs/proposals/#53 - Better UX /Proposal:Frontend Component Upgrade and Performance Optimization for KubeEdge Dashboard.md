@@ -1,7 +1,5 @@
 # Proposal: Frontend Component Upgrade and Performance Optimization for KubeEdge Dashboard
 
-
-
 ## 1. Background & Pain Points
 
 KubeEdge Dashboard is a visual management platform tailored for edge computing scenarios. It serves as the primary interface for operations engineers to manage edge nodes, deploy applications, and monitor logs. As the core user-facing component of the KubeEdge project, it plays a crucial role in daily operation and maintenance tasks.
@@ -20,10 +18,10 @@ KubeEdge Dashboard is a visual management platform tailored for edge computing s
 
   ```
   /src
-    /pages
-    /components
-    /utils
-    /services
+    /app
+    /component
+    /util
+    /service
   ```
 
 * Business tables are typically implemented using a **wrapped ProTable-style component**:
@@ -72,7 +70,7 @@ This project aims to address the above high-priority issues with the following g
 
 2️⃣ Design configurable and reusable form/table APIs to reduce business logic duplication and maintenance cost
 
-3️⃣ Introduce and adapt **MUI v5 Dashboard Layout** to achieve responsive design and unified theme management
+3️⃣ Introduce and adapt **MUI Dashboard Layout** to achieve responsive design and unified theme management
 
 4️⃣ Establish a modern, scalable frontend component architecture to support future iterations
 
@@ -212,10 +210,8 @@ Benefits: Modular, decoupled, scalable for future growth
 
 **Proposed Solution**:
 
-* Integrate **MUI v5 Official Dashboard Layout**
+* Integrate **MUI Official Dashboard Layout**
 
-  * Sidebar / Topbar / MainContent
-  * Expand/collapse support
   * Responsive breakpoints (`sm`/`md`/`lg`/`xl`)
 * Use `ThemeProvider`
 
