@@ -6,3 +6,6 @@
 # Build and dependencies
 node_modules/
 .next/
+next-env.d.ts
+c_go-kubeedge-dashboard.md
+docs/proposals/dashboard_bff_proposal.md
