@@ -56,6 +56,7 @@ require (
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
-replace github.com/kubeedge/dashboard/client => ../common/client
-
-replace github.com/kubeedge/dashboard/errors => ../common/errors
+replace (
+	github.com/kubeedge/dashboard/client => ../common/client
+	github.com/kubeedge/dashboard/errors => ../common/errors
+)
