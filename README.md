@@ -87,7 +87,7 @@ docker run --rm -p 8080:8080 \
   --name kubeedge-dashboard-api \
   kubeedge-dashboard-api:local \
   --insecure-bind-address=0.0.0.0 --insecure-port=8080 \
-  --apiserver-host=${API_HOST} \
+  --apiserver-host="${API_HOST}" \
   $( [ "$API_INSECURE" = "true" ] && echo --apiserver-skip-tls-verify=true )
 
 # Alternatively, mount a kubeconfig from the host

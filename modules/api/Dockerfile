@@ -52,4 +52,4 @@ USER nonroot:nonroot
 
 # Defaults bind to all interfaces inside container
 ENTRYPOINT ["/usr/local/bin/dashboard-api"]
-CMD ["--insecure-bind-address=0.0.0.0", "--insecure-port=8080"] 
+CMD ["--insecure-bind-address=0.0.0.0", "--insecure-port=8080"]
