@@ -41,7 +41,7 @@ export default function EdgeApplicationPage() {
   const [pageSize, setPageSize] = useState(25);
   const [sort, setSort] = useState<string | undefined>('creationTimestamp');
   const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
-  const [mock, setMock] = useState<number>(200);
+  const [mock, setMock] = useState<number | undefined>(undefined);
   const params = useMemo(() => ({
     namespace,
     page,
@@ -152,7 +152,7 @@ export default function EdgeApplicationPage() {
             <MenuItem value="desc">desc</MenuItem>
           </TextField>
           <TextField size="small" label="Name" value={name||''} onChange={(e) => setName(e.target.value)} placeholder="supports * wildcards" />
-          <TextField size="small" label="Mock" type="number" value={mock} onChange={(e) => setMock(Number(e.target.value)||0)} />
+          {/* mock control removed in PR branch */}
           <Button variant="outlined" onClick={() => mutate()}>Apply</Button>
           <Box sx={{ flexGrow: 1 }} />
           <Pagination
