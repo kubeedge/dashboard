@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ColumnDefinition, TableCard } from '@/component/TableCard';
-import { Box, TextField, Button } from '@mui/material';
+import { Box, TextField, Button, MenuItem, Pagination } from '@mui/material';
 import { createEdgeApplication, deleteEdgeApplication, getEdgeApplication, useListEdgeApplications } from '@/api/edgeApplication';
 import YAMLViewerDialog from '@/component/YAMLViewerDialog';
 import AddEdgeApplicationDialog from '@/component/AddEdgeApplicationDialog';
@@ -11,22 +11,22 @@ import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 
-const columns: ColumnDefinition<EdgeApplication>[] = [
+const columns: ColumnDefinition<EdgeApplication | any>[] = [
   {
     name: 'Namespace',
-    render: (edgeApplication) => edgeApplication?.metadata?.namespace,
+    render: (edgeApplication) => (edgeApplication as any)?.metadata?.namespace ?? (edgeApplication as any)?.namespace,
   },
   {
     name: 'Name',
-    render: (edgeApplication) => edgeApplication?.metadata?.name,
+    render: (edgeApplication) => (edgeApplication as any)?.metadata?.name ?? (edgeApplication as any)?.name,
   },
   {
     name: 'NodeGroups',
-    render: (edgeApplication) => edgeApplication?.spec?.workloadScope?.targetNodeGroups?.map(group => group.name).join(', '),
+    render: (edgeApplication) => (edgeApplication as any)?.spec?.workloadScope?.targetNodeGroups?.map((group: any) => group.name).join(', ') ?? '',
   },
   {
     name: 'Creation time',
-    render: (edgeApplication) => edgeApplication.metadata?.creationTimestamp,
+    render: (edgeApplication) => (edgeApplication as any)?.metadata?.creationTimestamp ?? (edgeApplication as any)?.creationTimestamp,
   },
   {
     name: 'Operation',
@@ -35,9 +35,23 @@ const columns: ColumnDefinition<EdgeApplication>[] = [
 ];
 
 export default function EdgeApplicationPage() {
-  const [name, setName] = React.useState('');
+  const [name, setName] = useState('');
   const { namespace } = useNamespace();
-  const { data, mutate } = useListEdgeApplications(namespace);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sort, setSort] = useState<string | undefined>('creationTimestamp');
+  const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
+  const [mock, setMock] = useState<number>(200);
+  const params = useMemo(() => ({
+    namespace,
+    page,
+    pageSize,
+    sort,
+    order,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
+    mock,
+  }), [namespace, page, pageSize, sort, order, name, mock]);
+  const { data, mutate } = useListEdgeApplications(params);
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
@@ -119,6 +133,36 @@ export default function EdgeApplicationPage() {
           detailButtonLabel="YAML"
           deleteButtonLabel="Delete"
         />
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
+          <TextField size="small" select label="Rows per page" value={pageSize}
+            onChange={(e) => { const v = Number(e.target.value)||10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
+            <MenuItem value={5}>5</MenuItem>
+            <MenuItem value={10}>10</MenuItem>
+            <MenuItem value={20}>20</MenuItem>
+            <MenuItem value={50}>50</MenuItem>
+          </TextField>
+          <TextField size="small" select label="Sort" value={sort||''} onChange={(e) => setSort(e.target.value||undefined)} sx={{ minWidth: 180 }}>
+            <MenuItem value="">Default</MenuItem>
+            <MenuItem value="name">name</MenuItem>
+            <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
+          </TextField>
+          <TextField size="small" select label="Order" value={order||''} onChange={(e) => setOrder((e.target.value as any)||undefined)} sx={{ minWidth: 140 }}>
+            <MenuItem value="">Default</MenuItem>
+            <MenuItem value="asc">asc</MenuItem>
+            <MenuItem value="desc">desc</MenuItem>
+          </TextField>
+          <TextField size="small" label="Name" value={name||''} onChange={(e) => setName(e.target.value)} placeholder="supports * wildcards" />
+          <TextField size="small" label="Mock" type="number" value={mock} onChange={(e) => setMock(Number(e.target.value)||0)} />
+          <Button variant="outlined" onClick={() => mutate()}>Apply</Button>
+          <Box sx={{ flexGrow: 1 }} />
+          <Pagination
+            page={page}
+            onChange={(_, value) => { setPage(value); mutate(); }}
+            count={Math.max(1, Math.ceil(((data?.total ?? 0) as number) / (pageSize || 1)))}
+            size="small"
+            color="primary"
+          />
+        </Box>
       </Box>
       <YAMLViewerDialog
         open={yamlDialogOpen}

@@ -18,10 +18,12 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/emicklei/go-restful/v3"
 	appsv1alpha1 "github.com/kubeedge/api/apis/apps/v1alpha1"
 
+	listutil "github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/edgeapplication"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +31,13 @@ import (
 func (apiHandler *APIHandler) addEdgeApplicationRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/edgeapplication").To(apiHandler.handleGetEdgeApplications).
-			Writes(appsv1alpha1.EdgeApplicationList{}).
-			Returns(http.StatusOK, "OK", appsv1alpha1.EdgeApplicationList{}))
+			Writes(ListResponse[edgeapplication.EdgeApplicationListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[edgeapplication.EdgeApplicationListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/edgeapplication/{namespace}").To(apiHandler.handleGetEdgeApplications).
 			Param(apiV1Ws.PathParameter("namespace", "Namespace of the edge application")).
-			Writes(appsv1alpha1.EdgeApplicationList{}).
-			Returns(http.StatusOK, "OK", appsv1alpha1.EdgeApplicationList{}))
+			Writes(ListResponse[edgeapplication.EdgeApplicationListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[edgeapplication.EdgeApplicationListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/edgeapplication/{namespace}/{name}").To(apiHandler.handleGetEdgeApplication).
 			Param(apiV1Ws.PathParameter("namespace", "Namespace of the edge application")).
@@ -70,14 +72,34 @@ func (apiHandler *APIHandler) handleGetEdgeApplications(request *restful.Request
 		return
 	}
 
-	namespace := request.PathParameter("namespace")
-	result, err := edgeapplication.GetEdgeApplicationList(kubeedgeClient, namespace)
+	// parse list query
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: edgeapplication.SortableFields, FilterableFields: edgeapplication.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
 
-	response.WriteEntity(result)
+	namespace := request.PathParameter("namespace")
+	var items []appsv1alpha1.EdgeApplication
+	if mockStr := request.QueryParameter("mock"); mockStr != "" { // dev-only hook
+		if n, err := strconv.Atoi(mockStr); err == nil && n > 0 {
+			items = edgeapplication.GenerateMockEdgeApplications(n, namespace)
+		}
+	}
+	if items == nil {
+		rawList, err := edgeapplication.GetEdgeApplicationList(kubeedgeClient, namespace)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		items = rawList.Items
+	}
+
+	items = listutil.FilterItems(items, toCommonFilters(query.Filters), edgeapplication.EdgeApplicationFieldGetter)
+	listutil.SortItems(items, query.Sort, query.Order, edgeapplication.EdgeApplicationComparators())
+	pageItems, total, _ := listutil.Paginate(items, query.Page, query.PageSize)
+	view := listutil.Project(pageItems, edgeapplication.EdgeApplicationToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetEdgeApplication(request *restful.Request, response *restful.Response) {
