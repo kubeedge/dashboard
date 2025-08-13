@@ -13,9 +13,6 @@ export function useListEdgeApplications(params?: Record<string, string | number 
   Object.entries(params || {}).forEach(([k, v]) => {
     if (v !== undefined && v !== null && `${v}` !== '' && k !== 'namespace') search.set(k, String(v));
   });
-  if (process.env.NEXT_PUBLIC_ENABLE_MOCK === 'true' && process.env.NEXT_PUBLIC_MOCK_COUNT) {
-    search.set('mock', String(process.env.NEXT_PUBLIC_MOCK_COUNT));
-  }
   const qs = search.toString();
   if (qs) path += `?${qs}`;
   return useQuery<any>(`listEdgeApplications:${path}`, path, { method: 'GET' });

@@ -16,10 +16,6 @@ export function useListDeployments(params?: Record<string, string | number | und
       search.set(k, String(v));
     }
   });
-  // Dev-only mock hook controlled by env vars
-  if (process.env.NEXT_PUBLIC_ENABLE_MOCK === 'true' && process.env.NEXT_PUBLIC_MOCK_COUNT) {
-    search.set('mock', String(process.env.NEXT_PUBLIC_MOCK_COUNT));
-  }
   const qs = search.toString();
   if (qs) path += `?${qs}`;
   return useQuery<any>(`listDeployments:${path}`, path, { method: 'GET' });
