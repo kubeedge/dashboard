@@ -152,8 +152,7 @@ export default function EdgeApplicationPage() {
             <MenuItem value="desc">desc</MenuItem>
           </TextField>
           <TextField size="small" label="Name" value={name||''} onChange={(e) => setName(e.target.value)} placeholder="supports * wildcards" />
-          {/* mock control removed in PR branch */}
-          <Button variant="outlined" onClick={() => mutate()}>Apply</Button>
+          {/* mock control removed in PR branch; automatic fetch on change, no apply button */}
           <Box sx={{ flexGrow: 1 }} />
           <Pagination
             page={page}
