@@ -78,7 +78,7 @@ func (apiHandler *APIHandler) handleGetNodes(request *restful.Request, response 
 		}
 	}
 
-	items = listutil.FilterItems(items, toCommonFilters(query.Filters), node.NodeFieldGetter)
+	items = listutil.FilterItems(items, toCommonFilterClauses(query.Filters), node.NodeFieldGetter)
 	listutil.SortItems(items, query.Sort, query.Order, node.NodeComparators())
 	pageItems, total, _ := listutil.Paginate(items, query.Page, query.PageSize)
 	view := listutil.Project(pageItems, node.NodeToListItem)
@@ -134,16 +134,4 @@ func (apiHandler *APIHandler) handleDeleteNode(request *restful.Request, respons
 	}
 
 	response.WriteHeader(http.StatusNoContent)
-}
-
-// helper: convert handler.FilterClause to common.FilterClause to avoid import cycle
-func toCommonFilters(in []FilterClause) []listutil.FilterClause {
-	if len(in) == 0 {
-		return nil
-	}
-	out := make([]listutil.FilterClause, 0, len(in))
-	for _, f := range in {
-		out = append(out, listutil.FilterClause{Field: f.Field, Value: f.Value, Mode: f.Mode})
-	}
-	return out
 }
