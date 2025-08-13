@@ -137,7 +137,6 @@ export default function NodeGroupPage() {
             </TextField>
             <TextField size="small" label="Namespace" value={namespace||''} onChange={(e) => setNamespace(e.target.value||undefined)} />
             <TextField size="small" label="Name" value={name||''} onChange={(e) => setName(e.target.value||undefined)} placeholder="supports * wildcards" />
-            <Button variant="outlined" onClick={() => mutate()}>Apply</Button>
             <Box sx={{ flexGrow: 1 }} />
             <Pagination
               page={page}

@@ -155,7 +155,6 @@ export default function NodePage() {
             <MenuItem value="NotReady">NotReady</MenuItem>
           </TextField>
           <TextField size="small" label="Name" value={name||''} onChange={(e) => setName(e.target.value||undefined)} placeholder="supports * wildcards" />
-          <Button variant="outlined" onClick={() => mutate()}>Apply</Button>
           <Box sx={{ flexGrow: 1 }} />
           <Pagination
             page={page}
