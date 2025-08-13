@@ -86,7 +86,7 @@ func (apiHandler *APIHandler) handleGetNodeGroups(request *restful.Request, resp
 		items = rawList.Items
 	}
 
-	items = listutil.FilterItems(items, toCommonFilters(query.Filters), nodegroup.NodeGroupFieldGetter)
+	items = listutil.FilterItems(items, toCommonFilterClauses(query.Filters), nodegroup.NodeGroupFieldGetter)
 	listutil.SortItems(items, query.Sort, query.Order, nodegroup.NodeGroupComparators())
 	pageItems, total, _ := listutil.Paginate(items, query.Page, query.PageSize)
 	view := listutil.Project(pageItems, nodegroup.NodeGroupToListItem)
