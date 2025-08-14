@@ -95,7 +95,7 @@ func (apiHandler *APIHandler) handleGetEdgeApplications(request *restful.Request
 		items = rawList.Items
 	}
 
-	items = listutil.FilterItems(items, toCommonFilters(query.Filters), edgeapplication.EdgeApplicationFieldGetter)
+	items = listutil.FilterItems(items, toCommonFilterClauses(query.Filters), edgeapplication.EdgeApplicationFieldGetter)
 	listutil.SortItems(items, query.Sort, query.Order, edgeapplication.EdgeApplicationComparators())
 	pageItems, total, _ := listutil.Paginate(items, query.Page, query.PageSize)
 	view := listutil.Project(pageItems, edgeapplication.EdgeApplicationToListItem)
