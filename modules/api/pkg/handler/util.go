@@ -66,7 +66,7 @@ func (apiHandler *APIHandler) getKubeEdgeClient(
 	return kubeEdgeClient, nil
 }
 
-// toCommonFilterClauses converts handler.FilterClause to common.FilterClause to avoid import cycles.
+// toCommonFilters converts handler.FilterClause to common.FilterClause to avoid import cycles.
 func toCommonFilterClauses(in []FilterClause) []listutil.FilterClause {
 	if len(in) == 0 {
 		return nil
