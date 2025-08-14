@@ -96,7 +96,7 @@ func (apiHandler *APIHandler) handleGetDeployments(request *restful.Request, res
 		items = rawList.Items
 	}
 
-	items = listutil.FilterItems(items, toCommonFilters(query.Filters), deployment.DeploymentFieldGetter)
+	items = listutil.FilterItems(items, toCommonFilterClauses(query.Filters), deployment.DeploymentFieldGetter)
 	listutil.SortItems(items, query.Sort, query.Order, deployment.DeploymentComparators())
 	pageItems, total, _ := listutil.Paginate(items, query.Page, query.PageSize)
 	view := listutil.Project(pageItems, deployment.DeploymentToListItem)
