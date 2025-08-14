@@ -126,6 +126,7 @@ export default function DeploymentPage() {
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="Details"
           deleteButtonLabel="Delete"
+          noPagination={true}
         />
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
           <TextField size="small" select label="Rows per page" value={pageSize}
