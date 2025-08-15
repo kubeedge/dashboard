@@ -25,8 +25,8 @@ export default function DeploymentDrawer({ open, onClose, onSubmit }: Deployment
   const [activeStep, setActiveStep] = useState(0);
   const { setErrorMessage } = useAlert();
   const [data, setData] = useState<any>({});
-  const { data: configMaps, mutate: configMapMutate } = useListConfigMaps(namespace);
-  const { data: secrets, mutate: secretMutate } = useListSecrets(namespace);
+  const { data: configMaps, mutate: configMapMutate } = useListConfigMaps({ namespace });
+  const { data: secrets, mutate: secretMutate } = useListSecrets({ namespace });
   const { data: namespaces } = useListNamespaces();
 
   useEffect(() => {
