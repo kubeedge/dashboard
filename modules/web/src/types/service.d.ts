@@ -67,4 +67,11 @@ interface ServiceStatus {
 
 export interface Service extends Resource<ServiceSpec, ServiceStatus> {}
 
-export interface ServiceList extends ResourceList<Service> {}
+export interface ServiceList extends ResourceList<Service> {
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+  sort?: string;
+  order?: string;
+}

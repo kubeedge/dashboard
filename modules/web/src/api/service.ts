@@ -3,8 +3,21 @@ import { Status } from '@/types/common';
 import { Service, ServiceList } from '@/types/service';
 import { request } from '@/helper/request';
 
-export function useListServices(namespace?: string) {
-  const url = namespace ? `/service/${namespace}` : '/service';
+export function useListServices(params?: Record<string, string | number | undefined>) {
+  const searchParams = new URLSearchParams();
+  
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== '' && key !== 'namespace') {
+        searchParams.append(key, value.toString());
+      }
+    });
+  }
+  
+  const namespace = params?.namespace as string;
+  const baseUrl = namespace ? `/service/${namespace}` : '/service';
+  const url = searchParams.toString() ? `${baseUrl}?${searchParams.toString()}` : baseUrl;
+  
   return useQuery<ServiceList>('listServices', url, {
     method: 'GET',
   });
