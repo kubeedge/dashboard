@@ -23,14 +23,15 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/clusterrolebinding"
+	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/errors"
 )
 
 func (apiHandler *APIHandler) addClusterRoleBindingRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/clusterrolebinding").To(apiHandler.handleGetClusterRoleBindings).
-			Writes(rbacv1.ClusterRoleBindingList{}).
-			Returns(http.StatusOK, "OK", rbacv1.ClusterRoleBindingList{}))
+			Writes(ListResponse[clusterrolebinding.ClusterRoleBindingListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[clusterrolebinding.ClusterRoleBindingListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/clusterrolebinding/{name}").To(apiHandler.handleGetClusterRoleBinding).
 			Param(apiV1Ws.PathParameter("name", "Name of the ClusterRoleBinding")).
@@ -60,12 +61,24 @@ func (apiHandler *APIHandler) handleGetClusterRoleBindings(request *restful.Requ
 		return
 	}
 
-	result, err := clusterrolebinding.GetClusterRoleBindingList(k8sClient)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: clusterrolebinding.SortableFields, FilterableFields: clusterrolebinding.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	response.WriteHeaderAndEntity(http.StatusOK, result)
+
+	rawList, err := clusterrolebinding.GetClusterRoleBindingList(k8sClient)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	items := rawList.Items
+
+	items = common.FilterItems(items, toCommonFilterClauses(query.Filters), clusterrolebinding.ClusterRoleBindingFieldGetter)
+	common.SortItems(items, query.Sort, query.Order, clusterrolebinding.ClusterRoleBindingComparators())
+	pageItems, total, _ := common.Paginate(items, query.Page, query.PageSize)
+	view := common.Project(pageItems, clusterrolebinding.ClusterRoleBindingToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetClusterRoleBinding(request *restful.Request, response *restful.Response) {

@@ -22,6 +22,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	rbacv1 "k8s.io/api/rbac/v1"
 
+	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/role"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +30,13 @@ import (
 func (apiHandler *APIHandler) addRoleRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/role").To(apiHandler.handleGetRoles).
-			Writes(rbacv1.RoleList{}).
-			Returns(http.StatusOK, "OK", rbacv1.RoleList{}))
+			Writes(ListResponse[role.RoleListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[role.RoleListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/role/{namespace}").To(apiHandler.handleGetRoles).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
-			Writes(rbacv1.RoleList{}).
-			Returns(http.StatusOK, "OK", rbacv1.RoleList{}))
+			Writes(ListResponse[role.RoleListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[role.RoleListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/role/{namespace}/{name}").To(apiHandler.handleGetRole).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
@@ -69,13 +70,26 @@ func (apiHandler *APIHandler) handleGetRoles(request *restful.Request, response 
 		return
 	}
 
-	namespace := request.PathParameter("namespace")
-	result, err := role.GetRoleList(k8sClient, namespace)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: role.SortableFields, FilterableFields: role.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	response.WriteHeaderAndEntity(http.StatusOK, result)
+
+	namespace := request.PathParameter("namespace")
+	
+	rawList, err := role.GetRoleList(k8sClient, namespace)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	items := rawList.Items
+
+	items = common.FilterItems(items, toCommonFilterClauses(query.Filters), role.RoleFieldGetter)
+	common.SortItems(items, query.Sort, query.Order, role.RoleComparators())
+	pageItems, total, _ := common.Paginate(items, query.Page, query.PageSize)
+	view := common.Project(pageItems, role.RoleToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetRole(request *restful.Request, response *restful.Response) {
