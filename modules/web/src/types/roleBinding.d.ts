@@ -19,4 +19,11 @@ export interface RoleBinding extends TypeMeta {
   subjects?: Subject[];
 }
 
-export interface RoleBindingList extends ResourceList<RoleBinding> {}
+export interface RoleBindingList extends ResourceList<RoleBinding> {
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+  sort?: string;
+  order?: string;
+}
