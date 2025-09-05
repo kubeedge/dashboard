@@ -18,10 +18,12 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/emicklei/go-restful/v3"
 	corev1 "k8s.io/api/core/v1"
 
+	listutil "github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/configmap"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +31,13 @@ import (
 func (apiHandler *APIHandler) addConfigMapRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/configmap").To(apiHandler.handleGetConfigMaps).
-			Writes(corev1.ConfigMapList{}).
-			Returns(http.StatusOK, "OK", corev1.ConfigMapList{}))
+			Writes(ListResponse[configmap.ConfigMapListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[configmap.ConfigMapListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/configmap/{namespace}").To(apiHandler.handleGetConfigMaps).
 			Param(apiV1Ws.PathParameter("namespace", "Namespace of the ConfigMap")).
-			Writes(corev1.ConfigMapList{}).
-			Returns(http.StatusOK, "OK", corev1.ConfigMapList{}))
+			Writes(ListResponse[configmap.ConfigMapListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[configmap.ConfigMapListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/configmap/{namespace}/{name}").To(apiHandler.handleGetConfigMap).
 			Param(apiV1Ws.PathParameter("namespace", "Namespace of the ConfigMap")).
@@ -70,12 +72,34 @@ func (apiHandler *APIHandler) handleGetConfigMaps(request *restful.Request, resp
 		return
 	}
 
-	result, err := configmap.GetConfigMapList(k8sClient, request.PathParameter("namespace"))
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: configmap.SortableFields, FilterableFields: configmap.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	response.WriteHeaderAndEntity(http.StatusOK, result)
+
+	namespace := request.PathParameter("namespace")
+
+	var items []corev1.ConfigMap
+	if mockStr := request.QueryParameter("mock"); mockStr != "" {
+		if n, err := strconv.Atoi(mockStr); err == nil && n > 0 {
+			items = configmap.GenerateMockConfigMaps(n, namespace)
+		}
+	}
+	if items == nil {
+		rawList, err := configmap.GetConfigMapList(k8sClient, namespace)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		items = rawList.Items
+	}
+
+	items = listutil.FilterItems(items, toCommonFilterClauses(query.Filters), configmap.ConfigMapFieldGetter)
+	listutil.SortItems(items, query.Sort, query.Order, configmap.ConfigMapComparators())
+	pageItems, total, _ := listutil.Paginate(items, query.Page, query.PageSize)
+	view := listutil.Project(pageItems, configmap.ConfigMapToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetConfigMap(request *restful.Request, response *restful.Response) {
