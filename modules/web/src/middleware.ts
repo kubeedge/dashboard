@@ -31,7 +31,8 @@ async function handleApiProxy(req: NextRequest) {
       headers[key] = value
     });
     const path = req.nextUrl.pathname.replace('/api/', '/api/v1/')
-    const url = new URL(path, process.env.API_SERVER);
+    const search = req.nextUrl.search || ''
+    const url = new URL(path + search, process.env.API_SERVER);
 
     const resp = await fetch(url, {
       method: req.method,
