@@ -3,11 +3,22 @@ import { Status } from '@/types/common';
 import { DeviceModel, DeviceModelList } from '@/types/deviceModel';
 import { request } from '@/helper/request';
 
-export function useListDeviceModels(namespace?: string) {
-  const url = namespace ? `/devicemodel/${namespace}` : 'devicemodel';
-  return useQuery<DeviceModelList>('listDeviceModels', url, {
-    method: 'GET',
+export function useListDeviceModels(params?: Record<string, string | number | undefined>) {
+  let path = '/devicemodel';
+  // Optional namespace path parameter for compatibility
+  const namespace = params?.namespace as string | undefined;
+  if (namespace) {
+    path = `/devicemodel/${namespace}`;
+  }
+  const search = new URLSearchParams();
+  Object.entries(params || {}).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && `${v}` !== '' && k !== 'namespace') {
+      search.set(k, String(v));
+    }
   });
+  const qs = search.toString();
+  if (qs) path += `?${qs}`;
+  return useQuery<any>(`listDeviceModels:${path}`, path, { method: 'GET' });
 }
 
 export function getDeviceModel(namespace: string, name: string) {
