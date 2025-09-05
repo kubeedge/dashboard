@@ -151,4 +151,11 @@ export interface CustomResourceDefinition extends Resource<
   spec: CustomResourceDefinitionSpec;
 }
 
-export interface CustomResourceDefinitionList extends ResourceList<CustomResourceDefinition> {}
+export interface CustomResourceDefinitionList extends ResourceList<CustomResourceDefinition> {
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+  sort?: string;
+  order?: string;
+}
