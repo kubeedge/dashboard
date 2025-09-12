@@ -23,7 +23,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/role"
-
 	"github.com/kubeedge/dashboard/errors"
 )
 
