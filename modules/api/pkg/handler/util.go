@@ -64,3 +64,48 @@ func (apiHandler *APIHandler) getKubeEdgeClient(
 
 	return kubeEdgeClient, nil
 }
+
+// RouteOpt is a configuration function for RouteBuilder (similar to functional options).
+type RouteOpt func(rb *restful.RouteBuilder)
+
+// Common options: Param / Reads / Writes / Returns / Doc.
+func WithParam(p *restful.Parameter) RouteOpt {
+	return func(rb *restful.RouteBuilder) {
+		rb.Param(p)
+	}
+}
+
+func WithReads(obj interface{}) RouteOpt {
+	return func(rb *restful.RouteBuilder) {
+		rb.Reads(obj)
+	}
+}
+
+func WithWrites(obj interface{}) RouteOpt {
+	return func(rb *restful.RouteBuilder) {
+		rb.Writes(obj)
+	}
+}
+
+func WithReturns(code int, desc string, obj interface{}) RouteOpt {
+	return func(rb *restful.RouteBuilder) {
+		rb.Returns(code, desc, obj)
+	}
+}
+
+func WithDoc(doc string) RouteOpt {
+	return func(rb *restful.RouteBuilder) {
+		rb.Doc(doc)
+	}
+}
+
+// AddRoute creates a RouteBuilder based on HTTP method, applies all RouteOpt,
+// and registers it to the WebService.
+func AddRoute(ws *restful.WebService, method string, path string, handler restful.RouteFunction, opts ...RouteOpt) {
+	rb := ws.Method(method).Path(path).To(handler)
+
+	for _, o := range opts {
+		o(rb)
+	}
+	ws.Route(rb)
+}
