@@ -60,6 +60,7 @@ cd module/api
 go run main.go --apiserver-host=https://192.168.33.129:6443
 ```
 
+### Notice
 If your API server is running with self-signed certificate, you can set `--apiserver-skip-tls-verify true` option to ignore the certificate verification.
 
 ### Frontend
