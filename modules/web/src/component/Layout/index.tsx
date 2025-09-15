@@ -16,7 +16,7 @@ const LayoutContent = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const { isChineseLanguage } = useI18n();
 
-  // 创建主题，根据语言选择MUI本地化
+  // Create theme with MUI localization based on language
   const theme = React.useMemo(
     () => createTheme({}, isChineseLanguage() ? zhCN : enUS),
     [isChineseLanguage]

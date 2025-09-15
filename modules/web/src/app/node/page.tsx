@@ -18,36 +18,51 @@ import AddNodeDialog from '@/component/AddNodeDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatRelativeTime, formatStatus } from '@/helper/localization';
 
 export default function NodePage() {
   const { data, mutate } = useListNodes();
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { setErrorMessage } = useAlert();
-  const { t } = useI18n();
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
 
   const columns: ColumnDefinition<Node>[] = [{
     name: t('table.name') + '/ID',
-    render: (node) => (<div>
-      <div style={{ color: 'rgb(47, 84, 235)', marginBottom: '2px' }}>
-        {node?.metadata?.name}
-      </div>
-      <div>{node?.metadata?.uid}</div>
-    </div>)
+    render: (node) => (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box sx={{ color: 'rgb(47, 84, 235)', fontWeight: 500 }}>
+          {node?.metadata?.name || '-'}
+        </Box>
+        <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+          {node?.metadata?.uid || '-'}
+        </Box>
+      </Box>
+    )
   }, {
     name: t('table.status'),
-    render: (node) => getNodeStatus(node),
+    render: (node) => {
+      const status = getNodeStatus(node);
+      return formatStatus(status, currentLanguage);
+    },
   }, {
     name: t('table.hostname'),
-    render: (node) => (<div>
-      <div>{node.status?.addresses?.find(address => address.type === 'Hostname')?.address}</div>
-      <div>{node.status?.addresses?.find(address => address.type === 'InternalIP')?.address}</div>
-    </div>)
+    render: (node) => (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box>
+          {node.status?.addresses?.find(address => address.type === 'Hostname')?.address || '-'}
+        </Box>
+        <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+          {node.status?.addresses?.find(address => address.type === 'InternalIP')?.address || '-'}
+        </Box>
+      </Box>
+    )
   }, {
     name: t('table.age'),
-    render: (node) => node.metadata?.creationTimestamp
+    render: (node) => formatRelativeTime(node.metadata?.creationTimestamp, currentLanguage)
   }, {
     name: t('table.version'),
-    render: (node) => node.status?.nodeInfo?.kubeletVersion
+    render: (node) => node.status?.nodeInfo?.kubeletVersion || '-'
   }, {
     name: t('table.actions'),
     renderOperation: true

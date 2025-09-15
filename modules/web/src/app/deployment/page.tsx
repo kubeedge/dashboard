@@ -12,32 +12,35 @@ import DeploymentDetailDialog from '@/component/DeploymentDetailDialog';
 import { useListPods } from '@/api/pod';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatRelativeTime, formatNumber } from '@/helper/localization';
 
 export default function DeploymentPage() {
   const { namespace } = useNamespace();
   const { data, mutate } = useListDeployments(namespace);
-  const { t } = useI18n();
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
 
   const columns: ColumnDefinition<Deployment>[] = [
     {
       name: t('table.namespace'),
-      render: (deployment) => deployment?.metadata?.namespace,
+      render: (deployment) => deployment?.metadata?.namespace || '-',
     },
     {
       name: t('table.name'),
-      render: (deployment) => deployment?.metadata?.name,
+      render: (deployment) => deployment?.metadata?.name || '-',
     },
     {
-      name: t('table.status') + ' (可用/总数)',
+      name: t('table.status') + ` (${currentLanguage.startsWith('zh') ? '可用/总数' : 'Available/Total'})`,
       render: (deployment) => {
         const availableReplicas = deployment.status?.availableReplicas
           || ((deployment.status?.replicas || 0) - (deployment.status?.unavailableReplicas || 0));
-        return `${availableReplicas}/${deployment.status?.replicas || 0}`;
+        const totalReplicas = deployment.status?.replicas || 0;
+        return `${formatNumber(availableReplicas, currentLanguage)}/${formatNumber(totalReplicas, currentLanguage)}`;
       },
     },
     {
       name: t('table.age'),
-      render: (deployment) => deployment.metadata?.creationTimestamp,
+      render: (deployment) => formatRelativeTime(deployment.metadata?.creationTimestamp, currentLanguage),
     },
     {
       name: t('table.actions'),

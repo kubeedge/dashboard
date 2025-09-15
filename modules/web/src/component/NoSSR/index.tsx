@@ -8,8 +8,8 @@ interface NoSSRProps {
 }
 
 /**
- * NoSSR组件 - 防止服务端渲染和客户端渲染不匹配
- * 在客户端完成水合之前显示fallback内容
+ * NoSSR Component - Prevents server-side and client-side rendering mismatch
+ * Shows fallback content before client-side hydration completes
  */
 export default function NoSSR({ children, fallback = null }: NoSSRProps) {
     const [isMounted, setIsMounted] = useState(false);

@@ -1,28 +1,28 @@
-# KubeEdge Dashboard 国际化功能
+# KubeEdge Dashboard Internationalization (i18n)
 
-## 🌐 概述
+## 🌐 Overview
 
-KubeEdge Dashboard 现已支持中英文双语切换，实现了完整的国际化(i18n)功能。
+KubeEdge Dashboard now supports bilingual switching between Chinese and English, implementing complete internationalization (i18n) functionality.
 
-## 📁 文件结构
+## 📁 File Structure
 
 ```
 src/
 ├── locale/
-│   ├── index.ts          # i18n 配置文件
-│   ├── en.json          # 英文语言包
-│   ├── zh.json          # 中文语言包
-│   └── README.md        # 说明文档
+│   ├── index.ts          # i18n configuration file
+│   ├── en.json          # English language pack
+│   ├── zh.json          # Chinese language pack
+│   └── README.md        # Documentation
 ├── hook/
-│   └── useI18n.ts       # 国际化 Hook
+│   └── useI18n.ts       # Internationalization hook
 └── component/
-    ├── I18nProvider/    # 国际化提供者组件
-    └── LanguageSwitcher/ # 语言切换器组件
+    ├── I18nProvider/    # Internationalization provider component
+    └── LanguageSwitcher/ # Language switcher component
 ```
 
-## 🚀 使用方法
+## 🚀 Usage
 
-### 1. 在组件中使用翻译
+### 1. Using Translations in Components
 
 ```tsx
 import { useI18n } from '@/hook/useI18n';
@@ -39,16 +39,16 @@ function MyComponent() {
 }
 ```
 
-### 2. 语言切换
+### 2. Language Switching
 
-用户可以通过顶部导航栏的语言切换器在中英文之间切换：
+Users can switch between Chinese and English through the language switcher in the top navigation bar:
 
 - 🇺🇸 English
 - 🇨🇳 中文
 
-### 3. 添加新的翻译键
+### 3. Adding New Translation Keys
 
-在 `en.json` 和 `zh.json` 中添加相应的翻译：
+Add corresponding translations in both `en.json` and `zh.json`:
 
 **en.json:**
 ```json
@@ -70,78 +70,119 @@ function MyComponent() {
 }
 ```
 
-## 🎯 已支持的功能
+## 🎯 Feature Status
 
-### ✅ 已完成
-- [x] 基础国际化框架搭建
-- [x] 中英文语言包
-- [x] 语言切换组件
-- [x] 顶部导航栏国际化
-- [x] 侧边栏菜单国际化
-- [x] 主页面卡片国际化
-- [x] 表格组件国际化
-- [x] 节点页面国际化
-- [x] 本地存储语言偏好
+### ✅ Completed
+- [x] Basic i18n framework setup
+- [x] Chinese and English language packs
+- [x] Language switcher component
+- [x] Top navigation bar internationalization
+- [x] Sidebar menu internationalization
+- [x] Main page cards internationalization
+- [x] Table component internationalization
+- [x] Node page internationalization
+- [x] Local storage language preference
 
-### 🔄 进行中
-- [ ] 所有页面组件国际化
-- [ ] 表单验证消息国际化
-- [ ] 错误提示消息国际化
-- [ ] 日期时间格式本地化
+### 🔄 In Progress
+- [ ] All page components internationalization
+- [ ] Form validation messages internationalization
+- [ ] Error message internationalization
+- [ ] Date time format localization
 
-### 📋 待实现
-- [ ] 数字格式本地化
-- [ ] 货币格式本地化
-- [ ] 响应式设计优化
-- [ ] 无障碍功能支持
+### 📋 Todo
+- [ ] Number format localization
+- [ ] Currency format localization
+- [ ] Responsive design optimization
+- [ ] Accessibility feature support
 
-## 🛠️ 技术实现
+## 🛠️ Technical Implementation
 
-### 依赖包
-- `react-i18next`: React 国际化库
-- `i18next`: 核心国际化库
-- `i18next-browser-languagedetector`: 浏览器语言检测
+### Dependencies
+- `react-i18next`: React internationalization library
+- `i18next`: Core internationalization library
+- `i18next-browser-languagedetector`: Browser language detection
 
-### 核心特性
-- **自动语言检测**: 根据浏览器语言自动选择
-- **本地存储**: 用户语言偏好保存在 localStorage
-- **动态切换**: 实时切换语言无需刷新页面
-- **类型安全**: 完整的 TypeScript 支持
+### Core Features
+- **Automatic Language Detection**: Automatically selects based on browser language
+- **Local Storage**: User language preference saved in localStorage
+- **Dynamic Switching**: Real-time language switching without page refresh
+- **Type Safety**: Complete TypeScript support
 
-## 🎨 设计原则
+## 🎨 Design Principles
 
-1. **一致性**: 所有UI文本统一管理，确保翻译一致性
-2. **可扩展性**: 易于添加新语言支持
-3. **性能优化**: 按需加载语言包
-4. **用户体验**: 平滑的语言切换体验
+1. **Consistency**: All UI text centrally managed to ensure translation consistency
+2. **Extensibility**: Easy to add new language support
+3. **Performance Optimization**: Language packs loaded on demand
+4. **User Experience**: Smooth language switching experience
 
-## 📝 开发指南
+## 📝 Development Guide
 
-### 添加新语言
-1. 创建新的语言文件 `src/locale/[locale].json`
-2. 在 `src/locale/index.ts` 中添加语言配置
-3. 更新 `LanguageSwitcher` 组件支持新语言
+### Adding New Languages
+1. Create new language file `src/locale/[locale].json`
+2. Add language configuration in `src/locale/index.ts`
+3. Update `LanguageSwitcher` component to support new language
 
-### 最佳实践
-- 使用语义化的键名，如 `common.save` 而不是 `save`
-- 保持翻译键的层级结构清晰
-- 为复杂的翻译提供上下文注释
-- 定期检查和更新翻译内容
+### Best Practices
+- Use semantic key names, e.g., `common.save` instead of `save`
+- Keep translation key hierarchy structure clear
+- Provide context comments for complex translations
+- Regularly check and update translation content
 
-## 🔧 配置选项
+## 🔧 Configuration Options
 
-可以通过修改 `src/locale/index.ts` 来调整配置：
+You can adjust configuration by modifying `src/locale/index.ts`:
 
 ```typescript
 i18n.init({
-  fallbackLng: 'en',        // 默认语言
-  debug: false,             // 调试模式
+  fallbackLng: 'en',        // Default language
+  debug: false,             // Debug mode
   interpolation: {
-    escapeValue: false,     // React 已安全处理
+    escapeValue: false,     // React already handles safely
   },
   detection: {
-    order: ['localStorage', 'navigator'], // 检测顺序
-    caches: ['localStorage'], // 缓存方式
+    order: ['localStorage', 'navigator'], // Detection order
+    caches: ['localStorage'], // Cache method
   },
 });
 ```
+
+## 🌍 Localization Features
+
+### Date and Time Formatting
+- **Chinese Format**: `2024年1月15日 14:30`
+- **English Format**: `Jan 15, 2024 2:30 PM`
+- **Relative Time**: Supports Chinese/English relative time display
+
+### Number Formatting
+- **Chinese**: Uses Chinese thousand separators
+- **English**: Uses English thousand separators
+- **Percentage**: Localized percentage display
+
+### Resource Formatting
+- **Storage Size**: Supports Chinese/English units
+- **CPU Resources**: Supports millicores and cores display
+- **Memory Resources**: Automatic Kubernetes memory unit conversion
+
+### Status Localization
+- **Status Mapping**: Maps English statuses to Chinese equivalents
+- **Supported Statuses**: Running/运行中, Pending/等待中, Failed/失败, etc.
+
+## 📊 Table Localization
+
+### Pagination
+- **Chinese Labels**: `每页行数：`, `共 X 条`
+- **English Labels**: `Rows per page:`, `of X`
+- **Page Information**: Localized according to language habits
+
+### Data Display
+- **Image Display**: Uses Chip components with truncation support
+- **Label Display**: Limits display count with `+N more` for excess
+- **Status Display**: Uses colored Chips with Chinese/English support
+- **Resource Display**: Localized CPU and memory resource display
+
+## 🎯 User Experience Improvements
+
+1. **Chinese User Friendly**: Dates, numbers, and statuses displayed according to Chinese habits
+2. **Visual Optimization**: Uses Chip components, layered display, color coding
+3. **Interaction Improvements**: Better button styles and responsive layout
+4. **Information Density**: Reasonable text truncation and ellipsis display

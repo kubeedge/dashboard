@@ -15,27 +15,27 @@ const resources = {
 };
 
 i18n
-    // 检测用户语言
+    // Detect user language
     .use(LanguageDetector)
-    // 传递 i18n 实例给 react-i18next
+    // Pass i18n instance to react-i18next
     .use(initReactI18next)
-    // 初始化 i18next
+    // Initialize i18next
     .init({
         resources,
         fallbackLng: 'en',
         debug: process.env.NODE_ENV === 'development',
 
-        // 关键配置：避免SSR不匹配
+        // Key configuration: avoid SSR mismatch
         react: {
-            useSuspense: false, // 禁用Suspense，避免SSR问题
+            useSuspense: false, // Disable Suspense to avoid SSR issues
         },
 
         interpolation: {
-            escapeValue: false, // React 已经安全处理了
+            escapeValue: false, // React already handles safely
         },
 
         detection: {
-            // 语言检测选项
+            // Language detection options
             order: ['localStorage', 'navigator', 'htmlTag'],
             caches: ['localStorage'],
             lookupLocalStorage: 'i18nextLng',

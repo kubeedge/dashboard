@@ -15,13 +15,13 @@ export default function I18nProvider({ children }: I18nProviderProps) {
     useEffect(() => {
         setIsMounted(true);
 
-        // 等待i18n初始化完成
+        // Wait for i18n initialization to complete
         const initI18n = async () => {
             if (!i18n.isInitialized) {
                 await i18n.init();
             }
 
-            // 强制设置为英文作为初始语言，避免SSR不匹配
+            // Force set to English as initial language to avoid SSR mismatch
             if (typeof window !== 'undefined') {
                 const savedLang = localStorage.getItem('i18nextLng');
                 if (savedLang) {
@@ -30,7 +30,7 @@ export default function I18nProvider({ children }: I18nProviderProps) {
                     await i18n.changeLanguage('en');
                 }
             } else {
-                // 服务端默认英文
+                // Server-side default to English
                 await i18n.changeLanguage('en');
             }
 
@@ -40,7 +40,7 @@ export default function I18nProvider({ children }: I18nProviderProps) {
         initI18n();
     }, []);
 
-    // 在客户端挂载和i18n准备就绪之前，使用默认英文
+    // Before client mount and i18n ready, use default English
     if (!isMounted || !isReady) {
         return (
             <I18nextProvider i18n={i18n}>

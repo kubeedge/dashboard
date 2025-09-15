@@ -182,7 +182,9 @@
         "loading": "加载中...",
         "rowsPerPage": "每页行数：",
         "of": "共",
-        "page": "页"
+        "page": "页",
+        "image": "镜像",
+        "restarts": "重启次数"
     },
     "status": {
         "running": "运行中",

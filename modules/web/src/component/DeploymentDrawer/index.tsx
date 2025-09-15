@@ -13,7 +13,7 @@ import { useListNamespaces } from '@/api/namespace';
 import { Container, ContainerPort, EnvFromSource, EnvVar, VolumeMount } from '@/types/pod';
 import { Volume } from '@/types/volume';
 
-// 步骤标题将通过useI18n动态获取
+// Step titles will be dynamically obtained through useI18n
 
 interface DeploymentDrawerProps {
   open?: boolean;
