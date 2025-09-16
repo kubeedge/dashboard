@@ -1,5 +1,5 @@
-import { IconButton, Box, Chip } from '@mui/material'
-import { Circle, MoreVert } from '@mui/icons-material';
+import { Box, Chip } from '@mui/material'
+import { Circle } from '@mui/icons-material';
 import { Pod } from '@/types/pod';
 import { ColumnDefinition, TableCard } from '../TableCard';
 import { getPodStatus } from '@/helper/status';
@@ -166,7 +166,6 @@ export const PodsTable = (props: PodsTableProps) => {
       render: (row) => formatRelativeTime(row.metadata?.creationTimestamp, currentLanguage),
     }
   ];
-
   return (
     <Box sx={{ width: '100%', minHeight: 350, backgroundColor: 'white' }}>
       <TableCard
