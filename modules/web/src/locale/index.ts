@@ -35,8 +35,8 @@ i18n
         },
 
         detection: {
-            // Language detection options
-            order: ['localStorage', 'navigator', 'htmlTag'],
+            // Prefer SSR-provided language via <html lang>, then persist
+            order: ['htmlTag', 'localStorage', 'navigator'],
             caches: ['localStorage'],
             lookupLocalStorage: 'i18nextLng',
         },

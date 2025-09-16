@@ -28,6 +28,7 @@ const LayoutContent = ({ children }: { children: React.ReactNode }) => {
           <Box
             component="main"
             sx={{ flexGrow: 1, p: 0, width: '100%', height: '100vh' }}
+            suppressHydrationWarning
           >
             {children}
           </Box>
@@ -38,7 +39,7 @@ const LayoutContent = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ display: 'flex' }}>
+      <Box sx={{ display: 'flex' }} suppressHydrationWarning>
         <AppProvider>
           <CssBaseline />
           <AppHeader />
@@ -57,9 +58,9 @@ const LayoutContent = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children, initialLanguage }: { children: React.ReactNode, initialLanguage?: string }) => {
   return (
-    <I18nProvider>
+    <I18nProvider initialLanguage={initialLanguage}>
       <LayoutContent>{children}</LayoutContent>
     </I18nProvider>
   );
