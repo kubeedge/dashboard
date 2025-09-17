@@ -180,9 +180,14 @@
         "pleaseEnterName": "Please enter name",
         "noData": "No data available",
         "loading": "Loading...",
-        "rowsPerPage": "Rows per page:",
+        "rowsPerPage": "Rows per page",
         "of": "of",
-        "page": "Page"
+        "page": "Page",
+        "image": "Image",
+        "restarts": "Restarts",
+        "total": "Total",
+        "items": "items",
+        "creationTime": "Creation Time"
     },
     "status": {
         "running": "Running",

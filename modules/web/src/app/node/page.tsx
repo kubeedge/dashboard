@@ -1,4 +1,4 @@
-// src/pages/NodePage.js
+// 节点管理页面
 'use client';
 
 import React, { useState } from 'react';
@@ -18,7 +18,7 @@ import AddNodeDialog from '@/component/AddNodeDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
-import { formatRelativeTime, formatStatus } from '@/helper/localization';
+import { formatRelativeTime, formatStatus, formatDateTime } from '@/helper/localization';
 
 export default function NodePage() {
   const { data, mutate } = useListNodes();
@@ -58,8 +58,17 @@ export default function NodePage() {
       </Box>
     )
   }, {
-    name: t('table.age'),
-    render: (node) => formatRelativeTime(node.metadata?.creationTimestamp, currentLanguage)
+    name: t('table.creationTime'),
+    render: (node) => (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+          {formatDateTime(node.metadata?.creationTimestamp, currentLanguage)}
+        </Box>
+        <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+          {formatRelativeTime(node.metadata?.creationTimestamp, currentLanguage)}
+        </Box>
+      </Box>
+    )
   }, {
     name: t('table.version'),
     render: (node) => node.status?.nodeInfo?.kubeletVersion || '-'

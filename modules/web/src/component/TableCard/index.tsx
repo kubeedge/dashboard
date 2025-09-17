@@ -1,4 +1,4 @@
-// src/component/TableCard.js
+// 表格卡片组件
 import React, { ChangeEvent } from 'react';
 import { Box, Button, Typography, IconButton, Chip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
@@ -55,8 +55,8 @@ export function TableCard<T>({
   onDeleteClick,
   detailButtonLabel,
   deleteButtonLabel,
-  specialHandling = false, // New props for special handling
-  specialBtnHandling = false, // New props for button special handling
+  specialHandling = false, // 特殊处理标识
+  specialBtnHandling = false, // 按钮特殊处理标识
   noTableHeader = false,
   noPagination = false,
 }: TableCardProps<T>) {
@@ -64,13 +64,24 @@ export function TableCard<T>({
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
+  // 记住用户的分页偏好
+  React.useEffect(() => {
+    const savedRowsPerPage = localStorage.getItem('tableRowsPerPage');
+    if (savedRowsPerPage) {
+      setRowsPerPage(parseInt(savedRowsPerPage, 10));
+    }
+  }, []);
+
   const handleChangePage = (event: React.MouseEvent<HTMLButtonElement, MouseEvent> | null, newPage: number) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
     setPage(0);
+    // 保存用户偏好
+    localStorage.setItem('tableRowsPerPage', newRowsPerPage.toString());
   };
 
   let paginatedData = data;
@@ -175,30 +186,55 @@ export function TableCard<T>({
         </Table>
       </TableContainer>
       {!noPagination && (
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 50]}
-          component="div"
-          count={data?.length || 0}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage={t('table.rowsPerPage')}
-          labelDisplayedRows={({ from, to, count }) =>
-            t('table.page') + ` ${from}-${to} ` + t('table.of') + ` ${count !== -1 ? count : `more than ${to}`}`
-          }
-          sx={{
-            '& .MuiTablePagination-selectLabel': {
-              fontSize: '0.875rem',
-            },
-            '& .MuiTablePagination-displayedRows': {
-              fontSize: '0.875rem',
-            },
-            '& .MuiTablePagination-select': {
-              fontSize: '0.875rem',
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '16px',
+          borderTop: '1px solid #e0e0e0',
+          backgroundColor: '#fafafa'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              {t('table.total')}: {data?.length || 0} {t('table.items')}
+            </Typography>
+          </Box>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+            component="div"
+            count={data?.length || 0}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage={t('table.rowsPerPage') + ':'}
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}-${to} / ${count !== -1 ? count : `${to}+`}`
             }
-          }}
-        />
+            sx={{
+              '& .MuiTablePagination-toolbar': {
+                paddingLeft: 0,
+                paddingRight: 0,
+              },
+              '& .MuiTablePagination-selectLabel': {
+                fontSize: '0.875rem',
+                color: 'text.secondary',
+              },
+              '& .MuiTablePagination-displayedRows': {
+                fontSize: '0.875rem',
+                color: 'text.secondary',
+              },
+              '& .MuiTablePagination-select': {
+                fontSize: '0.875rem',
+                marginLeft: 1,
+                marginRight: 2,
+              },
+              '& .MuiTablePagination-actions': {
+                marginLeft: 2,
+              }
+            }}
+          />
+        </Box>
       )}
     </Paper>
   );
