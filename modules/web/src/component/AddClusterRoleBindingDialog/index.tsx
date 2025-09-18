@@ -5,6 +5,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { ClusterRoleBinding, Subject, RoleRef } from '@/types/clusterRoleBinding';
 import { useListNamespaces } from '@/api/namespace';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddClusterRoleBindingDialogProps {
   open?: boolean;
@@ -13,6 +14,7 @@ interface AddClusterRoleBindingDialogProps {
 }
 
 const AddClusterRoleBindingDialog = ({ open, onClose, onSubmit }: AddClusterRoleBindingDialogProps) => {
+  const { t } = useI18n();
   const [name, setName] = React.useState('');
   const [roleRef, setRoleRef] = React.useState<RoleRef>({ kind: '', name: '', apiGroup: '' });
   const [subjects, setSubjects] = React.useState<Subject[]>([]);
@@ -55,49 +57,49 @@ const AddClusterRoleBindingDialog = ({ open, onClose, onSubmit }: AddClusterRole
 
   return (
     <Dialog open={!!open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add ClusterRoleBinding</DialogTitle>
+      <DialogTitle>{t('actions.add')} {t('common.clusterRoleBinding')}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <TextField
-            label="Name"
-            placeholder="name"
+            label={t('table.name')}
+            placeholder={t('form.namePlaceholder')}
             margin="dense"
             variant="outlined"
             required
             error={!name}
-            helperText={!name && 'Miss name'}
+            helperText={!name && t('table.missingName')}
             value={name}
             onChange={(event: any) => setName(event.target.value)}
             sx={{ marginBottom: '16px' }}
           />
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <Typography variant="subtitle1">RoleRef</Typography>
+            <Typography variant="subtitle1">{t('table.roleRef')}</Typography>
             <Box sx={{ display: 'flex', gap: '16px' }}>
               <TextField
-                label="Kind"
-                placeholder="kind"
+                label={t('table.kind')}
+                placeholder={t('table.kind')}
                 variant="outlined"
                 required
                 error={!roleRef.kind}
-                helperText={!roleRef.kind && 'Missing roleRef kind'}
+                helperText={!roleRef.kind && t('table.missingRoleRefKind')}
                 value={roleRef.kind}
                 onChange={(e) => handleRoleRefChange('kind', e.target.value)}
                 sx={{ flex: 1 }}
               />
               <TextField
-                label="Name"
-                placeholder="name"
+                label={t('table.name')}
+                placeholder={t('form.namePlaceholder')}
                 variant="outlined"
                 required
                 error={!roleRef.name}
-                helperText={!roleRef.name && 'Missing roleRef name'}
+                helperText={!roleRef.name && t('table.missingRoleRefName')}
                 value={roleRef.name}
                 onChange={(e) => handleRoleRefChange('name', e.target.value)}
                 sx={{ flex: 1 }}
               />
               <TextField
-                label="ApiGroup"
-                placeholder="apiGroup"
+                label={t('table.apiGroup')}
+                placeholder={t('table.apiGroup')}
                 variant="outlined"
                 value={roleRef.apiGroup}
                 onChange={(e) => handleRoleRefChange('apiGroup', e.target.value)}
@@ -106,39 +108,39 @@ const AddClusterRoleBindingDialog = ({ open, onClose, onSubmit }: AddClusterRole
             </Box>
           </Box>
           <Box>
-            <Typography variant="subtitle1">Subjects</Typography>
+            <Typography variant="subtitle1">{t('table.subjects')}</Typography>
             {subjects.map((subject, index) => (
               <Box key={index} sx={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '16px' }}>
                 <TextField
-                  label="Kind"
-                  placeholder="kind"
+                  label={t('table.kind')}
+                  placeholder={t('table.kind')}
                   variant="outlined"
                   required
                   error={!subject.kind}
-                  helperText={!subject.kind && 'Missing subject kind'}
+                  helperText={!subject.kind && t('table.missingSubjectKind')}
                   value={subject.kind}
                   onChange={(e) => handleSubjectChange(index, 'kind', e.target.value)}
                   sx={{ flex: 1 }}
                 />
                 <TextField
-                  label="Name"
-                  placeholder="name"
+                  label={t('table.name')}
+                  placeholder={t('form.namePlaceholder')}
                   variant="outlined"
                   required
                   error={!subject.name}
-                  helperText={!subject.name && 'Missing subject name'}
+                  helperText={!subject.name && t('table.missingSubjectName')}
                   value={subject.name}
                   onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
                   sx={{ flex: 1 }}
                 />
                 <TextField
-                  label="Namespace"
-                  placeholder="namespace"
+                  label={t('table.namespace')}
+                  placeholder={t('form.namespacePlaceholder')}
                   variant="outlined"
                   select
                   required
                   error={!subject.namespace}
-                  helperText={!subject.namespace && 'Miss subject namespace'}
+                  helperText={!subject.namespace && t('table.missingSubjectNamespace')}
                   value={subject.namespace}
                   onChange={(e) => handleSubjectChange(index, 'namespace', e.target.value)}
                   sx={{ flex: 1 }}
@@ -161,15 +163,15 @@ const AddClusterRoleBindingDialog = ({ open, onClose, onSubmit }: AddClusterRole
               sx={{ backgroundColor: 'white', color: 'black', width: '100%', display: 'flex', alignItems: 'center', gap: '8px' }}
               onClick={handleAddSubject}
             >
-              <AddIcon /> Add Subject
+              <AddIcon /> {t('table.addSubject')}
             </Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '20px' }}>
             <Button variant="outlined" onClick={handleClose}>
-              Cancel
+              {t('actions.cancel')}
             </Button>
             <Button variant="contained" onClick={handleSubmit}>
-              Submit
+              {t('actions.submit')}
             </Button>
           </Box>
         </Box>

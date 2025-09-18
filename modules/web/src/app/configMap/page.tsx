@@ -10,29 +10,7 @@ import AddConfigmapDialog from '@/component/AddConfigmapDialog';
 import ConfigmapDetailDialog from '@/component/ConfigmapDetailDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<ConfigMap>[] = [
-  {
-    name: 'Namespace',
-    render: (configMap) => configMap?.metadata?.namespace,
-  },
-  {
-    name: 'Name',
-    render: (configMap) => configMap?.metadata?.name,
-  },
-  {
-    name: 'Labels',
-    render: (configMap) => JSON.stringify(configMap.metadata?.labels),
-  },
-  {
-    name: 'Creation time',
-    render: (configMap) => configMap.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
+import { useI18n } from '@/hook/useI18n';
 
 export default function ConfigmapPage() {
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -42,6 +20,30 @@ export default function ConfigmapPage() {
   const { data, mutate } = useListConfigMaps(namespace);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { setErrorMessage } = useAlert();
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<ConfigMap>[] = [
+    {
+      name: t('table.namespace'),
+      render: (configMap) => configMap?.metadata?.namespace,
+    },
+    {
+      name: t('table.name'),
+      render: (configMap) => configMap?.metadata?.name,
+    },
+    {
+      name: t('form.labels'),
+      render: (configMap) => JSON.stringify(configMap.metadata?.labels),
+    },
+    {
+      name: t('table.age'),
+      render: (configMap) => configMap.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.actions'),
+      renderOperation: true,
+    },
+  ];
 
   useEffect(() => {
     mutate();
@@ -81,17 +83,17 @@ export default function ConfigmapPage() {
 
   const handleDelete = (_: any, row: ConfigMap) => {
     showConfirmDialog({
-      title: 'Delete ConfigMap',
-      content: `Are you sure to delete ConfigMap ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.configMap'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteConfigMap(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete ConfigMap');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   };
 
@@ -99,16 +101,16 @@ export default function ConfigmapPage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Configmap"
-          addButtonLabel="Add Configmap"
+          title={t('common.configMap')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.configMap')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
           onRefreshClick={handleRefreshClick}
           onDetailClick={handleDetailClick}
           onDeleteClick={handleDelete}
-          detailButtonLabel="Details"
-          deleteButtonLabel="Delete"
+          detailButtonLabel={t('actions.view')}
+          deleteButtonLabel={t('actions.delete')}
           specialHandling={false}
         />
       </Box>

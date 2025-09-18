@@ -11,24 +11,26 @@ import AddNodeGroupDialog from '@/component/AddNodeGroupDialog';
 import type { NodeGroup } from '@/types/nodeGroup';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<NodeGroup>[] = [
-  {
-    name: 'Name',
-    render: (nodeGroup: NodeGroup) => nodeGroup?.metadata?.name,
-  },
-  {
-    name: 'Creation time',
-    render: (nodeGroup: NodeGroup) => nodeGroup?.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
-
+import { useI18n } from '@/hook/useI18n';
 
 export default function NodeGroupPage() {
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<NodeGroup>[] = [
+    {
+      name: t('table.name'),
+      render: (nodeGroup: NodeGroup) => nodeGroup?.metadata?.name,
+    },
+    {
+      name: t('table.creationTime'),
+      render: (nodeGroup: NodeGroup) => nodeGroup?.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.operation'),
+      renderOperation: true,
+    },
+  ];
+
   const [selectedYaml, setSelectedYaml] = React.useState<NodeGroup | null>(null);
   const [openYamlDialog, setOpenYamlDialog] = React.useState(false);
   const [openAddNodeGroupDialog, setOpenAddNodeGroupDialog] = React.useState(false);
@@ -50,24 +52,24 @@ export default function NodeGroupPage() {
       setSelectedYaml(resp?.data);
       setOpenYamlDialog(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get NodeGroup');
+      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
     }
   };
 
   const handleDeleteClick = async (_: any, row: NodeGroup) => {
     showConfirmDialog({
-      title: 'Delete NodeGroup',
-      content: `Are you sure to delete NodeGroup ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.nodeGroup'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteNodeGroup(row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete NodeGroup');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
 
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   };
 
@@ -89,8 +91,8 @@ export default function NodeGroupPage() {
       <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
         <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
           <TableCard
-            title="Node Group"
-            addButtonLabel="Add NodeGroup"
+            title={t('common.nodeGroup')}
+            addButtonLabel={t('actions.add') + ' ' + t('common.nodeGroup')}
             columns={columns}
             data={data?.items}
             onAddClick={handleAddClick}
@@ -98,7 +100,7 @@ export default function NodeGroupPage() {
             onDetailClick={handleDetailClick}
             onDeleteClick={handleDeleteClick}
             detailButtonLabel="YAML"
-            deleteButtonLabel="Delete"
+            deleteButtonLabel={t('actions.delete')}
           />
         </Box>
         <YAMLViewerDialog
