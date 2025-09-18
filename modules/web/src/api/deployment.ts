@@ -1,14 +1,24 @@
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { Deployment, DeploymentList } from '@/types/deployment';
+import { Deployment } from '@/types/deployment';
 import { request } from '@/helper/request';
 
-
-export function useListDeployments(namespace?: string) {
-  const url = namespace ? `/deployment/${namespace}` : '/deployment';
-  return useQuery<DeploymentList>('listDeployments', url, {
-    method: 'GET',
+export function useListDeployments(params?: Record<string, string | number | undefined>) {
+  let path = '/deployment';
+  // Optional namespace path parameter for compatibility
+  const namespace = params?.namespace as string | undefined;
+  if (namespace) {
+    path = `/deployment/${namespace}`;
+  }
+  const search = new URLSearchParams();
+  Object.entries(params || {}).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && `${v}` !== '' && k !== 'namespace') {
+      search.set(k, String(v));
+    }
   });
+  const qs = search.toString();
+  if (qs) path += `?${qs}`;
+  return useQuery<any>(`listDeployments:${path}`, path, { method: 'GET' });
 }
 
 export function getDeployment(namespace: string, name: string) {

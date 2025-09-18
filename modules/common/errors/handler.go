@@ -24,7 +24,15 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+// NewBadRequest creates a BadRequest error with message
+func NewBadRequest(message string) error {
+	return k8serrors.NewBadRequest(message)
+}
+
 func HandleError(err error) (int, error) {
+	if k8serrors.IsBadRequest(err) {
+		return http.StatusBadRequest, k8serrors.NewBadRequest(err.Error())
+	}
 	if k8serrors.IsUnauthorized(err) {
 		return http.StatusUnauthorized, k8serrors.NewUnauthorized("Unauthorized")
 	}
