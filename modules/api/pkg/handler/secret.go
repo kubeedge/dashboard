@@ -18,10 +18,12 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/emicklei/go-restful/v3"
 	corev1 "k8s.io/api/core/v1"
 
+	listutil "github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/secret"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +31,13 @@ import (
 func (apiHandler *APIHandler) addSecretRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/secret").To(apiHandler.handleGetSecrets).
-			Writes(corev1.SecretList{}).
-			Returns(http.StatusOK, "OK", corev1.SecretList{}))
+			Writes(ListResponse[secret.SecretListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[secret.SecretListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/secret/{namespace}").To(apiHandler.handleGetSecrets).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
-			Writes(corev1.SecretList{}).
-			Returns(http.StatusOK, "OK", corev1.SecretList{}))
+			Writes(ListResponse[secret.SecretListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[secret.SecretListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/secret/{namespace}/{name}").To(apiHandler.handleGetSecret).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
@@ -69,14 +71,34 @@ func (apiHandler *APIHandler) handleGetSecrets(request *restful.Request, respons
 		return
 	}
 
-	namespace := request.PathParameter("namespace")
-	result, err := secret.GetSecretList(k8sClient, namespace)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: secret.SortableFields, FilterableFields: secret.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
 
-	response.WriteEntity(result)
+	namespace := request.PathParameter("namespace")
+
+	var items []corev1.Secret
+	if mockStr := request.QueryParameter("mock"); mockStr != "" {
+		if n, err := strconv.Atoi(mockStr); err == nil && n > 0 {
+			items = secret.GenerateMockSecrets(n, namespace)
+		}
+	}
+	if items == nil {
+		rawList, err := secret.GetSecretList(k8sClient, namespace)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		items = rawList.Items
+	}
+
+	items = listutil.FilterItems(items, toCommonFilterClauses(query.Filters), secret.SecretFieldGetter)
+	listutil.SortItems(items, query.Sort, query.Order, secret.SecretComparators())
+	pageItems, total, _ := listutil.Paginate(items, query.Page, query.PageSize)
+	view := listutil.Project(pageItems, secret.SecretToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetSecret(request *restful.Request, response *restful.Response) {
