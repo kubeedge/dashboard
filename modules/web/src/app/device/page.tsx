@@ -10,34 +10,37 @@ import DeviceDetailDialog from '@/component/DeviceDetailDialog';
 import AddDeviceDialog from '@/component/AddDeviceDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
-const columns: ColumnDefinition<Device>[] = [
-  {
-    name: 'Name',
-    render: (device) => device?.metadata?.name,
-  },
-  {
-    name: 'Protocol',
-    render: (device) => device?.spec?.protocol?.protocolName,
-  },
-  {
-    name: 'NodeName',
-    render: (device) => device?.spec?.nodeName,
-  },
-  {
-    name: 'Creation time',
-    render: (device) => device.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
-
-export default function DevicesPage() {
-  const [isAddDeviceDialogOpen, setIsAddDeviceDialogOpen] = React.useState(false);
+export default function DevicePage() {
   const { namespace } = useNamespace();
   const { data, mutate } = useListDevices(namespace);
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<Device>[] = [
+    {
+      name: t('table.name'),
+      render: (device) => device?.metadata?.name,
+    },
+    {
+      name: t('table.protocol'),
+      render: (device) => device?.spec?.protocol?.protocolName,
+    },
+    {
+      name: t('table.nodeName'),
+      render: (device) => device?.spec?.nodeName,
+    },
+    {
+      name: t('table.creationTime'),
+      render: (device) => device.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.operation'),
+      renderOperation: true,
+    },
+  ];
+
+  const [isAddDeviceDialogOpen, setIsAddDeviceDialogOpen] = React.useState(false);
   const [selectedDevice, setSelectedDevice] = React.useState<Device | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
@@ -60,23 +63,23 @@ export default function DevicesPage() {
       setSelectedDevice(resp?.data);
       setIsDetailDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get Device');
+      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
     }
   };
 
   const handleDeleteClick = (_: any, row: Device) => {
     showConfirmDialog({
-      title: 'Delete Device',
-      content: `Are you sure to delete Device ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.device'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteDevice(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Device');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     });
   };
 
@@ -98,8 +101,8 @@ export default function DevicesPage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Devices"
-          addButtonLabel="Add Devices"
+          title={t('common.device')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.device')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
@@ -107,7 +110,7 @@ export default function DevicesPage() {
           onDetailClick={handleDetailClick}
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="Details"
-          deleteButtonLabel="Delete"
+          deleteButtonLabel={t('actions.delete')}
         />
       </Box>
       <DeviceDetailDialog

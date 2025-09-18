@@ -3,6 +3,7 @@ import React from 'react';
 import { Box, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { DeviceModel } from '@/types/deviceModel';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 const attributeTypes = ['INT', 'STRING', 'DOUBLE', 'FLOAT', 'BOOLEAN', 'BYTES'];
 
@@ -48,6 +49,7 @@ interface AddDeviceModelDialogProps {
 }
 
 const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogProps) => {
+  const { t } = useI18n();
   const [name, setName] = React.useState('');
   const [protocol, setProtocol] = React.useState('');
   const [description, setDescription] = React.useState('');
@@ -117,12 +119,12 @@ const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogP
 
   return (
     <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>Add DeviceModel</DialogTitle>
+      <DialogTitle>{t('table.addDeviceModel')}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <TextField
             margin="dense"
-            label="Name"
+            label={t('table.name')}
             variant="outlined"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -133,7 +135,7 @@ const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogP
           />
 
           <TextField
-            label="Protocol"
+            label={t('table.protocol')}
             variant="outlined"
             value={protocol}
             onChange={(e) => setProtocol(e.target.value)}
@@ -144,7 +146,7 @@ const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogP
           />
 
           <TextField
-            label="Description"
+            label={t('table.description')}
             variant="outlined"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -155,7 +157,7 @@ const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogP
           />
 
           <TextField
-            label="Attribute Name"
+            label={t('table.attributeName')}
             variant="outlined"
             value={attributeName}
             onChange={(e) => setAttributeName(e.target.value)}
@@ -166,16 +168,16 @@ const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogP
           />
 
           <FormControl fullWidth>
-            <InputLabel>Attribute Type</InputLabel>
+            <InputLabel>{t('table.attributeType')}</InputLabel>
             <Select
-              label="Attribute Type"
+              label={t('table.attributeType')}
               value={attributeType}
               onChange={(e) => setAttributeType(e.target.value)}
               displayEmpty
             >
-              <MenuItem value="">Attribute Type</MenuItem>
+              <MenuItem value="">{t('table.attributeType')}</MenuItem>
               {attributeTypes.map(type => (
-                <MenuItem key={type} value={type}>{type}</MenuItem>
+                <MenuItem key={type} value={type}>{t(`dataTypes.${type.toLowerCase()}`) || type}</MenuItem>
               ))}
             </Select>
             {errors.attributeType && <Box sx={{ color: 'red' }}>{errors.attributeType}</Box>}
@@ -184,10 +186,10 @@ const AddDeviceModelDialog = ({ open, onClose, onSubmit }: AddDeviceModelDialogP
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
-          Cancel
+          {t('actions.cancel')}
         </Button>
         <Button onClick={handleSubmit} variant="contained">
-          Submit
+          {t('actions.submit')}
         </Button>
       </DialogActions>
     </Dialog>

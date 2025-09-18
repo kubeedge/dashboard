@@ -7,6 +7,7 @@ import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
 import { Service } from '@/types/service';
 import { useListNamespaces } from '@/api/namespace';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddServiceDialogProps {
   open?: boolean;
@@ -15,12 +16,13 @@ interface AddServiceDialogProps {
 }
 
 export default function AddServiceDialog({ open, onClose, onSubmit }: AddServiceDialogProps) {
+  const { t } = useI18n();
   const [name, setName] = useState('');
   const [namespace, setNamespace] = useState('');
-  const [annotations, setAnnotations] = useState<{key: string, value: string}[]>([]);
-  const [labels, setLabels] = useState<{key: string, value: string}[]>([]);
-  const [selectors, setSelectors] = useState<{key: string, value: string}[]>([]);
-  const [ports, setPorts] = useState<{protocol: string, name: string, port: string, nodePort: string, targetPort: string }[]>([]);
+  const [annotations, setAnnotations] = useState<{ key: string, value: string }[]>([]);
+  const [labels, setLabels] = useState<{ key: string, value: string }[]>([]);
+  const [selectors, setSelectors] = useState<{ key: string, value: string }[]>([]);
+  const [ports, setPorts] = useState<{ protocol: string, name: string, port: string, nodePort: string, targetPort: string }[]>([]);
   const [externalIPs, setExternalIPs] = useState('');
   const [sessionAffinity, setSessionAffinity] = useState('');
   const [timeoutSeconds, setTimeoutSeconds] = useState('');
@@ -147,7 +149,7 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
         }, {} as any),
         publishNotReadyAddresses: publishNotReadyAddresses === 'True',
         sessionAffinity: sessionAffinity,
-        sessionAffinityConfig: sessionAffinity === 'ClientIP' ? { clientIP: {timeoutSeconds: Number(timeoutSeconds)} } : undefined,
+        sessionAffinityConfig: sessionAffinity === 'ClientIP' ? { clientIP: { timeoutSeconds: Number(timeoutSeconds) } } : undefined,
         externalIPs: externalIPs ? externalIPs.split(',') : undefined,
       }
     };
@@ -178,17 +180,17 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
 
   return (
     <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle>Add Service</DialogTitle>
+      <DialogTitle>{t('actions.add')} {t('common.service')}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <FormControl fullWidth margin="dense">
-            <InputLabel>Namespace</InputLabel>
+            <InputLabel>{t('table.namespace')}</InputLabel>
             <Select
-                label="Namespace"
-                value={namespace}
-                onChange={(event) => setNamespace(event.target.value)}
-                placeholder="Namespace"
-              >
+              label={t('table.namespace')}
+              value={namespace}
+              onChange={(event) => setNamespace(event.target.value)}
+              placeholder="Namespace"
+            >
               {namespaceData?.items?.map((item) => (
                 <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
                   {item?.metadata?.name}
@@ -198,7 +200,7 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
           </FormControl>
 
           <TextField
-            label="Name"
+            label={t('table.name')}
             placeholder="name"
             variant="outlined"
             fullWidth
@@ -211,19 +213,19 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
 
           {/* Annotations */}
           <Box>
-            <Typography variant="subtitle1">Annotations</Typography>
+            <Typography variant="subtitle1">{t('form.annotations')}</Typography>
             <Button
               variant="outlined"
               startIcon={<AddIcon />}
               onClick={handleAddAnnotations}
               sx={{ width: '100%' }}
             >
-              Add Annotations
+              {t('table.addAnnotation')}
             </Button>
             {annotations.map((annotation, index) => (
               <Box key={index} sx={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                 <TextField
-                  label="Key"
+                  label={t('table.key')}
                   placeholder="Please input key"
                   variant="outlined"
                   value={annotation.key}
@@ -231,7 +233,7 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
                   required
                 />
                 <TextField
-                  label="Value"
+                  label={t('table.value')}
                   placeholder="Please input value"
                   variant="outlined"
                   value={annotation.value}
@@ -251,19 +253,19 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
 
           {/* Labels */}
           <Box>
-            <Typography variant="subtitle1">Labels</Typography>
+            <Typography variant="subtitle1">{t('form.labels')}</Typography>
             <Button
               variant="outlined"
               startIcon={<AddIcon />}
               onClick={handleAddLabels}
               sx={{ width: '100%' }}
             >
-              Add Labels
+              {t('table.addLabel')}
             </Button>
             {labels.map((label, index) => (
               <Box key={index} sx={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                 <TextField
-                  label="Key"
+                  label={t('table.key')}
                   placeholder="Please input key"
                   variant="outlined"
                   value={label.key}
@@ -271,7 +273,7 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
                   required
                 />
                 <TextField
-                  label="Value"
+                  label={t('table.value')}
                   placeholder="Please input value"
                   variant="outlined"
                   value={label.value}
@@ -291,19 +293,19 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
 
           {/* Selectors */}
           <Box>
-            <Typography variant="subtitle1">Selectors</Typography>
+            <Typography variant="subtitle1">{t('table.selectors')}</Typography>
             <Button
               variant="outlined"
               startIcon={<AddIcon />}
               onClick={handleAddSelectors}
               sx={{ width: '100%' }}
             >
-              Add Selectors
+              {t('table.addSelectors')}
             </Button>
             {selectors.map((selector, index) => (
               <Box key={index} sx={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                 <TextField
-                  label="Key"
+                  label={t('table.key')}
                   placeholder="Please input key"
                   variant="outlined"
                   value={selector.key}
@@ -311,7 +313,7 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
                   required
                 />
                 <TextField
-                  label="Value"
+                  label={t('table.value')}
                   placeholder="Please input value"
                   variant="outlined"
                   value={selector.value}
@@ -331,25 +333,25 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
 
           {/* PublishNotReadyAddresses */}
           <Box>
-            <Typography variant="subtitle1">PublishNotReadyAddresses</Typography>
+            <Typography variant="subtitle1">{t('table.publishNotReadyAddresses')}</Typography>
             <FormControl fullWidth>
-              <InputLabel id="publishNotReadyAddresses-label">PublishNotReadyAddresses</InputLabel>
+              <InputLabel id="publishNotReadyAddresses-label">{t('table.publishNotReadyAddresses')}</InputLabel>
               <Select
                 labelId="publishNotReadyAddresses-label"
                 value={publishNotReadyAddresses}
                 onChange={(e) => setPublishNotReadyAddresses(e.target.value)}
-                label="PublishNotReadyAddresses"
+                label={t('table.publishNotReadyAddresses')}
               >
-                <MenuItem value=""><em>None</em></MenuItem>
-                <MenuItem value="True">True</MenuItem>
-                <MenuItem value="False">False</MenuItem>
+                <MenuItem value=""><em>{t('common.none')}</em></MenuItem>
+                <MenuItem value="True">{t('common.true')}</MenuItem>
+                <MenuItem value="False">{t('common.false')}</MenuItem>
               </Select>
             </FormControl>
           </Box>
 
           {/* Type */}
           <Box>
-            <Typography variant="subtitle1">Type</Typography>
+            <Typography variant="subtitle1">{t('table.type')}</Typography>
             <FormControl component="fieldset" error={!!formErrors.type}>
               <RadioGroup
                 aria-label="type"
@@ -363,21 +365,21 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
                   onClick={() => setType('ClusterIP')}
                   sx={{ borderRadius: '0px', marginRight: '4px' }}
                 >
-                  ClusterIP
+                  {t('serviceTypes.clusterip')}
                 </Button>
                 <Button
                   variant={type === 'NodePort' ? 'contained' : 'outlined'}
                   onClick={() => setType('NodePort')}
                   sx={{ borderRadius: '0px', marginRight: '4px' }}
                 >
-                  NodePort
+                  {t('serviceTypes.nodeport')}
                 </Button>
                 <Button
                   variant={type === 'Headless' ? 'contained' : 'outlined'}
                   onClick={() => setType('Headless')}
                   sx={{ borderRadius: '0px', marginRight: '4px' }}
                 >
-                  Headless
+                  {t('serviceTypes.headless')}
                 </Button>
               </RadioGroup>
               {formErrors.type && <Typography color="error">{formErrors.type}</Typography>}
@@ -412,7 +414,7 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
                     <MenuItem value="UDP">UDP</MenuItem>
                   </TextField>
                   <TextField
-                    label="Name"
+                    label={t('table.name')}
                     placeholder="Name"
                     variant="outlined"
                     value={port.name}
@@ -507,8 +509,8 @@ export default function AddServiceDialog({ open, onClose, onSubmit }: AddService
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>Add</Button>
+        <Button onClick={handleClose}>{t('actions.cancel')}</Button>
+        <Button variant="contained" onClick={handleSubmit}>{t('actions.add')}</Button>
       </DialogActions>
     </Dialog>
   );

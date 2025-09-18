@@ -13,6 +13,7 @@ import { useListNodes } from '@/api/node';
 import { useListDeviceModels } from '@/api/deviceModel';
 import { useNamespace } from '@/hook/useNamespace';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddDeviceDialogProps {
   open?: boolean;
@@ -23,8 +24,9 @@ interface AddDeviceDialogProps {
 const attributeTypes = ['INT', 'STRING', 'DOUBLE', 'FLOAT', 'BOOLEAN', 'BYTES'];
 
 const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
+  const { t } = useI18n();
   const { control, handleSubmit, register, formState: { errors }, reset } = useForm();
-  const [attributes, setAttributes] = useState<{attributeName: string, type: string, attributeValue: string}[]>([]);
+  const [attributes, setAttributes] = useState<{ attributeName: string, type: string, attributeValue: string }[]>([]);
   const { namespace } = useNamespace();
   const nodeData = useListNodes()?.data;
   const deviceModelData = useListDeviceModels(namespace)?.data;
@@ -101,7 +103,7 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
 
   return (
     <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle>Add Devices</DialogTitle>
+      <DialogTitle>{t('actions.add')} {t('common.device')}</DialogTitle>
       <DialogContent>
         <form onSubmit={handleSubmit(onFormSubmit)}>
           <Box sx={{ marginBottom: '16px' }}>
@@ -109,13 +111,13 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
               name="name"
               control={control}
               defaultValue=""
-              rules={{ required: 'Miss name' }}
+              rules={{ required: t('form.required') }}
               render={({ field }) => (
                 <TextField
                   {...field}
                   margin="dense"
-                  label="Name"
-                  placeholder="name"
+                  label={t('table.name')}
+                  placeholder={t('form.namePlaceholder')}
                   variant="outlined"
                   fullWidth
                   error={!!errors.name}
@@ -129,13 +131,13 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
               name="deviceType"
               control={control}
               defaultValue=""
-              rules={{ required: 'Miss deviceType' }}
+              rules={{ required: t('form.required') }}
               render={({ field }) => (
                 <TextField
                   {...field}
                   select
-                  label="Device Type"
-                  placeholder="deviceType"
+                  label={t('table.deviceType')}
+                  placeholder={t('table.deviceType')}
                   variant="outlined"
                   fullWidth
                   error={!!errors.deviceType}
@@ -155,12 +157,12 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
               name="protocol"
               control={control}
               defaultValue=""
-              rules={{ required: 'Miss protocol' }}
+              rules={{ required: t('form.required') }}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Protocol"
-                  placeholder="Protocol"
+                  label={t('table.protocol')}
+                  placeholder={t('table.protocol')}
                   variant="outlined"
                   fullWidth
                   error={!!errors.protocol}
@@ -174,13 +176,13 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
               name="node"
               control={control}
               defaultValue=""
-              rules={{ required: 'Miss node' }}
+              rules={{ required: t('form.required') }}
               render={({ field }) => (
                 <TextField
                   {...field}
                   select
-                  label="Node"
-                  placeholder="node"
+                  label={t('common.node')}
+                  placeholder={t('common.node')}
                   variant="outlined"
                   fullWidth
                   error={!!errors.node}
@@ -200,12 +202,12 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
               name="description"
               control={control}
               defaultValue=""
-              rules={{ required: 'Miss description' }}
+              rules={{ required: t('form.required') }}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Description"
-                  placeholder="description"
+                  label={t('table.description')}
+                  placeholder={t('table.description')}
                   variant="outlined"
                   fullWidth
                   multiline
@@ -221,10 +223,10 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>AttributeName</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>AttributeValue</TableCell>
-                    <TableCell>Operation</TableCell>
+                    <TableCell>{t('table.attributeName')}</TableCell>
+                    <TableCell>{t('table.type')}</TableCell>
+                    <TableCell>{t('table.attributeValue')}</TableCell>
+                    <TableCell>{t('table.actions')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -234,7 +236,7 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
                         <TextField
                           value={attribute.attributeName}
                           onChange={(e) => handleAttributeChange(index, 'attributeName', e.target.value)}
-                          placeholder="Please enter"
+                          placeholder={t('table.pleaseEnter')}
                         />
                       </TableCell>
                       <TableCell>
@@ -246,7 +248,7 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
                         >
                           {attributeTypes.map((type) => (
                             <MenuItem key={type} value={type}>
-                              {type}
+                              {t(`dataTypes.${type.toLowerCase()}`) || type}
                             </MenuItem>
                           ))}
                         </Select>
@@ -255,7 +257,7 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
                         <TextField
                           value={attribute.attributeValue}
                           onChange={(e) => handleAttributeChange(index, 'attributeValue', e.target.value)}
-                          placeholder="Please enter"
+                          placeholder={t('table.pleaseEnter')}
                         />
                       </TableCell>
                       <TableCell>
@@ -274,16 +276,16 @@ const AddDeviceDialog = ({ open, onClose, onSubmit }: AddDeviceDialogProps) => {
                 sx={{ marginTop: '16px' }}
                 onClick={handleAddAttribute}
               >
-                Add a row of data
+                {t('actions.add')} {t('table.attributes')}
               </Button>
             </TableContainer>
           </Box>
           <DialogActions>
             <Button onClick={handleClose}>
-              Cancel
+              {t('actions.cancel')}
             </Button>
             <Button type="submit" variant="contained">
-              Submit
+              {t('actions.confirm')}
             </Button>
           </DialogActions>
         </form>
