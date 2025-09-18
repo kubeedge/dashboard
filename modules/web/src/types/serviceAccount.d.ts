@@ -13,4 +13,11 @@ export interface ServiceAccount extends TypeMeta {
   secrets?: ObjectReference[];
 }
 
-export interface ServiceAccountList extends ResourceList<ServiceAccount> {}
+export interface ServiceAccountList extends ResourceList<ServiceAccount> {
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+  sort?: string;
+  order?: string;
+}
