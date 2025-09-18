@@ -18,10 +18,12 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/emicklei/go-restful/v3"
 	appsv1alpha1 "github.com/kubeedge/api/apis/apps/v1alpha1"
 
+	listutil "github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/nodegroup"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,8 +31,8 @@ import (
 func (apiHandler *APIHandler) addNodeGroupRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/nodegroup").To(apiHandler.handleGetNodeGroups).
-			Writes(appsv1alpha1.NodeGroupList{}).
-			Returns(http.StatusOK, "OK", appsv1alpha1.NodeGroupList{}))
+			Writes(ListResponse[nodegroup.NodeGroupListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[nodegroup.NodeGroupListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/nodegroup/{name}").To(apiHandler.handleGetNodeGroup).
 			Param(apiV1Ws.PathParameter("name", "Name of the node group")).
@@ -61,13 +63,34 @@ func (apiHandler *APIHandler) handleGetNodeGroups(request *restful.Request, resp
 		return
 	}
 
-	result, err := nodegroup.GetNodeGroupList(kubeedgeClient)
+	// Parse query first
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: nodegroup.NodeGroupSortableFields, FilterableFields: nodegroup.NodeGroupFilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
 
-	response.WriteEntity(result)
+	var items []appsv1alpha1.NodeGroup
+	if mockStr := request.QueryParameter("mock"); mockStr != "" {
+		if n, err := strconv.Atoi(mockStr); err == nil && n > 0 {
+			// Dev-only: bypass real cluster and use mock list directly
+			items = nodegroup.GenerateMockNodeGroups(n)
+		}
+	}
+	if items == nil { // no mock requested → hit real API
+		rawList, err := nodegroup.GetNodeGroupList(kubeedgeClient)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		items = rawList.Items
+	}
+
+	items = listutil.FilterItems(items, toCommonFilterClauses(query.Filters), nodegroup.NodeGroupFieldGetter)
+	listutil.SortItems(items, query.Sort, query.Order, nodegroup.NodeGroupComparators())
+	pageItems, total, _ := listutil.Paginate(items, query.Page, query.PageSize)
+	view := listutil.Project(pageItems, nodegroup.NodeGroupToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetNodeGroup(request *restful.Request, response *restful.Response) {
