@@ -22,6 +22,7 @@ import (
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8sClient "k8s.io/client-go/kubernetes"
 
+	listutil "github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/client"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -63,4 +64,16 @@ func (apiHandler *APIHandler) getKubeEdgeClient(
 	}
 
 	return kubeEdgeClient, nil
+}
+
+// toCommonFilterClauses converts handler.FilterClause to common.FilterClause to avoid import cycles.
+func toCommonFilterClauses(in []FilterClause) []listutil.FilterClause {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make([]listutil.FilterClause, 0, len(in))
+	for _, f := range in {
+		out = append(out, listutil.FilterClause{Field: f.Field, Value: f.Value, Mode: f.Mode})
+	}
+	return out
 }
