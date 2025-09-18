@@ -6,6 +6,7 @@ import { Select } from '@mui/material';
 import { useListNodes } from '@/api/node';
 import { NodeGroup } from '@/types/nodeGroup';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddNodeGroupDialogProps {
   open?: boolean;
@@ -19,6 +20,7 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
   const [matchLabels, setMatchLabels] = useState<Record<string, string>[]>([]);
   const { data } = useListNodes();
   const { setErrorMessage } = useAlert();
+  const { t } = useI18n();
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setName(event?.target?.value);
 
@@ -59,7 +61,7 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
       });
       handleClose(event);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create NodeGroup');
+      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
     }
   };
 
@@ -72,21 +74,21 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
 
   return (
     <Dialog open={!!open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add Nodegroup</DialogTitle>
+      <DialogTitle>{t('actions.add')} {t('common.nodeGroup')}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <TextField
-            label="Name"
-            placeholder="name"
+            label={t('form.name')}
+            placeholder={t('form.namePlaceholder')}
             variant="outlined"
             value={name}
             onChange={handleNameChange}
             required
             margin="dense"
-            helperText={!name && 'Miss name'}
+            helperText={!name && t('form.required')}
           />
           <FormControl fullWidth>
-            <InputLabel id="nodes-select-label">Nodes</InputLabel>
+            <InputLabel id="nodes-select-label">{t('form.nodes')}</InputLabel>
             <Select
               multiple
               labelId="nodes-select-label"
@@ -94,8 +96,8 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
               onChange={handleNodesChange}
               renderValue={(selected) => selected.join(', ')}
               required
-              label="Nodes"
-              placeholder="nodes"
+              label={t('form.nodes')}
+              placeholder={t('form.nodes')}
               sx={{ minWidth: 300 }}
             >
               {data?.items?.map((node) => (
@@ -106,30 +108,30 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
             </Select>
           </FormControl>
           <Box>
-            <Typography variant="subtitle1" sx={{ marginBottom: '8px' }}>MatchLabels</Typography>
+            <Typography variant="subtitle1" sx={{ marginBottom: '8px' }}>{t('form.labels')}</Typography>
             {matchLabels.map((matchLabel, index) => (
               <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <TextField
-                  label="Key"
-                  placeholder="Please input key"
+                  label={t('form.labelKey')}
+                  placeholder={t('form.labelKey')}
                   variant="outlined"
                   margin="dense"
                   value={matchLabel.key}
                   onChange={(e) => handleMatchLabelChange(index, 'key', e.target.value)}
                   sx={{ flex: 1 }}
                   required
-                  helperText={!matchLabel.key && 'Miss key'}
+                  helperText={!matchLabel.key && t('form.required')}
                 />
                 <TextField
-                  label="Value"
-                  placeholder="Please input value"
+                  label={t('form.labelValue')}
+                  placeholder={t('form.labelValue')}
                   variant="outlined"
                   margin="dense"
                   value={matchLabel.value}
                   onChange={(e) => handleMatchLabelChange(index, 'value', e.target.value)}
                   sx={{ flex: 1 }}
                   required
-                  helperText={!matchLabel.value && 'Miss value'}
+                  helperText={!matchLabel.value && t('form.required')}
                 />
                 <IconButton
                   onClick={() => handleRemoveMatchLabel(index)}
@@ -144,12 +146,12 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
               startIcon={<AddIcon />}
               onClick={handleAddMatchLabel}
             >
-              Add MatchLabels
+              {t('actions.add')} {t('form.labels')}
             </Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button variant="contained" onClick={handleSubmit}>Submit</Button>
+            <Button onClick={handleClose}>{t('actions.cancel')}</Button>
+            <Button variant="contained" onClick={handleSubmit}>{t('actions.confirm')}</Button>
           </Box>
         </Box>
       </DialogContent>

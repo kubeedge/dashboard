@@ -16,12 +16,14 @@ import { getNodeStatus, getPodStatus } from "@/helper/status";
 import { useListNodes } from "@/api/node";
 import { Deployment } from "@/types/deployment";
 import { useListDeployments } from "@/api/deployment";
+import { useI18n } from "@/hook/useI18n";
 
 const CardRow = (props: {
   k8sVersion?: string;
   nodes?: Node[];
   apps?: Deployment[];
 }) => {
+  const { t } = useI18n();
   let readyNodes = 0;
   let notReadyNodes = 0;
   let availableApps = 0;
@@ -41,21 +43,21 @@ const CardRow = (props: {
 
   const cardData = [
     {
-      title: 'Node Status',
+      title: t('dashboard.nodeStatus'),
       statusData: [
-        { label: 'Ready', value: `${readyNodes}`, color: 'green', dotColor: 'green' },
-        { label: 'NotReady', value: `${notReadyNodes}`, color: 'orange', dotColor: 'red' },
+        { label: t('status.ready'), value: `${readyNodes}`, color: 'green', dotColor: 'green' },
+        { label: t('status.notReady'), value: `${notReadyNodes}`, color: 'orange', dotColor: 'red' },
       ],
     },
     {
-      title: 'Deployment Status',
+      title: t('dashboard.deploymentStatus'),
       statusData: [
-        { label: 'Running', value: `${availableApps}`, color: 'green', dotColor: 'green' },
-        { label: 'Disabled', value: `${unavailableApps}`, color: 'orange', dotColor: 'orange' },
+        { label: t('status.running'), value: `${availableApps}`, color: 'green', dotColor: 'green' },
+        { label: t('status.inactive'), value: `${unavailableApps}`, color: 'orange', dotColor: 'orange' },
       ],
     },
     {
-      title: 'Version Information',
+      title: t('dashboard.versionInfo'),
       statusData: [
         { label: 'Kubernetes', value: props?.k8sVersion || '', color: 'black', dotColor: 'transparent' },
         { label: 'KubeEdge', value: kubeedgeVersion || '', color: 'black', dotColor: 'transparent' },
@@ -77,6 +79,7 @@ const CardRow = (props: {
 const DashboardCir = (props: {
   pods?: Pod[];
 }) => {
+  const { t } = useI18n();
   const totalPods = props?.pods?.length || 0;
   let runningPods = 0;
   let totalCpu = 0;
@@ -98,27 +101,27 @@ const DashboardCir = (props: {
   })
 
   const cpuData = [
-    { value: totalCpu === 0 ? 0 : Math.round(totalCpu / totalCpu * 1000) / 10, total: `Memory: ${totalCpu}m`, color: '#00e676' },
+    { value: totalCpu === 0 ? 0 : Math.round(totalCpu / totalCpu * 1000) / 10, total: `CPU: ${totalCpu}m`, color: '#00e676' },
   ];
 
   const memoryData = [
-    { value: totalMemory === 0 ? 0 : Math.round(availableMemory / totalMemory * 1000) / 10, total: `Memory: ${totalMemory}Mi`, color: '#00e676' },
+    { value: totalMemory === 0 ? 0 : Math.round(availableMemory / totalMemory * 1000) / 10, total: `${t('dashboard.memory')}: ${totalMemory}Mi`, color: '#00e676' },
   ];
 
   const podData = [
-    { value: totalPods === 0 ? 0 : Math.round(runningPods / totalPods * 1000) / 10, total: `Pods: ${totalPods}`, color: '#00e676' },
+    { value: totalPods === 0 ? 0 : Math.round(runningPods / totalPods * 1000) / 10, total: `${t('dashboard.pods')}: ${totalPods}`, color: '#00e676' },
   ];
 
   return (
     <Grid container spacing={2} justifyContent="center">
       <Grid item xs={12} sm={12} md={12}>
-        <ProgressCard title="CPU" progressData={cpuData} />
+        <ProgressCard title={t('dashboard.cpu')} progressData={cpuData} />
       </Grid>
       <Grid item xs={12} sm={12} md={12}>
-        <ProgressCard title="Memory" progressData={memoryData} />
+        <ProgressCard title={t('dashboard.memory')} progressData={memoryData} />
       </Grid>
       <Grid item xs={12} sm={12} md={12}>
-        <ProgressCard title="Pod" progressData={podData} />
+        <ProgressCard title={t('dashboard.pod')} progressData={podData} />
       </Grid>
     </Grid>
   );

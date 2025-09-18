@@ -10,33 +10,35 @@ import AddSecretDialog from '@/component/AddSecretDialog';
 import SecretDetailDialog from '@/component/SecretDetailDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<Secret>[] = [
-  {
-    name: 'Namespace',
-    render: (secret) => secret?.metadata?.namespace,
-  },
-  {
-    name: 'Name',
-    render: (secret) => secret?.metadata?.name,
-  },
-  {
-    name: 'Type',
-    render: (secret) => secret.type,
-  },
-  {
-    name: 'Creation time',
-    render: (secret) => secret.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
+import { useI18n } from '@/hook/useI18n';
 
 export default function SecretPage() {
   const { namespace } = useNamespace();
   const { data, mutate } = useListSecrets(namespace);
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<Secret>[] = [
+    {
+      name: t('table.namespace'),
+      render: (secret) => secret?.metadata?.namespace,
+    },
+    {
+      name: t('table.name'),
+      render: (secret) => secret?.metadata?.name,
+    },
+    {
+      name: t('table.type'),
+      render: (secret) => secret.type,
+    },
+    {
+      name: t('table.age'),
+      render: (secret) => secret.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.actions'),
+      renderOperation: true,
+    },
+  ];
 
   const [openAddDialog, setOpenAddDialog] = React.useState(false);
   const [openDetailDialog, setOpenDetailDialog] = React.useState(false);
@@ -73,17 +75,17 @@ export default function SecretPage() {
 
   const handleDeleteClick = (_: any, row: Secret) => {
     showConfirmDialog({
-      title: 'Delete Secret',
-      content: `Are you sure to delete Secret ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.secret'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteSecret(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Secret');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   };
 
@@ -91,16 +93,16 @@ export default function SecretPage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Secret"
-          addButtonLabel="Add Secret"
+          title={t('common.secret')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.secret')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
           onRefreshClick={handleRefreshClick}
           onDetailClick={handleDetailClick}
           onDeleteClick={handleDeleteClick}
-          detailButtonLabel="Details"
-          deleteButtonLabel="Delete"
+          detailButtonLabel={t('actions.view')}
+          deleteButtonLabel={t('actions.delete')}
         />
       </Box>
       <AddSecretDialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} onSubmit={handleOnSubmit} />

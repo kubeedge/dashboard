@@ -7,27 +7,29 @@ import { getCustomResourceDefinition, useListCustomResourceDefinitions } from '@
 import YAMLViewerDialog from '@/component/YAMLViewerDialog';
 import { CustomResourceDefinition } from '@/types/customResourceDefinition';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<CustomResourceDefinition>[] = [{
-  name: 'Name',
-  render: (row) => row?.metadata?.name,
-}, {
-  name: 'Group',
-  render: (row) => row?.spec?.group,
-}, {
-  name: 'Creation time',
-  render: (row) => row?.metadata?.creationTimestamp,
-}, {
-  name: 'Operation',
-  renderOperation: true,
-}];
+import { useI18n } from '@/hook/useI18n';
 
 export default function CrdPage() {
-  const [ name, setName ] = React.useState('');
-  const [ time, setTime ] = React.useState('');
+  const [name, setName] = React.useState('');
+  const [time, setTime] = React.useState('');
   const { data, mutate } = useListCustomResourceDefinitions();
-  const [ yamlDialogOpen, setYamlDialogOpen ] = React.useState(false);
-  const [ currentYamlContent, setCurrentYamlContent ] = React.useState<any>(undefined);
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<CustomResourceDefinition>[] = [{
+    name: t('table.name'),
+    render: (row) => row?.metadata?.name,
+  }, {
+    name: t('table.group'),
+    render: (row) => row?.spec?.group,
+  }, {
+    name: t('table.creationTime'),
+    render: (row) => row?.metadata?.creationTimestamp,
+  }, {
+    name: t('table.operation'),
+    renderOperation: true,
+  }];
+  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
+  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(undefined);
   const { setErrorMessage } = useAlert();
 
   const handleNameChange = (event: any) => {
@@ -44,7 +46,7 @@ export default function CrdPage() {
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get CustomResourceDefinition');
+      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
     }
   };
 
@@ -68,16 +70,16 @@ export default function CrdPage() {
       >
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: '32px' }}>
           <TextField
-            label="Name"
-            placeholder="Please enter name"
+            label={t('table.name')}
+            placeholder={t('form.namePlaceholder')}
             variant="outlined"
             value={name}
             onChange={handleNameChange}
             sx={{ flex: 1, maxWidth: '320px' }}
           />
           <TextField
-            label="Time"
-            placeholder="Please enter time"
+            label={t('table.time')}
+            placeholder={t('form.timePlaceholder')}
             variant="outlined"
             value={time}
             onChange={handleTimeChange}
@@ -89,13 +91,13 @@ export default function CrdPage() {
             variant="outlined"
             sx={{ color: 'black', borderColor: 'black', width: '100px', height: '40px' }}
           >
-            Query
+            {t('actions.search')}
           </Button>
         </Box>
       </Box>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Crd"
+          title={t('common.crd')}
           columns={columns}
           data={data?.items}
           onQueryClick={() => mutate()}
