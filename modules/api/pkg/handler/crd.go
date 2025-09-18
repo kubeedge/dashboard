@@ -22,6 +22,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 
+	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/crd"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,8 +30,8 @@ import (
 func (apiHandler *APIHandler) addCRDRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/crd").To(apiHandler.getCRDs).
-			Writes(apiextensionsv1.CustomResourceDefinitionList{}).
-			Returns(http.StatusOK, "OK", apiextensionsv1.CustomResourceDefinitionList{}))
+			Writes(ListResponse[crd.CRDListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[crd.CRDListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/crd/{name}").To(apiHandler.getCRD).
 			Param(apiV1Ws.PathParameter("name", "Name of the CRD")).
@@ -46,12 +47,24 @@ func (apiHandler *APIHandler) getCRDs(request *restful.Request, response *restfu
 		return
 	}
 
-	result, err := crd.GetCRDList(k8sClient)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: crd.SortableFields, FilterableFields: crd.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	response.WriteEntity(result)
+
+	rawList, err := crd.GetCRDList(k8sClient)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	items := rawList.Items
+
+	items = common.FilterItems(items, toCommonFilterClauses(query.Filters), crd.CRDFieldGetter)
+	common.SortItems(items, query.Sort, query.Order, crd.CRDComparators())
+	pageItems, total, _ := common.Paginate(items, query.Page, query.PageSize)
+	view := common.Project(pageItems, crd.CRDToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) getCRD(request *restful.Request, response *restful.Response) {
