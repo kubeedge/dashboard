@@ -1,24 +1,35 @@
+
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Layout from "@/component/Layout";
+
+import ThemeRegistry from "@/components/Layout/ThemeRegistry";
+import LayoutSwitcher from "@/components/Layout/LayoutSwitcher";
+import { AppProvider } from "@/components/Common/AppContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Home - kubeedge",
-  description: "Kubeedge",
+  title: "KubeEdge Dashboard",
+  description: "Unified Dashboard Layout",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Layout>{children}</Layout>
+        <ThemeRegistry>
+          <AppProvider>
+            <LayoutSwitcher>
+              {children}
+            </LayoutSwitcher>
+          </AppProvider>
+        </ThemeRegistry>
       </body>
     </html>
   );

@@ -109,7 +109,7 @@ interface DeviceSpec {
   deviceModelRef: LocalObjectReference;
   nodeName?: string;
   properties?: DeviceProperty[];
-  protocol: ProtocolConfig;
+  protocol?: ProtocolConfig;
 }
 
 interface DeviceStatus {
