@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
+import { ColumnDefinition, TableCard } from '@/components/Common/TableCard';
 import { Box, TextField, Button } from '@mui/material';
 import { createServiceAccount, deleteServiceAccount, getServiceAccount, useListServiceAccounts } from '@/api/serviceAccount';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
+import YAMLViewerDialog from '@/components/Dialog/YAMLViewerDialog';
 import { ServiceAccount } from '@/types/serviceAccount';
-import AddServiceAccountDialog from '@/component/AddServiceAccountDialog';
+import AddServiceAccountDialog from '@/components/Form/AddServiceAccountDialog';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
@@ -41,7 +41,8 @@ export default function ServiceAccountsPage() {
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
+
 
   useEffect(() => {
     mutate();
@@ -61,7 +62,7 @@ export default function ServiceAccountsPage() {
       setCurrentYamlContent(resp.data);
       setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get ServiceAccount');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get ServiceAccount');
     }
   };
 
@@ -78,7 +79,7 @@ export default function ServiceAccountsPage() {
           await deleteServiceAccount(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create ServiceAccount');
+          Error(error?.response?.data?.message || error?.message || 'Failed to create ServiceAccount');
         }
       },
       onCancel: () => {},
@@ -95,8 +96,8 @@ export default function ServiceAccountsPage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title="ServiceAccounts"
           addButtonLabel="Add ServiceAccounts"
@@ -118,7 +119,6 @@ export default function ServiceAccountsPage() {
       <AddServiceAccountDialog
         open={addDialogOpen}
         onClose={handleAddDialogClose}
-        onSubmit={handleAddFormSubmit}
         />
       {ConfirmDialogComponent}
     </Box>

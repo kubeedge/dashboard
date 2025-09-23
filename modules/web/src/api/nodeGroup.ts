@@ -15,7 +15,7 @@ export function getNodeGroup(name: string) {
   });
 }
 
-export function createNodeGroup(data: NodeGroup) {
+export function createNodeGroup(data: NodeGroup, body: any) {
   return request<NodeGroup>(`/nodegroup`, {
     method: 'POST',
     data,
