@@ -21,6 +21,9 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/klog/v2"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/secret"
 	"github.com/kubeedge/dashboard/errors"
@@ -41,24 +44,29 @@ func (apiHandler *APIHandler) addSecretRoutes(apiV1Ws *restful.WebService) *APIH
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
 			Param(apiV1Ws.PathParameter("name", "Name of the secret")).
 			Writes(corev1.Secret{}).
-			Returns(http.StatusOK, "OK", corev1.Secret{}))
+			Returns(http.StatusOK, "OK", corev1.Secret{}).
+			Returns(http.StatusNotFound, "Not Found", nil))
 	apiV1Ws.Route(
 		apiV1Ws.POST("/secret/{namespace}").To(apiHandler.handleCreateSecret).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
 			Reads(corev1.Secret{}).
 			Writes(corev1.Secret{}).
-			Returns(http.StatusCreated, "Created", corev1.Secret{}))
+			Returns(http.StatusCreated, "Created", corev1.Secret{}).
+			Returns(http.StatusConflict, "Already Exists", nil))
 	apiV1Ws.Route(
-		apiV1Ws.PUT("/secret/{namespace}").To(apiHandler.handleUpdateSecret).
+		apiV1Ws.PUT("/secret/{namespace}/{name}").To(apiHandler.handleUpdateSecret).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
+			Param(apiV1Ws.PathParameter("name", "Name of the secret")).
 			Reads(corev1.Secret{}).
 			Writes(corev1.Secret{}).
-			Returns(http.StatusOK, "OK", corev1.Secret{}))
+			Returns(http.StatusOK, "OK", corev1.Secret{}).
+			Returns(http.StatusNotFound, "Not Found", nil))
 	apiV1Ws.Route(
 		apiV1Ws.DELETE("/secret/{namespace}/{name}").To(apiHandler.handleDeleteSecret).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
 			Param(apiV1Ws.PathParameter("name", "Name of the secret")).
-			Returns(http.StatusNoContent, "No Content", nil))
+			Returns(http.StatusNoContent, "No Content", nil).
+			Returns(http.StatusNotFound, "Not Found", nil))
 
 	return apiHandler
 }
@@ -70,8 +78,12 @@ func (apiHandler *APIHandler) handleGetSecrets(request *restful.Request, respons
 	}
 
 	namespace := request.PathParameter("namespace")
+	if namespace == "" {
+		namespace = metav1.NamespaceAll
+	}
 	result, err := secret.GetSecretList(k8sClient, namespace)
 	if err != nil {
+		klog.Errorf("failed to list secrets in namespace %q: %v", namespace, err)
 		errors.HandleInternalError(response, err)
 		return
 	}
@@ -89,6 +101,11 @@ func (apiHandler *APIHandler) handleGetSecret(request *restful.Request, response
 	name := request.PathParameter("name")
 	result, err := secret.GetSecret(k8sClient, namespace, name)
 	if err != nil {
+		if apierrors.IsNotFound(err) {
+			response.WriteErrorString(http.StatusNotFound, "Secret not found")
+			return
+		}
+		klog.Errorf("failed to get secret %s/%s: %v", namespace, name, err)
 		errors.HandleInternalError(response, err)
 		return
 	}
@@ -102,21 +119,26 @@ func (apiHandler *APIHandler) handleCreateSecret(request *restful.Request, respo
 		return
 	}
 
-	data := new(corev1.Secret)
-	err = request.ReadEntity(data)
+	var data corev1.Secret
+	err = request.ReadEntity(&data)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
-	result, err := secret.CreateSecret(k8sClient, namespace, data)
+	result, err := secret.CreateSecret(k8sClient, namespace, &data)
 	if err != nil {
+		if apierrors.IsAlreadyExists(err) {
+			response.WriteErrorString(http.StatusConflict, "Secret already exists")
+			return
+		}
+		klog.Errorf("failed to create secret in namespace %s: %v", namespace, err)
 		errors.HandleInternalError(response, err)
 		return
 	}
 
-	response.WriteEntity(result)
+	response.WriteHeaderAndEntity(http.StatusCreated, result)
 }
 
 func (apiHandler *APIHandler) handleUpdateSecret(request *restful.Request, response *restful.Response) {
@@ -125,16 +147,25 @@ func (apiHandler *APIHandler) handleUpdateSecret(request *restful.Request, respo
 		return
 	}
 
-	data := new(corev1.Secret)
-	err = request.ReadEntity(data)
+	var data corev1.Secret
+	err = request.ReadEntity(&data)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
 
 	namespace := request.PathParameter("namespace")
-	result, err := secret.UpdateSecret(k8sClient, namespace, data)
+	name := request.PathParameter("name")
+	data.Namespace = namespace
+	data.Name = name
+
+	result, err := secret.UpdateSecret(k8sClient, namespace, &data)
 	if err != nil {
+		if apierrors.IsNotFound(err) {
+			response.WriteErrorString(http.StatusNotFound, "Secret not found")
+			return
+		}
+		klog.Errorf("failed to update secret %s/%s: %v", namespace, name, err)
 		errors.HandleInternalError(response, err)
 		return
 	}
@@ -152,6 +183,11 @@ func (apiHandler *APIHandler) handleDeleteSecret(request *restful.Request, respo
 	name := request.PathParameter("name")
 	err = secret.DeleteSecret(k8sClient, namespace, name)
 	if err != nil {
+		if apierrors.IsNotFound(err) {
+			response.WriteErrorString(http.StatusNotFound, "Secret not found")
+			return
+		}
+		klog.Errorf("failed to delete secret %s/%s: %v", namespace, name, err)
 		errors.HandleInternalError(response, err)
 		return
 	}
