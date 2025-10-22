@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
+import { ColumnDefinition, TableCard } from '@/components/Common/TableCard';
 import { Box } from '@mui/material';
 import { createRuleEndpoint, deleteRuleEndpoint, getRuleEndpoint, useListRuleEndpoints } from '@/api/ruleEndpoint';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
+import YAMLViewerDialog from '@/components/Dialog/YAMLViewerDialog';
 import { RuleEndpoint } from '@/types/ruleEndpoint';
-import AddRuleEndpointDialog from '@/component/AddRuleEndpointDialog';
+import AddRuleEndpointDialog from '@/components/Form/AddRuleEndpointDialog';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
@@ -37,7 +37,8 @@ export default function RuleEndpointPage() {
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
+
 
   useEffect(() => {
     mutate();
@@ -62,7 +63,7 @@ export default function RuleEndpointPage() {
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get RuleEndpoint');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get RuleEndpoint');
     }
   };
 
@@ -79,7 +80,7 @@ export default function RuleEndpointPage() {
           await deleteRuleEndpoint(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete RuleEndpoint');
+          Error(error?.response?.data?.message || error?.message || 'Failed to delete RuleEndpoint');
         }
       },
       onCancel: () => {},
@@ -87,8 +88,8 @@ export default function RuleEndpointPage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title="RuleEndpoint"
           addButtonLabel="Add RuleEndpoint"

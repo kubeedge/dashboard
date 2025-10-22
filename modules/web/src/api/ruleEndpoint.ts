@@ -35,3 +35,10 @@ export function deleteRuleEndpoint(namespace: string, name: string) {
     method: 'DELETE',
   });
 }
+
+
+export async function listRuleEndpoints(namespace?: string) {
+
+  const url = namespace ? `/ruleEndpoint/${namespace}` : '/ruleEndpoint';
+  return request<RuleEndpointList>(url, { method: 'GET' });
+}

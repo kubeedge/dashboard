@@ -5,11 +5,12 @@ import { Box } from '@mui/material';
 import { createSecret, deleteSecret, getSecret, useListSecrets } from '@/api/secret';
 import { Secret } from '@/types/secret';
 import { useNamespace } from '@/hook/useNamespace';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
-import AddSecretDialog from '@/component/AddSecretDialog';
-import SecretDetailDialog from '@/component/SecretDetailDialog';
+import { ColumnDefinition, TableCard } from '@/components/Common/TableCard';
+import AddSecretDialog from '@/components/Form/AddSecretDialog';
+import SecretDetailDialog from '@/components/Dialog/SecretDetailDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
+import Button from '@mui/material/Button';
 
 const columns: ColumnDefinition<Secret>[] = [
   {
@@ -42,7 +43,9 @@ export default function SecretPage() {
   const [openDetailDialog, setOpenDetailDialog] = React.useState(false);
   const [selectedSecret, setSelectedSecret] = React.useState<Secret | null>(null);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
+  const [addOpen, setAddOpen] = React.useState(false);
+
 
   React.useEffect(() => {
     mutate();
@@ -62,14 +65,21 @@ export default function SecretPage() {
       setSelectedSecret(resp?.data);
       setOpenDetailDialog(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get Secret');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get Secret');
     }
   };
 
-  const handleOnSubmit = async (_: any, record: Secret) => {
-    await createSecret(record?.metadata?.namespace || namespace || 'default', record);
-    mutate();
-  }
+
+    const handleOnSubmit = async (_: any, record: Secret) => {
+    try {
+      await createSecret(record?.metadata?.namespace || namespace || 'default', record);
+      success('Secret created');
+      setOpenAddDialog(false);
+      mutate();
+    } catch (e: any) {
+      error(e?.response?.data?.message || e?.message || 'Failed to create Secret');
+    }
+  };
 
   const handleDeleteClick = (_: any, row: Secret) => {
     showConfirmDialog({
@@ -80,7 +90,7 @@ export default function SecretPage() {
           await deleteSecret(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Secret');
+          Error(error?.response?.data?.message || error?.message || 'Failed to delete Secret');
         }
       },
       onCancel: () => {},
@@ -88,8 +98,8 @@ export default function SecretPage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title="Secret"
           addButtonLabel="Add Secret"
@@ -103,7 +113,9 @@ export default function SecretPage() {
           deleteButtonLabel="Delete"
         />
       </Box>
-      <AddSecretDialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} onSubmit={handleOnSubmit} />
+      <AddSecretDialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} onSubmit={handleOnSubmit}  />
+
+
       <SecretDetailDialog open={openDetailDialog} onClose={() => setOpenDetailDialog(false)} data={selectedSecret} />
       {ConfirmDialogComponent}
     </Box>
