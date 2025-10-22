@@ -13,4 +13,11 @@ export interface Role extends TypeMeta {
   rules?: PolicyRule[];
 }
 
-export interface RoleList extends ResourceList<Role> {}
+export interface RoleList extends ResourceList<Role> {
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+  sort?: string;
+  order?: string;
+}

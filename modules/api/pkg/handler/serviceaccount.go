@@ -22,6 +22,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	corev1 "k8s.io/api/core/v1"
 
+	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/serviceaccount"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +30,13 @@ import (
 func (apiHandler *APIHandler) addServiceAccountRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/serviceaccount").To(apiHandler.getServiceAccountList).
-			Writes(corev1.ServiceAccountList{}).
-			Returns(http.StatusOK, "OK", corev1.ServiceAccountList{}))
+			Writes(ListResponse[serviceaccount.ServiceAccountListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[serviceaccount.ServiceAccountListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/serviceaccount/{namespace}").To(apiHandler.getServiceAccountList).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
-			Writes(corev1.ServiceAccountList{}).
-			Returns(http.StatusOK, "OK", corev1.ServiceAccountList{}))
+			Writes(ListResponse[serviceaccount.ServiceAccountListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[serviceaccount.ServiceAccountListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/serviceaccount/{namespace}/{name}").To(apiHandler.getServiceAccount).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
@@ -69,14 +70,26 @@ func (apiHandler *APIHandler) getServiceAccountList(request *restful.Request, re
 		return
 	}
 
-	namespace := request.PathParameter("namespace")
-	result, err := serviceaccount.GetServiceAccountList(k8sClient, namespace)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: serviceaccount.SortableFields, FilterableFields: serviceaccount.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
 
-	response.WriteEntity(result)
+	namespace := request.PathParameter("namespace")
+	
+	rawList, err := serviceaccount.GetServiceAccountList(k8sClient, namespace)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	items := rawList.Items
+
+	items = common.FilterItems(items, toCommonFilterClauses(query.Filters), serviceaccount.ServiceAccountFieldGetter)
+	common.SortItems(items, query.Sort, query.Order, serviceaccount.ServiceAccountComparators())
+	pageItems, total, _ := common.Paginate(items, query.Page, query.PageSize)
+	view := common.Project(pageItems, serviceaccount.ServiceAccountToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) getServiceAccount(request *restful.Request, response *restful.Response) {

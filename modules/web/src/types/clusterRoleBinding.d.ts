@@ -19,4 +19,11 @@ export interface ClusterRoleBinding extends TypeMeta {
   subjects?: Subject[];
 }
 
-export interface ClusterRoleBindingList extends ResourceList<ClusterRoleBinding> {}
+export interface ClusterRoleBindingList extends ResourceList<ClusterRoleBinding> {
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+  sort?: string;
+  order?: string;
+}

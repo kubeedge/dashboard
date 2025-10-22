@@ -3,9 +3,25 @@ import { Status } from '@/types/common';
 import { ServiceAccount, ServiceAccountList } from '@/types/serviceAccount';
 import { request } from '@/helper/request';
 
-export function useListServiceAccounts(namespace?: string) {
-  const url = namespace ? `/serviceaccount/${namespace}` : '/serviceaccount';
-  return useQuery<ServiceAccountList>('listServiceAccounts', url, {
+export function useListServiceAccounts(params?: Record<string, string | number | undefined>) {
+  const searchParams = new URLSearchParams();
+  let url = '/serviceaccount';
+  
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && key !== 'namespace') {
+        searchParams.append(key, String(value));
+      }
+    });
+    
+    if (params.namespace) {
+      url = `/serviceaccount/${params.namespace}`;
+    }
+  }
+  
+  const finalUrl = searchParams.toString() ? `${url}?${searchParams.toString()}` : url;
+  
+  return useQuery<ServiceAccountList>('listServiceAccounts', finalUrl, {
     method: 'GET',
   });
 }
