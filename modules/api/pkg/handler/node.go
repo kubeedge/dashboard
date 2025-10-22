@@ -18,10 +18,12 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/emicklei/go-restful/v3"
 	corev1 "k8s.io/api/core/v1"
 
+	listutil "github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/node"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,8 +31,8 @@ import (
 func (apiHandler *APIHandler) addNodeRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/node").To(apiHandler.handleGetNodes).
-			Writes(corev1.NamespaceList{}).
-			Returns(http.StatusOK, "OK", corev1.NamespaceList{}))
+			Writes(ListResponse[node.NodeListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[node.NodeListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/node/{name}").To(apiHandler.handleGetNode).
 			Param(apiV1Ws.PathParameter("name", "Name of the node")).
@@ -56,12 +58,31 @@ func (apiHandler *APIHandler) handleGetNodes(request *restful.Request, response 
 		return
 	}
 
-	result, err := node.GetNodeList(k8sClient)
+	rawList, err := node.GetNodeList(k8sClient)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	response.WriteHeaderAndEntity(http.StatusOK, result)
+
+	// parse list query
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: node.SortableFields, FilterableFields: node.FilterableFields})
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+
+	items := rawList.Items
+	if mockStr := request.QueryParameter("mock"); mockStr != "" { // dev-only hook
+		if n, err := strconv.Atoi(mockStr); err == nil && n > 0 {
+			items = append(items, node.GenerateMockNodes(n)...)
+		}
+	}
+
+	items = listutil.FilterItems(items, toCommonFilterClauses(query.Filters), node.NodeFieldGetter)
+	listutil.SortItems(items, query.Sort, query.Order, node.NodeComparators())
+	pageItems, total, _ := listutil.Paginate(items, query.Page, query.PageSize)
+	view := listutil.Project(pageItems, node.NodeToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetNode(request *restful.Request, response *restful.Response) {
