@@ -22,6 +22,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	devicev1beta1 "github.com/kubeedge/api/apis/devices/v1beta1"
 
+	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/device"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +30,13 @@ import (
 func (apiHandler *APIHandler) addDeviceRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/device").To(apiHandler.handleGetDevices).
-			Writes(devicev1beta1.DeviceList{}).
-			Returns(http.StatusOK, "OK", devicev1beta1.DeviceList{}))
+			Writes(ListResponse[device.DeviceListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[device.DeviceListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/device/{namespace}").To(apiHandler.handleGetDevices).
 			Param(apiV1Ws.PathParameter("namespace", "Namespace of the device")).
-			Writes(devicev1beta1.DeviceList{}).
-			Returns(http.StatusOK, "OK", devicev1beta1.DeviceList{}))
+			Writes(ListResponse[device.DeviceListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[device.DeviceListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/device/{namespace}/{name}").To(apiHandler.handleGetDevice).
 			Param(apiV1Ws.PathParameter("namespace", "Namespace of the device")).
@@ -70,13 +71,26 @@ func (apiHandler *APIHandler) handleGetDevices(request *restful.Request, respons
 		return
 	}
 
-	namespace := request.PathParameter("namespace")
-	result, err := device.GetDeviceList(kubeedgeClient, namespace)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: device.SortableFields, FilterableFields: device.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	response.WriteEntity(result)
+
+	namespace := request.PathParameter("namespace")
+
+	rawList, err := device.GetDeviceList(kubeedgeClient, namespace)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	items := rawList.Items
+
+	items = common.FilterItems(items, toCommonFilterClauses(query.Filters), device.DeviceFieldGetter)
+	common.SortItems(items, query.Sort, query.Order, device.DeviceComparators())
+	pageItems, total, _ := common.Paginate(items, query.Page, query.PageSize)
+	view := common.Project(pageItems, device.DeviceToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetDevice(request *restful.Request, response *restful.Response) {
