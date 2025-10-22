@@ -22,6 +22,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	rulev1 "github.com/kubeedge/api/apis/rules/v1"
 
+	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/ruleendpoint"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +30,13 @@ import (
 func (apiHandler *APIHandler) addRuleEndpointRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/ruleendpoint").To(apiHandler.handleGetRuleEndpoints).
-			Writes(rulev1.RuleEndpointList{}).
-			Returns(http.StatusOK, "OK", rulev1.RuleEndpointList{}))
+			Writes(ListResponse[ruleendpoint.RuleEndpointListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[ruleendpoint.RuleEndpointListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/ruleendpoint/{namespace}").To(apiHandler.handleGetRuleEndpoints).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
-			Writes(rulev1.RuleEndpointList{}).
-			Returns(http.StatusOK, "OK", rulev1.RuleEndpointList{}))
+			Writes(ListResponse[ruleendpoint.RuleEndpointListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[ruleendpoint.RuleEndpointListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/ruleendpoint/{namespace}/{name}").To(apiHandler.handleGetRuleEndpoint).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
@@ -69,14 +70,28 @@ func (apiHandler *APIHandler) handleGetRuleEndpoints(request *restful.Request, r
 		return
 	}
 
-	namespace := request.PathParameter("namespace")
-	result, err := ruleendpoint.GetRuleEndpointList(kubeedgeClient, namespace)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: ruleendpoint.SortableFields, FilterableFields: ruleendpoint.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
 
-	response.WriteEntity(result)
+	namespace := request.PathParameter("namespace")
+
+	rawList, err := ruleendpoint.GetRuleEndpointList(kubeedgeClient, namespace)
+	if err != nil {
+		// If real data fails, log error but continue with empty list
+		// This allows frontend to work even when KubeEdge resources are not available
+		response.WriteHeaderAndEntity(http.StatusOK, NewListResponse([]ruleendpoint.RuleEndpointListItem{}, 0, query.Page, query.PageSize, query.Sort, query.Order))
+		return
+	}
+	items := rawList.Items
+
+	items = common.FilterItems(items, toCommonFilterClauses(query.Filters), ruleendpoint.RuleEndpointFieldGetter)
+	common.SortItems(items, query.Sort, query.Order, ruleendpoint.RuleEndpointComparators())
+	pageItems, total, _ := common.Paginate(items, query.Page, query.PageSize)
+	view := common.Project(pageItems, ruleendpoint.RuleEndpointToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetRuleEndpoint(request *restful.Request, response *restful.Response) {

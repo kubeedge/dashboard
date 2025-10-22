@@ -19,4 +19,11 @@ export interface Rule extends TypeMeta {
   status?: RuleStatus;
 }
 
-export interface RuleList extends ResourceList<Rule> {}
+export interface RuleList extends ResourceList<Rule> {
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+  sort?: string;
+  order?: string;
+}
