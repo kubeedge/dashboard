@@ -18,10 +18,12 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/emicklei/go-restful/v3"
 	appsv1 "k8s.io/api/apps/v1"
 
+	listutil "github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/deployment"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +31,13 @@ import (
 func (apiHandler *APIHandler) addDeploymentRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/deployment").To(apiHandler.handleGetDeployments).
-			Writes(appsv1.DeploymentList{}).
-			Returns(http.StatusOK, "OK", appsv1.DeploymentList{}))
+			Writes(ListResponse[deployment.DeploymentListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[deployment.DeploymentListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/deployment/{namespace}").To(apiHandler.handleGetDeployments).
 			Param(apiV1Ws.PathParameter("namespace", "Namespace of the deployment")).
-			Writes(appsv1.DeploymentList{}).
-			Returns(http.StatusOK, "OK", appsv1.DeploymentList{}))
+			Writes(ListResponse[deployment.DeploymentListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[deployment.DeploymentListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/deployment/{namespace}/{name}").To(apiHandler.handleGetDeployment).
 			Param(apiV1Ws.PathParameter("namespace", "Namespace of the deployment")).
@@ -70,13 +72,35 @@ func (apiHandler *APIHandler) handleGetDeployments(request *restful.Request, res
 		return
 	}
 
-	namespace := request.PathParameter("namespace")
-	result, err := deployment.GetDeploymentList(k8sClient, namespace)
+	// parse list query
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: deployment.SortableFields, FilterableFields: deployment.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	response.WriteHeaderAndEntity(http.StatusOK, result)
+
+	namespace := request.PathParameter("namespace")
+
+	var items []appsv1.Deployment
+	if mockStr := request.QueryParameter("mock"); mockStr != "" { // dev-only hook
+		if n, err := strconv.Atoi(mockStr); err == nil && n > 0 {
+			items = deployment.GenerateMockDeployments(n, namespace)
+		}
+	}
+	if items == nil {
+		rawList, err := deployment.GetDeploymentList(k8sClient, namespace)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		items = rawList.Items
+	}
+
+	items = listutil.FilterItems(items, toCommonFilterClauses(query.Filters), deployment.DeploymentFieldGetter)
+	listutil.SortItems(items, query.Sort, query.Order, deployment.DeploymentComparators())
+	pageItems, total, _ := listutil.Paginate(items, query.Page, query.PageSize)
+	view := listutil.Project(pageItems, deployment.DeploymentToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetDeployment(request *restful.Request, response *restful.Response) {
