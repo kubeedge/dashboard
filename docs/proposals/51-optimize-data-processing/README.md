@@ -3,6 +3,7 @@ title: Dashboard Data Processing Optimization via BFF Layer
 status: implementable
 authors:
   - "@ellie604"
+  - "@xinyilu2@andrew.cmu.edu"
 approvers:
   - "@ghosind"
   - "@Shelley-BaoYue"
