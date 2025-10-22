@@ -5,8 +5,8 @@ go 1.23.0
 require (
 	github.com/emicklei/go-restful/v3 v3.12.2
 	github.com/kubeedge/api v1.20.0
-  	github.com/kubeedge/dashboard/errors v0.0.0-00010101000000-000000000000
 	github.com/kubeedge/dashboard/client v0.0.0-00010101000000-000000000000
+	github.com/kubeedge/dashboard/errors v0.0.0-00010101000000-000000000000
 	github.com/spf13/pflag v1.0.6
 	golang.org/x/tools v0.32.0
 	k8s.io/api v0.32.3
@@ -57,4 +57,5 @@ require (
 )
 
 replace github.com/kubeedge/dashboard/client => ../common/client
+
 replace github.com/kubeedge/dashboard/errors => ../common/errors
