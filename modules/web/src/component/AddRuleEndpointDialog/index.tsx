@@ -4,6 +4,7 @@ import { Box, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActio
 import { RuleEndpoint } from '@/types/ruleEndpoint';
 import { useListNamespaces } from '@/api/namespace';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddRuleEndpointDialogProps {
   open?: boolean;
@@ -12,6 +13,7 @@ interface AddRuleEndpointDialogProps {
 }
 
 const AddRuleEndpointDialog = ({ open, onClose, onSubmit }: AddRuleEndpointDialogProps) => {
+  const { t } = useI18n();
   const [namespace, setNamespace] = React.useState('');
   const [name, setName] = React.useState('');
   const [endpointType, setEndpointType] = React.useState('');
@@ -49,7 +51,7 @@ const AddRuleEndpointDialog = ({ open, onClose, onSubmit }: AddRuleEndpointDialo
               properties: {
                 service_port: servicePort,
               },
-             }),
+            }),
           }
         });
         handleClose(event);
@@ -69,75 +71,75 @@ const AddRuleEndpointDialog = ({ open, onClose, onSubmit }: AddRuleEndpointDialo
 
   return (
     <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>Add RuleEndpoint</DialogTitle>
-        <DialogContent>
-          <FormControl fullWidth margin="normal" error={!!errors.newNamespace}>
-            <InputLabel required>Namespace</InputLabel>
-            <Select
-              label="Namespace"
-              value={namespace}
-              onChange={(e) => setNamespace(e.target.value)}
-              placeholder="Namespace"
-            >
-              {data?.items?.map(item => (
-                <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
-                  {item?.metadata?.name}
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.newNamespace && <FormHelperText>{errors.newNamespace}</FormHelperText>}
-          </FormControl>
+      <DialogTitle>{t('actions.add')} {t('common.ruleEndpoint')}</DialogTitle>
+      <DialogContent>
+        <FormControl fullWidth margin="normal" error={!!errors.newNamespace}>
+          <InputLabel required>{t('table.namespace')}</InputLabel>
+          <Select
+            label={t('table.namespace')}
+            value={namespace}
+            onChange={(e) => setNamespace(e.target.value)}
+            placeholder="Namespace"
+          >
+            {data?.items?.map(item => (
+              <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
+                {item?.metadata?.name}
+              </MenuItem>
+            ))}
+          </Select>
+          {errors.newNamespace && <FormHelperText>{errors.newNamespace}</FormHelperText>}
+        </FormControl>
 
+        <TextField
+          label={t('table.name')}
+          required
+          fullWidth
+          margin="normal"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          error={!!errors.newName}
+          helperText={errors.newName}
+        />
+
+        <FormControl fullWidth margin="normal" error={!!errors.ruleEndpointType}>
+          <InputLabel required>{t('table.ruleEndpointType')}</InputLabel>
+          <Select
+            label={t('table.ruleEndpointType')}
+            value={endpointType}
+            onChange={(event) => setEndpointType(event.target.value)}
+            placeholder="RuleEndpointType"
+          >
+            <MenuItem value="rest">{t('ruleEndpointTypes.rest')}</MenuItem>
+            <MenuItem value="eventbus">{t('ruleEndpointTypes.eventbus')}</MenuItem>
+            <MenuItem value="servicebus">{t('ruleEndpointTypes.servicebus')}</MenuItem>
+          </Select>
+          {errors.ruleEndpointType && <FormHelperText>{errors.ruleEndpointType}</FormHelperText>}
+        </FormControl>
+
+        {endpointType === 'servicebus' && (
           <TextField
-            label="Name"
+            label="Service_port"
             required
             fullWidth
             margin="normal"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            error={!!errors.newName}
-            helperText={errors.newName}
+            placeholder="Service_port"
+            value={servicePort}
+            onChange={(e) => setServicePort(e.target.value)}
+            error={!!errors.servicePort}
+            helperText={errors.servicePort}
           />
-
-          <FormControl fullWidth margin="normal" error={!!errors.ruleEndpointType}>
-            <InputLabel required>RuleEndpointType</InputLabel>
-            <Select
-              label="RuleEndpointType"
-              value={endpointType}
-              onChange={(event) => setEndpointType(event.target.value)}
-              placeholder="RuleEndpointType"
-            >
-              <MenuItem value="rest">rest</MenuItem>
-              <MenuItem value="eventbus">eventbus</MenuItem>
-              <MenuItem value="servicebus">servicebus</MenuItem>
-            </Select>
-            {errors.ruleEndpointType && <FormHelperText>{errors.ruleEndpointType}</FormHelperText>}
-          </FormControl>
-
-          {endpointType === 'servicebus' && (
-            <TextField
-              label="Service_port"
-              required
-              fullWidth
-              margin="normal"
-              placeholder="Service_port"
-              value={servicePort}
-              onChange={(e) => setServicePort(e.target.value)}
-              error={!!errors.servicePort}
-              helperText={errors.servicePort}
-            />
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} color="primary" variant="contained">
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} color="primary">
+          {t('actions.cancel')}
+        </Button>
+        <Button onClick={handleSubmit} color="primary" variant="contained">
+          {t('actions.submit')}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

@@ -10,29 +10,31 @@ import { Service } from '@/types/service';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useNamespace } from '@/hook/useNamespace';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<Service>[] = [
-  {
-    name: 'Namespace',
-    render: (service) => service?.metadata?.namespace,
-  },
-  {
-    name: 'Name',
-    render: (service) => service?.metadata?.name,
-  },
-  {
-    name: 'Creation time',
-    render: (service) => service.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
+import { useI18n } from '@/hook/useI18n';
 
 export default function ServicePage() {
   const { namespace } = useNamespace();
   const { data, mutate } = useListServices(namespace);
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<Service>[] = [
+    {
+      name: t('table.namespace'),
+      render: (service) => service?.metadata?.namespace,
+    },
+    {
+      name: t('table.name'),
+      render: (service) => service?.metadata?.name,
+    },
+    {
+      name: t('table.age'),
+      render: (service) => service.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.actions'),
+      renderOperation: true,
+    },
+  ];
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addServiceDialogOpen, setAddServiceDialogOpen] = React.useState(false);
@@ -72,17 +74,17 @@ export default function ServicePage() {
 
   const handleDeleteClick = (_: any, row: Service) => {
     showConfirmDialog({
-      title: 'Delete Service',
-      content: `Are you sure to delete Service ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.service'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteService(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Service');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   };
 
@@ -90,8 +92,8 @@ export default function ServicePage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Service"
-          addButtonLabel="Add Service"
+          title={t('common.service')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.service')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
@@ -99,7 +101,7 @@ export default function ServicePage() {
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="YAML"
-          deleteButtonLabel="Delete"
+          deleteButtonLabel={t('actions.delete')}
         />
       </Box>
       <YAMLViewerDialog

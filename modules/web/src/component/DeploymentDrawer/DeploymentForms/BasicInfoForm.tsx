@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, TextField, Button, MenuItem,Typography } from '@mui/material';
+import { Box, TextField, Button, MenuItem, Typography } from '@mui/material';
 import { useListNamespaces } from '@/api/namespace';
 import { Namespace } from '@/types/namespace';
+import { useI18n } from '@/hook/useI18n';
 
 interface KVPair {
   key: string;
@@ -22,6 +23,7 @@ interface BasicInfoFormProps {
 }
 
 export default function BasicInfoForm({ data, onChange, namespaces }: BasicInfoFormProps) {
+  const { t } = useI18n();
   const handleAddAnnotation = () => {
     onChange('annotations', [...(data?.annotations || []), { key: '', value: '' }]);
   };
@@ -55,7 +57,7 @@ export default function BasicInfoForm({ data, onChange, namespaces }: BasicInfoF
   return (
     <Box component="form" noValidate autoComplete="off">
       <TextField
-        label="Namespace"
+        label={t('table.namespace')}
         select
         required
         fullWidth
@@ -64,7 +66,7 @@ export default function BasicInfoForm({ data, onChange, namespaces }: BasicInfoF
           onChange('namespace', e.target.value);
         }}
         error={!data?.namespace}
-        placeholder="Please select namespace"
+        placeholder={t('form.namespacePlaceholder')}
         margin="normal"
       >
         {namespaces?.map((item) => (
@@ -75,48 +77,48 @@ export default function BasicInfoForm({ data, onChange, namespaces }: BasicInfoF
       </TextField>
 
       <TextField
-        label="Name"
+        label={t('table.name')}
         required
         fullWidth
         value={data?.name || ''}
         onChange={(e) => onChange('name', e.target.value)}
         error={!data?.name}
-        placeholder="Please enter name"
+        placeholder={t('form.namePlaceholder')}
         margin="normal"
       />
 
       <TextField
-        label="Description"
+        label={t('table.description')}
         fullWidth
         value={data?.description || ''}
         onChange={(e) => {
           onChange('description', e.target.value);
         }}
-        placeholder="Please enter description"
+        placeholder={t('table.description')}
         margin="normal"
       />
 
       <Box>
         <Box sx={{ marginBottom: 2 }}>
-          <Typography variant="subtitle1">Annotation:</Typography>
+          <Typography variant="subtitle1">{t('form.annotations')}:</Typography>
           <Button onClick={handleAddAnnotation} variant="contained" color="primary" fullWidth>
-            + Add Annotation
+            + {t('table.addAnnotation')}
           </Button>
         </Box>
         {(data?.annotations || []).map((annotation, index) => (
           <Box key={index} sx={{ display: 'flex', gap: 2, marginBottom: 1 }}>
             <TextField
-              placeholder="Please enter key"
+              placeholder={t('table.pleaseEnterKey')}
               value={annotation.key}
               onChange={(e) => handleAnnotationChange(index, 'key', e.target.value)}
-              helperText={!annotation.key && 'Missing key'}
+              helperText={!annotation.key && t('table.missingKey')}
               fullWidth
             />
             <TextField
-              placeholder="Please enter value"
+              placeholder={t('table.pleaseEnterValue')}
               value={annotation.value}
               onChange={(e) => handleAnnotationChange(index, 'value', e.target.value)}
-              helperText={!annotation.value && 'Missing value'}
+              helperText={!annotation.value && t('table.missingValue')}
               fullWidth
             />
             <Button onClick={() => handleRemoveAnnotation(index)}>-</Button>
@@ -126,25 +128,25 @@ export default function BasicInfoForm({ data, onChange, namespaces }: BasicInfoF
 
       <Box>
         <Box sx={{ marginBottom: 2 }}>
-          <Typography variant="subtitle1">Labels:</Typography>
+          <Typography variant="subtitle1">{t('form.labels')}:</Typography>
           <Button onClick={handleAddLabel} variant="contained" color="primary" fullWidth>
-            + Add Label
+            + {t('table.addLabel')}
           </Button>
         </Box>
         {data?.labels?.map((label, index) => (
           <Box key={index} sx={{ display: 'flex', gap: 2, marginBottom: 1 }}>
             <TextField
-              placeholder="Please enter key"
+              placeholder={t('table.pleaseEnterKey')}
               value={label.key}
               onChange={(e) => handleLabelChange(index, 'key', e.target.value)}
-              helperText={!label.key && 'Missing key'}
+              helperText={!label.key && t('table.missingKey')}
               fullWidth
             />
             <TextField
-              placeholder="Please enter value"
+              placeholder={t('table.pleaseEnterValue')}
               value={label.value}
               onChange={(e) => handleLabelChange(index, 'value', e.target.value)}
-              helperText={!label.value && 'Missing value'}
+              helperText={!label.value && t('table.missingValue')}
               fullWidth
             />
             <Button onClick={() => handleRemoveLabel(index)}>-</Button>
@@ -153,7 +155,7 @@ export default function BasicInfoForm({ data, onChange, namespaces }: BasicInfoF
       </Box>
 
       <TextField
-        label="Replicas"
+        label={t('table.replicas')}
         required
         type="number"
         fullWidth
@@ -163,7 +165,7 @@ export default function BasicInfoForm({ data, onChange, namespaces }: BasicInfoF
           onChange('replicas', num);
         }}
         error={!(data?.replicas || 1)}
-        placeholder="Please enter Replicas"
+        placeholder={t('table.replicas')}
         margin="normal"
         inputProps={{ min: 1 }}
       />

@@ -11,37 +11,42 @@ import DeploymentDrawer from '@/component/DeploymentDrawer';
 import DeploymentDetailDialog from '@/component/DeploymentDetailDialog';
 import { useListPods } from '@/api/pod';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<Deployment>[] = [
-  {
-    name: 'Namespace',
-    render: (deployment) => deployment?.metadata?.namespace,
-  },
-  {
-    name: 'Name',
-    render: (deployment) => deployment?.metadata?.name,
-  },
-  {
-    name: 'Replicas (available/unavailable)',
-    render: (deployment) => {
-      const availableReplicas = deployment.status?.availableReplicas
-        || ((deployment.status?.replicas || 0) - (deployment.status?.unavailableReplicas || 0));
-      return `${availableReplicas}/${deployment.status?.replicas || 0}`;
-    },
-  },
-  {
-    name: 'Creation time',
-    render: (deployment) => deployment.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
+import { useI18n } from '@/hook/useI18n';
+import { formatRelativeTime, formatNumber } from '@/helper/localization';
 
 export default function DeploymentPage() {
   const { namespace } = useNamespace();
   const { data, mutate } = useListDeployments(namespace);
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+
+  const columns: ColumnDefinition<Deployment>[] = [
+    {
+      name: t('table.namespace'),
+      render: (deployment) => deployment?.metadata?.namespace || '-',
+    },
+    {
+      name: t('table.name'),
+      render: (deployment) => deployment?.metadata?.name || '-',
+    },
+    {
+      name: t('table.status') + ` (${currentLanguage.startsWith('zh') ? '可用/总数' : 'Available/Total'})`,
+      render: (deployment) => {
+        const availableReplicas = deployment.status?.availableReplicas
+          || ((deployment.status?.replicas || 0) - (deployment.status?.unavailableReplicas || 0));
+        const totalReplicas = deployment.status?.replicas || 0;
+        return `${formatNumber(availableReplicas, currentLanguage)}/${formatNumber(totalReplicas, currentLanguage)}`;
+      },
+    },
+    {
+      name: t('table.age'),
+      render: (deployment) => formatRelativeTime(deployment.metadata?.creationTimestamp, currentLanguage),
+    },
+    {
+      name: t('table.actions'),
+      renderOperation: true,
+    },
+  ];
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const [detailOpen, setDetailOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -59,7 +64,7 @@ export default function DeploymentPage() {
     setDrawerOpen(true);
   };
 
-  const handleDetailClick = async (_:any, row: Deployment) => {
+  const handleDetailClick = async (_: any, row: Deployment) => {
     try {
       const resp = await getDeployment(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setCurrentDeployment(resp?.data);
@@ -76,17 +81,17 @@ export default function DeploymentPage() {
 
   const handleDeleteClick = (_: any, row: Deployment) => {
     showConfirmDialog({
-      title: 'Delete Deployment',
-      content: `Are you sure to delete Deployment ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.deployment'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteDeployment(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Deployment');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     });
   };
 
@@ -99,16 +104,16 @@ export default function DeploymentPage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Deployment"
-          addButtonLabel="Add Deployment"
+          title={t('common.deployment')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.deployment')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
-          onRefreshClick={() => {mutate()}}
+          onRefreshClick={() => { mutate() }}
           onDetailClick={handleDetailClick}
           onDeleteClick={handleDeleteClick}
-          detailButtonLabel="Details"
-          deleteButtonLabel="Delete"
+          detailButtonLabel={t('actions.view')}
+          deleteButtonLabel={t('actions.delete')}
         />
         {ConfirmDialogComponent}
       </Box>

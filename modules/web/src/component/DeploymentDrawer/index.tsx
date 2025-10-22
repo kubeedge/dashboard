@@ -6,13 +6,14 @@ import StorageMountForm from './DeploymentForms/StorageMountForm';
 import MoreSettingForm from './DeploymentForms/MoreSettingForm';
 import { Deployment } from '@/types/deployment';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 import { useListConfigMaps } from '@/api/configMap';
 import { useListSecrets } from '@/api/secret';
 import { useListNamespaces } from '@/api/namespace';
 import { Container, ContainerPort, EnvFromSource, EnvVar, VolumeMount } from '@/types/pod';
 import { Volume } from '@/types/volume';
 
-const steps = ['Basic Info', 'Container Info', 'Storage Mount', 'More Setting'];
+// Step titles will be dynamically obtained through useI18n
 
 interface DeploymentDrawerProps {
   open?: boolean;
@@ -21,6 +22,8 @@ interface DeploymentDrawerProps {
 }
 
 export default function DeploymentDrawer({ open, onClose, onSubmit }: DeploymentDrawerProps) {
+  const { t } = useI18n();
+  const steps = [t('table.basicInfo'), t('table.containerInfo'), t('table.storageMount'), t('table.moreSetting')];
   const [namespace, setNamespace] = useState<any>('');
   const [activeStep, setActiveStep] = useState(0);
   const { setErrorMessage } = useAlert();
@@ -462,17 +465,17 @@ export default function DeploymentDrawer({ open, onClose, onSubmit }: Deployment
         {getStepContent(activeStep)}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '24px' }}>
           {activeStep === 0 ? (
-            <Button onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleClose}>{t('actions.cancel')}</Button>
           ) : (
-            <Button onClick={handleBack}>Previous</Button>
+            <Button onClick={handleBack}>{t('table.previous')}</Button>
           )}
           {activeStep === steps.length - 1 ? (
             <Button variant="contained" color="primary" onClick={handleFormSubmit}>
-              Submit
+              {t('actions.confirm')}
             </Button>
           ) : (
             <Button variant="contained" color="primary" onClick={handleNext}>
-              Next
+              {t('table.next')}
             </Button>
           )}
         </Box>

@@ -15,6 +15,8 @@ import { useNamespace } from '@/hook/useNamespace';
 import { useStorage } from '@/hook/useStorage';
 import useCookie from '@/hook/useCookie';
 import { redirect } from 'next/navigation';
+import LanguageSwitcher from '@/component/LanguageSwitcher';
+import { useI18n } from '@/hook/useI18n';
 
 const CustomSelect = styled(Select)(({ theme }) => ({
   height: 32,
@@ -41,6 +43,7 @@ export const AppHeader = () => {
   const { namespace, setNamespace } = useNamespace();
   const [_, setStoredToken] = useStorage('token');
   const [cookie, setCookie] = useCookie('dashboard_user');
+  const { t } = useI18n();
 
   const handleMenu = (event: any) => {
     setAnchorEl(event.currentTarget);
@@ -76,18 +79,18 @@ export const AppHeader = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
           <Image src="/icons/favicon.png" alt="KubeEdge" width={32} height={32} style={{ marginRight: 8 }} />
           <Typography variant="h6" noWrap component="div" sx={{ fontSize: 18 }}>
-            KubeEdge Dashboard
+            KubeEdge {t('common.dashboard')}
           </Typography>
         </Box>
 
-        {/* Center: Namespace Dropdown */}
-        <Box sx={{ marginRight: 2 }}>
+        {/* Center: Namespace Dropdown and Language Switcher */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginRight: 2 }}>
           <CustomSelect
             value={namespace || ''}
             onChange={handleNamespaceClose}
             displayEmpty
           >
-            <MenuItem key={'all-namespace'} value={''}>All NameSpace</MenuItem>
+            <MenuItem key={'all-namespace'} value={''}>{t('table.namespace')}</MenuItem>
             {data?.items?.map((namespace) => {
               const name = namespace.metadata?.name;
               return (
@@ -97,6 +100,10 @@ export const AppHeader = () => {
               );
             })}
           </CustomSelect>
+
+          <Box sx={{ '& .MuiSelect-select': { color: 'white' }, '& .MuiSelect-icon': { color: 'white' } }}>
+            <LanguageSwitcher variant="standard" showIcon={false} />
+          </Box>
         </Box>
 
         {/* Right side: Username */}
@@ -109,7 +116,7 @@ export const AppHeader = () => {
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            <MenuItem onClick={handleLogout}>{t('common.logout')}</MenuItem>
           </Menu>
         </Box>
       </Toolbar>

@@ -13,11 +13,13 @@ import { Collapse } from '@mui/material';
 import { ListItemProps } from '@mui/material/ListItem';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import { useI18n } from '@/hook/useI18n';
 
 const drawerWidth = 240;
 
 export interface NavMenuItem {
   name?: string;
+  nameKey?: string;
   link?: string;
   items?: NavMenuItem[];
 }
@@ -33,21 +35,24 @@ interface ListItemLinkProps extends ListItemProps {
 }
 
 function ListItemLink(props: ListItemLinkProps) {
+  const { t } = useI18n();
   let icon;
   if (props.item?.items && props.item.items.length > 0) {
     icon = props.open ? <ExpandLess /> : <ExpandMore />;
   }
 
+  const displayName = props.item?.nameKey ? t(props.item.nameKey) : props.item?.name;
+
   if (props.item?.link) {
     return (
       <ListItemButton component={Link as React.ElementType} href={props.item.link}>
-        <ListItemText primary={props.item?.name} />
+        <ListItemText primary={displayName} />
       </ListItemButton>
     );
   } else {
     return (
       <ListItemButton onClick={props.onToggle}>
-        <ListItemText primary={props.item?.name} />
+        <ListItemText primary={displayName} />
         {icon}
       </ListItemButton>
     );

@@ -10,29 +10,31 @@ import { Role } from '@/types/role';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
-const columns: ColumnDefinition<Role>[] = [
-  {
-    name: 'Namespace',
-    render: (role) => role?.metadata?.namespace,
-  },
-  {
-    name: 'Name',
-    render: (role) => role?.metadata?.name,
-  },
-  {
-    name: 'Creation time',
-    render: (role) => role.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
-
-export default function RolesPage() {
+export default function RolePage() {
   const { namespace } = useNamespace();
   const { data, mutate } = useListRoles(namespace);
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<Role>[] = [
+    {
+      name: t('table.namespace'),
+      render: (role) => role?.metadata?.namespace,
+    },
+    {
+      name: t('table.name'),
+      render: (role) => role?.metadata?.name,
+    },
+    {
+      name: t('table.age'),
+      render: (role) => role.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.actions'),
+      renderOperation: true,
+    },
+  ];
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addRoleDialogOpen, setAddRoleDialogOpen] = React.useState(false);
@@ -67,17 +69,17 @@ export default function RolesPage() {
 
   const handleDeleteClick = (_: any, row: Role) => {
     showConfirmDialog({
-      title: 'Delete Role',
-      content: `Are you sure to delete Role ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.role'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteRole(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Role');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   };
 
@@ -94,8 +96,8 @@ export default function RolesPage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Roles"
-          addButtonLabel="Add Role"
+          title={t('common.role')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.role')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
@@ -103,7 +105,7 @@ export default function RolesPage() {
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="YAML"
-          deleteButtonLabel="Delete"
+          deleteButtonLabel={t('actions.delete')}
         />
       </Box>
       <YAMLViewerDialog

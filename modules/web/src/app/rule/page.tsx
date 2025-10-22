@@ -10,48 +10,51 @@ import { Rule } from '@/types/rule';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<Rule>[] = [
-  {
-    name: 'Namespace',
-    render: (rule) => rule?.metadata?.namespace,
-  },
-  {
-    name: 'Name',
-    render: (rule) => rule?.metadata?.name,
-  },
-  {
-    name: 'Source',
-    render: (rule) => rule?.spec?.source,
-  },
-  {
-    name: 'SourceResource',
-    render: (rule) => rule?.spec?.sourceResource?.path,
-  },
-  {
-    name: 'Target',
-    render: (rule) => rule?.spec?.target,
-  },
-  {
-    name: 'TargetResource',
-    render: (rule) => rule?.spec?.targetResource?.path,
-  },
-  {
-    name: 'Creation time',
-    render: (rule) => rule.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
+import { useI18n } from '@/hook/useI18n';
 
 export default function RulePage() {
+  const { namespace } = useNamespace();
+  const { data, mutate } = useListRules(namespace);
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<Rule>[] = [
+    {
+      name: t('table.namespace'),
+      render: (rule) => rule?.metadata?.namespace,
+    },
+    {
+      name: t('table.name'),
+      render: (rule) => rule?.metadata?.name,
+    },
+    {
+      name: t('table.source'),
+      render: (rule) => rule?.spec?.source,
+    },
+    {
+      name: t('table.sourceResource'),
+      render: (rule) => rule?.spec?.sourceResource?.path,
+    },
+    {
+      name: t('table.target'),
+      render: (rule) => rule?.spec?.target,
+    },
+    {
+      name: t('table.targetResource'),
+      render: (rule) => rule?.spec?.targetResource?.path,
+    },
+    {
+      name: t('table.creationTime'),
+      render: (rule) => rule.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.operation'),
+      renderOperation: true,
+    },
+  ];
+
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
-  const { namespace } = useNamespace();
-  const { data, mutate } = useListRules(namespace);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { setErrorMessage } = useAlert();
 
@@ -77,7 +80,7 @@ export default function RulePage() {
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get Rule');
+      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
     }
 
   }
@@ -97,17 +100,17 @@ export default function RulePage() {
 
   const handleDeleteClick = (_: any, row: Rule) => {
     showConfirmDialog({
-      title: 'Delete Rule',
-      content: `Are you sure to delete Rule ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.rule'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteRule(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Rule');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   };
 
@@ -115,8 +118,8 @@ export default function RulePage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Rule"
-          addButtonLabel="Add Rule"
+          title={t('common.rule')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.rule')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
@@ -125,7 +128,7 @@ export default function RulePage() {
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="YAML"
-          deleteButtonLabel="Delete"
+          deleteButtonLabel={t('actions.delete')}
         />
       </Box>
       <AddRuleDialog

@@ -1,6 +1,7 @@
-// src/component/AddRuleDialog.js
+// src/component/AddNodeDialog.tsx
 import React, { useState } from 'react';
 import { Box, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddNodeDialogProps {
   open?: boolean;
@@ -8,6 +9,7 @@ interface AddNodeDialogProps {
 }
 
 const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
+  const { t } = useI18n();
   const [formValues, setFormValues] = useState({
     cloudMasterIP: '',
     kubeedgeVersion: '',
@@ -19,10 +21,10 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
 
   const validateForm = () => {
     const errors: any = {};
-    if (!formValues.cloudMasterIP) errors.cloudMasterIP = 'Please enter Cloud master node ip:port';
-    if (!formValues.kubeedgeVersion) errors.kubeedgeVersion = 'Please enter KubeEdge version';
-    if (!formValues.runtimeType) errors.runtimeType = 'Please select a runtime type';
-    if (!formValues.token) errors.token = 'Please enter Token';
+    if (!formValues.cloudMasterIP) errors.cloudMasterIP = t('messages.pleaseEnterCloudMasterIP');
+    if (!formValues.kubeedgeVersion) errors.kubeedgeVersion = t('messages.pleaseEnterKubeEdgeVersion');
+    if (!formValues.runtimeType) errors.runtimeType = t('messages.pleaseSelectRuntimeType');
+    if (!formValues.token) errors.token = t('messages.pleaseEnterToken');
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -45,7 +47,7 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
     const { name, value } = event.target;
     setFormValues({ ...formValues, [name]: value });
   };
-  
+
   const handleClose = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     setFormValues({
       cloudMasterIP: '',
@@ -60,11 +62,11 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
 
   return (
     <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle>Add Node</DialogTitle>
+      <DialogTitle>{t('actions.add')} {t('common.node')}</DialogTitle>
       <DialogContent>
         <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <TextField
-            label="Cloud master node ip:port"
+            label={t('table.cloudMasterIP')}
             name="cloudMasterIP"
             value={formValues.cloudMasterIP}
             onChange={handleInputChange}
@@ -76,7 +78,7 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
             fullWidth
           />
           <TextField
-            label="KubeEdge version"
+            label={t('table.kubeedgeVersion')}
             name="kubeedgeVersion"
             value={formValues.kubeedgeVersion}
             onChange={handleInputChange}
@@ -88,13 +90,13 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
             fullWidth
           />
           <FormControl error={!!formErrors.runtimeType} fullWidth required>
-            <InputLabel id="runtime-type-select-label">Runtime type</InputLabel>
+            <InputLabel id="runtime-type-select-label">{t('table.runtimeType')}</InputLabel>
             <Select
               labelId="runtime-type-select-label"
               name="runtimeType"
               value={formValues.runtimeType}
               onChange={handleInputChange}
-              label="Runtime type"
+              label={t('table.runtimeType')}
               placeholder="Please select a runtime type"
             >
               <MenuItem value="docker">Docker</MenuItem>
@@ -103,7 +105,7 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
             {formErrors.runtimeType && <FormHelperText>{formErrors.runtimeType}</FormHelperText>}
           </FormControl>
           <TextField
-            label="Token"
+            label={t('table.token')}
             name="token"
             value={formValues.token}
             onChange={handleInputChange}
@@ -115,7 +117,7 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
             fullWidth
           />
           <TextField
-            label="Command"
+            label={t('table.command')}
             value={formValues.command}
             onChange={handleInputChange}
             fullWidth
@@ -128,10 +130,10 @@ const AddNodeDialog = ({ open, onClose }: AddNodeDialogProps) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
-          Cancel
+          {t('actions.cancel')}
         </Button>
         <Button onClick={handleGenerateCommand} variant="contained" color="primary">
-          Generate Command
+          {t('actions.generateCommand')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -1,4 +1,4 @@
-// src/pages/NodePage.js
+// 节点管理页面
 'use client';
 
 import React, { useState } from 'react';
@@ -17,39 +17,65 @@ import { getNodeStatus } from '@/helper/status';
 import AddNodeDialog from '@/component/AddNodeDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<Node>[] = [{
-  name: 'Name/ID',
-  render: (node) => (<div>
-    <div style={{ color: 'rgb(47, 84, 235)', marginBottom: '2px' }}>
-      {node?.metadata?.name}
-    </div>
-    <div>{node?.metadata?.uid}</div>
-  </div>)
-}, {
-  name: 'Status',
-  render: (node) => getNodeStatus(node),
-}, {
-  name: 'Hostname/IP',
-  render: (node) => (<div>
-    <div>{node.status?.addresses?.find(address => address.type === 'Hostname')?.address}</div>
-    <div>{node.status?.addresses?.find(address => address.type === 'InternalIP')?.address}</div>
-  </div>)
-}, {
-  name: 'Creation time',
-  render: (node) => node.metadata?.creationTimestamp
-}, {
-  name: 'Edge side software version',
-  render: (node) => node.status?.nodeInfo?.kubeletVersion
-}, {
-  name: 'Operation',
-  renderOperation: true
-}]
+import { useI18n } from '@/hook/useI18n';
+import { formatRelativeTime, formatStatus, formatDateTime } from '@/helper/localization';
 
 export default function NodePage() {
   const { data, mutate } = useListNodes();
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { setErrorMessage } = useAlert();
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+
+  const columns: ColumnDefinition<Node>[] = [{
+    name: t('table.name') + '/ID',
+    render: (node) => (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box sx={{ color: 'rgb(47, 84, 235)', fontWeight: 500 }}>
+          {node?.metadata?.name || '-'}
+        </Box>
+        <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+          {node?.metadata?.uid || '-'}
+        </Box>
+      </Box>
+    )
+  }, {
+    name: t('table.status'),
+    render: (node) => {
+      const status = getNodeStatus(node);
+      return formatStatus(status, currentLanguage);
+    },
+  }, {
+    name: t('table.hostname'),
+    render: (node) => (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box>
+          {node.status?.addresses?.find(address => address.type === 'Hostname')?.address || '-'}
+        </Box>
+        <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+          {node.status?.addresses?.find(address => address.type === 'InternalIP')?.address || '-'}
+        </Box>
+      </Box>
+    )
+  }, {
+    name: t('table.creationTime'),
+    render: (node) => (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+          {formatDateTime(node.metadata?.creationTimestamp, currentLanguage)}
+        </Box>
+        <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+          {formatRelativeTime(node.metadata?.creationTimestamp, currentLanguage)}
+        </Box>
+      </Box>
+    )
+  }, {
+    name: t('table.version'),
+    render: (node) => node.status?.nodeInfo?.kubeletVersion || '-'
+  }, {
+    name: t('table.actions'),
+    renderOperation: true
+  }];
 
   const [open, setOpen] = useState(false);
 
@@ -81,17 +107,17 @@ export default function NodePage() {
 
   const handleDelete = (_: any, row: Node) => {
     showConfirmDialog({
-      title: 'Delete Node',
-      content: `Are you sure to delete Node ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.node'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteNode(row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Node');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   }
 
@@ -99,23 +125,23 @@ export default function NodePage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Nodes"
-          addButtonLabel="Add Node"
+          title={t('common.node')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.node')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
-          onRefreshClick={() => {mutate()}}
+          onRefreshClick={() => { mutate() }}
           onDetailClick={handleDetailClick}
           onDeleteClick={handleDelete}
-          detailButtonLabel="Details"
-          deleteButtonLabel="Delete"
+          detailButtonLabel={t('actions.view')}
+          deleteButtonLabel={t('actions.delete')}
           specialHandling={true}
         />
       </Box>
       <AddNodeDialog
         open={open}
         onClose={handleClose}
-        />
+      />
       <NodeDetailDialog
         open={detailDialogOpen}
         onClose={handleDetailDialogClose}

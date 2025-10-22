@@ -6,6 +6,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { ConfigMap } from '@/types/configMap';
 import { useListNamespaces } from '@/api/namespace';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddConfigmapDialogProps {
   open?: boolean;
@@ -14,6 +15,7 @@ interface AddConfigmapDialogProps {
 }
 
 const AddConfigmapDialog = ({ open, onClose, onSubmit }: AddConfigmapDialogProps) => {
+  const { t } = useI18n();
   const [namespace, setNamespace] = useState('');
   const [name, setName] = useState('');
   const [labels, setLabels] = useState([{ key: '', value: '' }]);
@@ -81,16 +83,16 @@ const AddConfigmapDialog = ({ open, onClose, onSubmit }: AddConfigmapDialogProps
 
   return (
     <Dialog open={!!open} onClose={handleClose}>
-      <DialogTitle>Add Configmap</DialogTitle>
+      <DialogTitle>{t('table.addConfigmap')}</DialogTitle>
       <DialogContent>
         <Box sx={{ width: '500px', gap: '16px' }}>
           <FormControl fullWidth margin="dense">
-            <InputLabel id="namespace-label">Namespace</InputLabel>
+            <InputLabel id="namespace-label">{t('table.namespace')}</InputLabel>
             <Select
               labelId="namespace-label"
               value={namespace}
               onChange={(e) => setNamespace(e.target.value)}
-              label="Namespace"
+              label={t('table.namespace')}
               required
             >
               {namespaceData?.items?.map((item) => (
@@ -99,54 +101,54 @@ const AddConfigmapDialog = ({ open, onClose, onSubmit }: AddConfigmapDialogProps
                 </MenuItem>
               ))}
             </Select>
-            {!namespace && <Typography color="error">Miss namespace</Typography>}
+            {!namespace && <Typography color="error">{t('table.missNamespace')}</Typography>}
           </FormControl>
 
           {/* Name */}
           <TextField
-            label="Name"
+            label={t('table.name')}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="name"
+            placeholder={t('form.namePlaceholder')}
             fullWidth
             sx={{ marginBottom: '16px' }}
             required
           />
-          {!name && <Typography color="error">Miss name</Typography>}
+          {!name && <Typography color="error">{t('table.missingName')}</Typography>}
 
           {/* Labels */}
           <Box sx={{ marginBottom: '16px' }}>
-            <Typography variant="subtitle1">Labels</Typography>
+            <Typography variant="subtitle1">{t('form.labels')}</Typography>
             <Button
               variant="outlined"
               startIcon={<AddIcon />}
               onClick={handleAddLabel}
               sx={{ width: '100%', marginBottom: '8px' }}
             >
-              Add Label
+              {t('table.addLabel')}
             </Button>
             {labels.map((label, index) => (
               <Box key={index} sx={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                 <TextField
-                  label="Key"
+                  label={t('table.key')}
                   value={label.key}
                   onChange={(e) => {
                     const newLabels = [...labels];
                     newLabels[index].key = e.target.value;
                     setLabels(newLabels);
                   }}
-                  placeholder="Please input key"
+                  placeholder={t('table.pleaseEnterKey')}
                   required
                 />
                 <TextField
-                  label="Value"
+                  label={t('table.value')}
                   value={label.value}
                   onChange={(e) => {
                     const newLabels = [...labels];
                     newLabels[index].value = e.target.value;
                     setLabels(newLabels);
                   }}
-                  placeholder="Please input value"
+                  placeholder={t('table.pleaseEnterValue')}
                   required
                 />
                 <Button
@@ -161,37 +163,37 @@ const AddConfigmapDialog = ({ open, onClose, onSubmit }: AddConfigmapDialogProps
           </Box>
 
           <Box>
-            <Typography variant="subtitle1">Data</Typography>
+            <Typography variant="subtitle1">{t('table.data')}</Typography>
             <Button
               variant="outlined"
               startIcon={<AddIcon />}
               onClick={handleAddData}
               sx={{ width: '100%', marginBottom: '8px' }}
             >
-              Add Data
+              {t('table.addData')}
             </Button>
             {data.map((datum, index) => (
               <Box key={index} sx={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                 <TextField
-                  label="Key"
+                  label={t('table.key')}
                   value={datum.key}
                   onChange={(e) => {
                     const newData = [...data];
                     newData[index].key = e.target.value;
                     setData(newData);
                   }}
-                  placeholder="Please input key"
+                  placeholder={t('table.pleaseEnterKey')}
                   required
                 />
                 <TextField
-                  label="Value"
+                  label={t('table.value')}
                   value={datum.value}
                   onChange={(e) => {
                     const newData = [...data];
                     newData[index].value = e.target.value;
                     setData(newData);
                   }}
-                  placeholder="Please input value"
+                  placeholder={t('table.pleaseEnterValue')}
                   required
                 />
                 <Button
@@ -207,8 +209,8 @@ const AddConfigmapDialog = ({ open, onClose, onSubmit }: AddConfigmapDialogProps
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>Submit</Button>
+        <Button onClick={handleClose}>{t('actions.cancel')}</Button>
+        <Button variant="contained" onClick={handleSubmit}>{t('actions.submit')}</Button>
       </DialogActions>
     </Dialog>
   );

@@ -9,24 +9,26 @@ import AddClusterRoleDialog from '@/component/AddClusterRoleDialog';
 import { ClusterRole } from '@/types/clusterRole';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<ClusterRole>[] = [
-  {
-    name: 'Name',
-    render: (clusterrole) => clusterrole?.metadata?.name,
-  },
-  {
-    name: 'Creation time',
-    render: (clusterrole) => clusterrole.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
+import { useI18n } from '@/hook/useI18n';
 
 export default function ClusterrolesPage() {
   const { data, mutate } = useListClusterRoles();
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<ClusterRole>[] = [
+    {
+      name: t('table.name'),
+      render: (clusterrole) => clusterrole?.metadata?.name,
+    },
+    {
+      name: t('table.creationTime'),
+      render: (clusterrole) => clusterrole.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.operation'),
+      renderOperation: true,
+    },
+  ];
   const [yamlDialogOpen, setYamlDialogOpen] = useState(false);
   const [currentYamlContent, setCurrentYamlContent] = useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -47,7 +49,7 @@ export default function ClusterrolesPage() {
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get ClusterRole');
+      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
     }
   };
 
@@ -66,18 +68,18 @@ export default function ClusterrolesPage() {
 
   const handleDeleteClick = (_: any, row: ClusterRole) => {
     showConfirmDialog({
-      title: 'Delete ClusterRole',
-      content: `Are you sure to delete ClusterRole ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.clusterRole'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteClusterRole(row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete ClusterRole');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
 
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   };
 
@@ -85,8 +87,8 @@ export default function ClusterrolesPage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Clusterroles"
-          addButtonLabel="Add Clusterroles"
+          title={t('common.clusterRole')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.clusterRole')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
@@ -94,7 +96,7 @@ export default function ClusterrolesPage() {
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="YAML"
-          deleteButtonLabel="Delete"
+          deleteButtonLabel={t('actions.delete')}
         />
       </Box>
       <YAMLViewerDialog

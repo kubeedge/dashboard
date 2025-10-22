@@ -19,6 +19,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { ConfigMap } from '@/types/configMap';
 import { Secret } from '@/types/secret';
+import { useI18n } from '@/hook/useI18n';
 
 interface ContainerInfoFormProps {
   data: any;
@@ -31,6 +32,7 @@ const fieldRefValues = ['meta.name', 'meta.namespace', 'meta.labels', 'meta.anno
 const resourceFieldRefValues = ['limits.cpu', 'limits.memory', 'requests.cpu', 'requests.memory'];
 
 export default function ContainerInfoForm({ data, onChange, configMaps, secrets }: ContainerInfoFormProps) {
+  const { t } = useI18n();
   const [refType, setRefType] = React.useState<string>('');
   const [keyRef, setKeyRef] = React.useState<string>('');
   const [keyFrom, setKeyFrom] = React.useState<string[]>([]);
@@ -105,10 +107,10 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
           <CardContent>
             <Box sx={{ mb: 2 }}>
               <Button variant="contained" onClick={() => handleAddContainer('init')} sx={{ width: 200, mr: 2 }}>
-                Add initial container
+                {t('table.addInitialContainer')}
               </Button>
               <Button variant="contained" onClick={() => handleAddContainer('work')} sx={{ width: 200 }}>
-                Add work container
+                {t('table.addWorkContainer')}
               </Button>
             </Box>
 
@@ -123,7 +125,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                   position: 'relative',
                   borderRadius: 1,
                 }}>
-                  <Typography variant="h6">{container.type === 'init' ? 'Initial Container' : 'Work Container'}</Typography>
+                  <Typography variant="h6">{container.type === 'init' ? t('table.initialContainer') : t('table.workContainer')}</Typography>
                   <Typography variant="subtitle1">{container.name}</Typography>
                   <IconButton
                     color="error"
@@ -135,39 +137,39 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                 </Box>
                 <Box sx={{ width: '70%' }}>
                   <TextField
-                    label="Name"
+                    label={t('table.name')}
                     variant="outlined"
                     fullWidth
                     required
-                    placeholder="Please enter name"
+                    placeholder={t('form.pleaseEnterNamePlaceholder')}
                     error={!container?.name}
-                    helperText={!container?.name ? 'Missing name' : ''}
+                    helperText={!container?.name ? t('table.missingName') : ''}
                     value={container?.name || ''}
                     onChange={(e) => handleFormChange(index, 'name', e.target.value)}
                     sx={{ mb: 2 }}
                   />
                   <TextField
-                    label="Image"
+                    label={t('table.image')}
                     variant="outlined"
                     fullWidth
                     required
-                    placeholder="Please enter image"
+                    placeholder={t('form.pleaseEnterImage')}
                     error={!container?.image}
-                    helperText={!container?.image ? 'Missing image' : ''}
+                    helperText={!container?.image ? t('table.missingImage') : ''}
                     value={container?.image || ''}
                     onChange={(e) => handleFormChange(index, 'image', e.target.value)}
                     sx={{ mb: 2 }}
                   />
                   <FormControl fullWidth sx={{ mb: 2 }}>
-                    <InputLabel>Method</InputLabel>
+                    <InputLabel>{t('table.method')}</InputLabel>
                     <Select
-                      label="Method"
+                      label={t('table.method')}
                       value={container?.method || ''}
                       onChange={(e) => handleFormChange(index, 'method', e.target.value)}
                     >
-                      <MenuItem value="Always">Always</MenuItem>
-                      <MenuItem value="Never">Never</MenuItem>
-                      <MenuItem value="IfNotPresent">IfNotPresent</MenuItem>
+                      <MenuItem value="Always">{t('form.imagePullPolicyAlways')}</MenuItem>
+                      <MenuItem value="Never">{t('form.imagePullPolicyNever')}</MenuItem>
+                      <MenuItem value="IfNotPresent">{t('form.imagePullPolicyIfNotPresent')}</MenuItem>
                     </Select>
                   </FormControl>
 
@@ -179,7 +181,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                         onChange={(e) => handleFormChange(index, 'showCommand', e.target.checked)}
                       />
                     }
-                    label="Command"
+                    label={t('table.command')}
                   />
                   {container?.showCommand && (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', mb: 2 }}>
@@ -215,7 +217,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                         onChange={(e) => handleFormChange(index, 'showEnvVars', e.target.checked)}
                       />
                     }
-                    label="Environment variables"
+                    label={t('table.environmentVariables')}
                   />
                   {container?.showEnvVars && (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', mb: 2 }}>
@@ -408,7 +410,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                         onChange={(e) => handleFormChange(index, 'showResourceRequirements', e.target.checked)}
                       />
                     }
-                    label="Resource requirements"
+                    label={t('table.resourceRequirements')}
                   />
                   {container?.showResourceRequirements && (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', mb: 2 }}>
@@ -453,7 +455,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                         onChange={(e) => handleFormChange(index, 'showPorts', e.target.checked)}
                       />
                     }
-                    label="Container ports"
+                    label={t('table.containerPorts')}
                   />
                   {container?.showPorts && (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', mb: 2 }}>
@@ -534,7 +536,7 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets 
                         onChange={(e) => handleFormChange(index, 'showSecurityContext', e.target.checked)}
                       />
                     }
-                    label="Security Context"
+                    label={t('table.securityContext')}
                   />
                   {container?.showSecurityContext && (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

@@ -39,7 +39,7 @@ async function handleApiProxy(req: NextRequest) {
       body: req.body,
     })
 
-    if (req.method === 'DELETE' ||  resp.status >= 400) {
+    if (req.method === 'DELETE' || resp.status >= 400) {
       const msg = await resp.text();
       return NextResponse.json({
         message: msg,
@@ -73,5 +73,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login', req.nextUrl))
   }
 
-  return NextResponse.next();
+  // Inject language header for SSR/CSR consistency
+  const requestHeaders = new Headers(req.headers);
+  const cookieLang = cookies().get('i18nextLng')?.value;
+  const acceptLang = req.headers.get('accept-language') || '';
+  let lang = cookieLang || (acceptLang.toLowerCase().startsWith('zh') ? 'zh' : 'en');
+  if (lang !== 'zh' && lang !== 'en') {
+    lang = lang.startsWith('zh') ? 'zh' : 'en';
+  }
+  requestHeaders.set('x-lang', lang);
+
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }

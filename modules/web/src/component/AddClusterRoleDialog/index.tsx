@@ -7,6 +7,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { ClusterRole, PolicyRule } from '@/types/clusterRole';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddClusterRoleDialogProps {
   open?: boolean;
@@ -15,9 +16,10 @@ interface AddClusterRoleDialogProps {
 }
 
 const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogProps) => {
+  const { t } = useI18n();
   const [name, setName] = useState<string>('');
   const [rules, setRules] = useState<PolicyRule[]>([]);
-  const [selectors, setSelectors] = useState<{id:number, matchLabels: {key: string, value: string}[]}[]>([]);
+  const [selectors, setSelectors] = useState<{ id: number, matchLabels: { key: string, value: string }[] }[]>([]);
   const { setErrorMessage } = useAlert();
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -117,24 +119,24 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
 
   return (
     <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle>Add ClusterRole</DialogTitle>
+      <DialogTitle>{t('actions.add')} {t('common.clusterRole')}</DialogTitle>
       <DialogContent>
         <Box sx={{ marginBottom: '16px' }}>
           <TextField
             margin="dense"
-            label="Name"
-            placeholder="name"
+            label={t('table.name')}
+            placeholder={t('form.namePlaceholder')}
             fullWidth
             required
             value={name}
             onChange={handleNameChange}
             error={!name}
-            helperText={!name && 'Name is required'}
+            helperText={!name && t('table.missingName')}
           />
         </Box>
 
         <Box sx={{ marginBottom: '16px' }}>
-          <Typography variant="subtitle1" gutterBottom>Rules</Typography>
+          <Typography variant="subtitle1" gutterBottom>{t('table.rules')}</Typography>
           <Button
             startIcon={<AddIcon />}
             variant="outlined"
@@ -142,7 +144,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
             sx={{ marginBottom: '16px' }}
             onClick={handleAddRule}
           >
-            Add Rule
+            {t('table.addRule')}
           </Button>
           {rules.map((rule, index) => (
             <Box key={index} sx={{ marginBottom: '16px' }}>
@@ -150,7 +152,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
                 multiple
                 freeSolo
                 options={rule.verbs}
-                renderInput={(params) => <TextField {...params} label="Verbs" placeholder="Please input verbs and enter" />}
+                renderInput={(params) => <TextField {...params} label={t('table.verbs')} placeholder={t('table.pleaseEnterVerbs')} />}
                 value={rule.verbs}
                 onChange={(event, newValue) => handleRuleChange(index, 'verbs', newValue)}
                 fullWidth
@@ -163,7 +165,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
                 multiple
                 freeSolo
                 options={rule?.apiGroups || []}
-                renderInput={(params) => <TextField {...params} label="API Groups" placeholder="Please input apiGroups and enter" />}
+                renderInput={(params) => <TextField {...params} label={t('table.apiGroups')} placeholder={t('table.pleaseEnterApiGroups')} />}
                 value={rule.apiGroups}
                 onChange={(event, newValue) => handleRuleChange(index, 'apiGroups', newValue)}
                 fullWidth
@@ -176,7 +178,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
                 multiple
                 freeSolo
                 options={rule.resources || []}
-                renderInput={(params) => <TextField {...params} label="Resources" placeholder="Please input resources and enter" />}
+                renderInput={(params) => <TextField {...params} label={t('table.resources')} placeholder={t('table.pleaseEnterResources')} />}
                 value={rule.resources}
                 onChange={(event, newValue) => handleRuleChange(index, 'resources', newValue)}
                 fullWidth
@@ -189,7 +191,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
                 multiple
                 freeSolo
                 options={rule.resourceNames || []}
-                renderInput={(params) => <TextField {...params} label="Resource Names" placeholder="Please input resourceNames and enter" />}
+                renderInput={(params) => <TextField {...params} label={t('table.resourceNames')} placeholder={t('table.pleaseEnterResourceNames')} />}
                 value={rule.resourceNames}
                 onChange={(event, newValue) => handleRuleChange(index, 'resourceNames', newValue)}
                 fullWidth
@@ -206,7 +208,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
         </Box>
 
         <Box>
-          <Typography variant="subtitle1" gutterBottom>ClusterRole Selectors</Typography>
+          <Typography variant="subtitle1" gutterBottom>{t('table.clusterRoleSelectors')}</Typography>
           <Button
             startIcon={<AddIcon />}
             variant="outlined"
@@ -214,7 +216,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
             sx={{ marginBottom: '16px' }}
             onClick={handleAddSelector}
           >
-            Add ClusterRole Selectors
+            {t('table.addClusterRoleSelectors')}
           </Button>
           {selectors.map((selector) => (
             <Box key={selector.id} sx={{ marginBottom: '16px' }}>
@@ -224,7 +226,7 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
                 sx={{ marginBottom: '16px' }}
                 onClick={() => handleAddMatchLabel(selector.id)}
               >
-                Add Match Labels
+                {t('table.addMatchLabels')}
               </Button>
               <IconButton onClick={() => handleRemoveSelector(selector.id)}>
                 <RemoveIcon />
@@ -232,23 +234,23 @@ const AddClusterRoleDialog = ({ open, onClose, onSubmit }: AddClusterRoleDialogP
               {selector.matchLabels.map((label, index) => (
                 <Box key={index} sx={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                   <TextField
-                    label="Key"
-                    placeholder="Please input key"
+                    label={t('table.key')}
+                    placeholder={t('table.pleaseEnterKey')}
                     value={label.key}
                     onChange={(e) => handleMatchLabelChange(selector.id, index, 'key', e.target.value)}
                     required
                     error={!label.key}
-                    helperText={!label.key && 'Missing key'}
+                    helperText={!label.key && t('table.missingKey')}
                     fullWidth
                   />
                   <TextField
-                    label="Value"
-                    placeholder="Please input value"
+                    label={t('table.value')}
+                    placeholder={t('table.pleaseEnterValue')}
                     value={label.value}
                     onChange={(e) => handleMatchLabelChange(selector.id, index, 'value', e.target.value)}
                     required
                     error={!label.value}
-                    helperText={!label.value && 'Missing value'}
+                    helperText={!label.value && t('table.missingValue')}
                     fullWidth
                   />
                   <IconButton onClick={() => handleRemoveMatchLabel(selector.id, index)}>

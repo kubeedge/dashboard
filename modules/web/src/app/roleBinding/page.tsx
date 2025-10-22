@@ -10,33 +10,35 @@ import { RoleBinding } from '@/types/roleBinding';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
-const columns: ColumnDefinition<RoleBinding>[] = [
-  {
-    name: 'Namespace',
-    render: (rolebinding) => rolebinding?.metadata?.namespace,
-  },
-  {
-    name: 'Name',
-    render: (rolebinding) => rolebinding?.metadata?.name,
-  },
-  {
-    name: 'RoleRef',
-    render: (rolebinding) => JSON.stringify(rolebinding?.roleRef),
-  },
-  {
-    name: 'Creation time',
-    render: (rolebinding) => rolebinding.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
-
-export default function RolebindingsPage() {
+export default function RoleBindingPage() {
   const { namespace } = useNamespace();
   const { data, mutate } = useListRoleBindings(namespace);
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<RoleBinding>[] = [
+    {
+      name: t('table.namespace'),
+      render: (rolebinding) => rolebinding?.metadata?.namespace,
+    },
+    {
+      name: t('table.name'),
+      render: (rolebinding) => rolebinding?.metadata?.name,
+    },
+    {
+      name: t('table.roleRef'),
+      render: (rolebinding) => JSON.stringify(rolebinding?.roleRef),
+    },
+    {
+      name: t('table.age'),
+      render: (rolebinding) => rolebinding.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.actions'),
+      renderOperation: true,
+    },
+  ];
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addRoleBindingDialogOpen, setAddRoleBindingDialogOpen] = React.useState(false);
@@ -69,17 +71,17 @@ export default function RolebindingsPage() {
 
   const handleDeleteClick = (_: any, row: RoleBinding) => {
     showConfirmDialog({
-      title: 'Delete RoleBinding',
-      content: `Are you sure to delete RoleBiding ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.roleBinding'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteRoleBinding(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete RoleBinding');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   }
 
@@ -87,15 +89,15 @@ export default function RolebindingsPage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="Rolebindings"
-          addButtonLabel="Add Rolebindings"
+          title={t('common.roleBinding')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.roleBinding')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="YAML"
-          deleteButtonLabel="Delete"
+          deleteButtonLabel={t('actions.delete')}
         />
       </Box>
       <YAMLViewerDialog

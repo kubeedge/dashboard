@@ -5,6 +5,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { RoleBinding, RoleRef, Subject } from '@/types/roleBinding';
 import { useListNamespaces } from '@/api/namespace';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddRoleBindingDialogProps {
   open?: boolean;
@@ -13,6 +14,7 @@ interface AddRoleBindingDialogProps {
 }
 
 const AddRoleBindingDialog = ({ open, onClose, onSubmit }: AddRoleBindingDialogProps) => {
+  const { t } = useI18n();
   const [namespace, setNamespace] = useState('');
   const [name, setName] = useState('');
   const [roleRef, setRoleRef] = useState<RoleRef>({ kind: '', name: '', apiGroup: '' });
@@ -70,95 +72,95 @@ const AddRoleBindingDialog = ({ open, onClose, onSubmit }: AddRoleBindingDialogP
 
   return (
     <Dialog open={!!open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add RoleBinding</DialogTitle>
+      <DialogTitle>{t('actions.add')} {t('common.roleBinding')}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <FormControl fullWidth margin="dense">
-            <InputLabel>Namespace</InputLabel>
+            <InputLabel>{t('table.namespace')}</InputLabel>
             <Select
-              label="Namespace"
+              label={t('table.namespace')}
               value={namespace}
               onChange={(event) => setNamespace(event.target.value)}
               sx={{ marginBottom: '16px' }}
               required
-              placeholder="Namespace"
+              placeholder={t('form.namespacePlaceholder')}
             >
               {data?.items?.map((item) => (
                 <MenuItem key={item.metadata?.uid} value={item?.metadata?.name}>
                   {item?.metadata?.name}
                 </MenuItem>
               ))}
-              </Select>
+            </Select>
           </FormControl>
           <TextField
-            label="Name"
+            label={t('table.name')}
             variant="outlined"
             value={name}
             onChange={handleNameChange}
             sx={{ marginBottom: '16px' }}
             required
-            placeholder="Name"
+            placeholder={t('form.namePlaceholder')}
           />
           <Box sx={{ marginBottom: '16px' }}>
-            <Typography variant="subtitle1">RoleRef</Typography>
+            <Typography variant="subtitle1">{t('table.roleRef')}</Typography>
             <Box sx={{ display: 'flex', gap: '16px' }}>
               <TextField
-                label="Kind"
+                label={t('table.kind')}
                 variant="outlined"
                 value={roleRef.kind}
                 onChange={(e) => handleRoleRefChange('kind', e.target.value)}
                 sx={{ flex: 1 }}
                 required
-                placeholder="Kind"
+                placeholder={t('table.kind')}
               />
               <TextField
-                label="Name"
+                label={t('table.name')}
                 variant="outlined"
                 value={roleRef.name}
                 onChange={(e) => handleRoleRefChange('name', e.target.value)}
                 sx={{ flex: 1 }}
                 required
-                placeholder="Name"
+                placeholder={t('form.namePlaceholder')}
               />
               <TextField
-                label="ApiGroup"
+                label={t('table.apiGroup')}
                 variant="outlined"
                 value={roleRef.apiGroup}
                 onChange={(e) => handleRoleRefChange('apiGroup', e.target.value)}
                 sx={{ flex: 1 }}
-                placeholder="ApiGroup"
+                placeholder={t('table.apiGroup')}
               />
             </Box>
           </Box>
           <Box>
-            <Typography variant="subtitle1">Subjects</Typography>
+            <Typography variant="subtitle1">{t('table.subjects')}</Typography>
             {subjects.map((subject, index) => (
               <Box key={index} sx={{ marginBottom: '16px', display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <TextField
-                  label="Kind"
+                  label={t('table.kind')}
                   variant="outlined"
                   value={subject.kind}
                   onChange={(e) => handleSubjectChange(index, 'kind', e.target.value)}
                   sx={{ flex: 1 }}
                   required
-                  placeholder="Kind"
+                  placeholder={t('table.kind')}
                 />
                 <TextField
-                  label="Name"
+                  label={t('table.name')}
                   variant="outlined"
                   value={subject.name}
                   onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
                   sx={{ flex: 1 }}
                   required
-                  placeholder="Name"
+                  placeholder={t('form.namePlaceholder')}
                 />
                 <TextField
-                  label="ApiGroup"
+                  label={t('table.apiGroup')}
                   variant="outlined"
                   value={subject.apiGroup}
                   onChange={(e) => handleSubjectChange(index, 'apiGroup', e.target.value)}
                   sx={{ flex: 1 }}
-                  placeholder="ApiGroup"
+                  placeholder={t('table.apiGroup')}
                 />
                 <IconButton onClick={() => handleRemoveSubject(index)} color="error">
                   <RemoveIcon />
@@ -171,12 +173,12 @@ const AddRoleBindingDialog = ({ open, onClose, onSubmit }: AddRoleBindingDialogP
               sx={{ backgroundColor: 'white', width: '100%', marginTop: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
               startIcon={<AddIcon />}
             >
-              Add Subject
+              {t('table.addSubject')}
             </Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
+            <Button onClick={handleClose}>{t('actions.cancel')}</Button>
+            <Button variant="contained" color="primary" onClick={handleSubmit}>{t('actions.submit')}</Button>
           </Box>
         </Box>
       </DialogContent>

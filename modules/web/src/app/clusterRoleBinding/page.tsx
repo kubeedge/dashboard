@@ -11,28 +11,31 @@ import YAMLViewerDialog from '@/component/YAMLViewerDialog';
 import { ClusterRoleBinding } from '@/types/clusterRoleBinding';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<ClusterRoleBinding>[] = [
-  {
-    name: 'Name',
-    render: (clusterRoleBinding) => clusterRoleBinding?.metadata?.name,
-  },
-  {
-    name: 'RoleRef',
-    render: (clusterRoleBinding) => JSON.stringify(clusterRoleBinding.roleRef),
-  },
-  {
-    name: 'Creation time',
-    render: (clusterRoleBinding) => clusterRoleBinding.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
+import { useI18n } from '@/hook/useI18n';
 
 export default function ClusterRoleBindingPage() {
   const { data, mutate } = useListClusterRoleBindings();
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<ClusterRoleBinding>[] = [
+    {
+      name: t('table.name'),
+      render: (clusterRoleBinding) => clusterRoleBinding?.metadata?.name,
+    },
+    {
+      name: t('table.roleRef'),
+      render: (clusterRoleBinding) => JSON.stringify(clusterRoleBinding.roleRef),
+    },
+    {
+      name: t('table.creationTime'),
+      render: (clusterRoleBinding) => clusterRoleBinding.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.operation'),
+      renderOperation: true,
+    },
+  ];
+
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
@@ -59,29 +62,29 @@ export default function ClusterRoleBindingPage() {
   const handleYamlClick = async (_: any, row: ClusterRoleBinding) => {
     try {
       const resp = await getClusterRoleBinding(row?.metadata?.name || '');
-    setCurrentYamlContent(resp?.data);
-    setYamlDialogOpen(true);
+      setCurrentYamlContent(resp?.data);
+      setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get ClusterRoleBinding');
+      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
     }
   };
 
   const handleYamlDialogClose = () => setYamlDialogOpen(false);
 
-  const handleDeleteClick = (_:any, row: ClusterRoleBinding) => {
+  const handleDeleteClick = (_: any, row: ClusterRoleBinding) => {
     showConfirmDialog({
-      title: 'Delete ClusterRoleBinding',
-      content: `Are you sure to delete ClusterRoleBinding ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.clusterRoleBinding'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteClusterRoleBinding(row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete ClusterRoleBinding');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
 
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   }
 
@@ -90,8 +93,8 @@ export default function ClusterRoleBindingPage() {
       <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
         <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
           <TableCard
-            title="ClusterRoleBinding"
-            addButtonLabel="Add ClusterRoleBinding"
+            title={t('common.clusterRoleBinding')}
+            addButtonLabel={t('actions.add') + ' ' + t('common.clusterRoleBinding')}
             columns={columns}
             data={data?.items}
             onAddClick={handleAddClick}
@@ -100,7 +103,7 @@ export default function ClusterRoleBindingPage() {
             onDetailClick={handleYamlClick}
             onDeleteClick={handleDeleteClick}
             detailButtonLabel="YAML"
-            deleteButtonLabel="Delete"
+            deleteButtonLabel={t('actions.delete')}
           />
         </Box>
         <AddClusterRoleBindingDialog

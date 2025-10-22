@@ -1,79 +1,79 @@
 export const menu = [{
-  name: 'Home',
+  nameKey: 'common.dashboard',
   link: '/',
 }, {
-  name: 'Node',
+  nameKey: 'navigation.edge',
   items: [{
-    name: 'Nodes',
+    nameKey: 'common.node',
     link: '/node',
   }, {
-    name: 'NodeGroups',
+    nameKey: 'common.nodeGroup',
     link: '/nodeGroup',
   }],
 }, {
-  name: 'Application',
+  nameKey: 'navigation.workloads',
   items: [{
-    name: 'Deployments',
+    nameKey: 'common.deployment',
     link: '/deployment',
   }, {
-    name: 'EdgeApplications',
+    nameKey: 'common.edgeApplication',
     link: '/edgeApplication',
   }]
 }, {
-  name: 'Config',
+  nameKey: 'navigation.storage',
   items: [{
-    name: 'ConfigMaps',
+    nameKey: 'common.configMap',
     link: '/configMap',
   }, {
-    name: 'Secrets',
+    nameKey: 'common.secret',
     link: '/secret',
   }]
 }, {
-  name: 'Device',
+  nameKey: 'common.device',
   items: [{
-    name: 'DeviceModels',
+    nameKey: 'common.deviceModel',
     link: '/deviceModel',
   }, {
-    name: 'Devices',
+    nameKey: 'common.device',
     link: '/device',
   }],
 }, {
-  name: 'Edge-Cloud Message',
+  nameKey: 'navigation.networking',
   items: [{
-    name: 'Rule Endpoints',
+    nameKey: 'common.ruleEndpoint',
     link: '/ruleEndpoint',
   }, {
-    name: 'Rules',
+    nameKey: 'common.rule',
     link: '/rule',
   }]
 }, {
-  name: 'Service Grid',
+  nameKey: 'common.service',
   items: [{
-    name: 'Services',
+    nameKey: 'common.service',
     link: '/service',
   }]
 }, {
-  name: 'Kubernetes Policy',
+  nameKey: 'navigation.security',
   items: [{
-    name: 'Service Accounts',
+    nameKey: 'common.serviceAccount',
     link: '/serviceAccount',
   }, {
-    name: 'Roles',
+    nameKey: 'common.role',
     link: '/role',
   }, {
-    name: 'Role Bindings',
+    nameKey: 'common.roleBinding',
     link: '/roleBinding',
   }, {
-    name: 'Cluster Roles',
+    nameKey: 'common.clusterRole',
     link: '/clusterRole',
   }, {
-    name: 'Cluster Role Bindings',
+    nameKey: 'common.clusterRoleBinding',
     link: '/clusterRoleBinding'
   }],
 }, {
-  name: 'Customization',
+  nameKey: 'common.crd',
   items: [{
-    name: 'CRDs',
+    nameKey: 'common.crd',
     link: '/crd',
   }]
 }];

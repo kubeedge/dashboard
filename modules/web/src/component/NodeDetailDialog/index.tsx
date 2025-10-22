@@ -110,7 +110,7 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
       <YAMLViewerDialog
         open={yamlDialogOpen}
         onClose={handleYamlClose}
-        content={data} // 传递 YAML 内容
+        content={data} // Pass YAML content
       />
     </>
   );

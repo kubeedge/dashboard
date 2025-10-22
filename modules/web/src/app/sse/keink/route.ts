@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       const { done, value } = await reader.read();
       if (done) break;
       if (value) {
-        writer.write(value); // 写入原始数据（SSE格式）
+        writer.write(value); // Write raw data (SSE format)
       }
     }
     writer.close();

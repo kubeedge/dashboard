@@ -5,6 +5,7 @@ import { useListNamespaces } from '@/api/namespace';
 import { Rule } from '@/types/rule';
 import { useListRuleEndpoints } from '@/api/ruleEndpoint';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddRuleDialogProps {
   open?: boolean;
@@ -13,6 +14,7 @@ interface AddRuleDialogProps {
 }
 
 const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
+  const { t } = useI18n();
   const [namespace, setNamespace] = useState('');
   const [name, setName] = useState('');
   const [source, setSource] = useState('');
@@ -100,27 +102,27 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
 
   return (
     <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>Add Rule</DialogTitle>
+      <DialogTitle>{t('actions.add')} {t('common.rule')}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <FormControl fullWidth margin="dense">
-            <InputLabel>Namespace</InputLabel>
+            <InputLabel>{t('table.namespace')}</InputLabel>
             <Select
-              label="Namespace"
+              label={t('table.namespace')}
               value={namespace}
               onChange={(e) => setNamespace(e.target.value)}
             >
               {namespaceData?.items?.map(item => (
                 <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
                   {item?.metadata?.name}
-                  </MenuItem>
+                </MenuItem>
               ))}
             </Select>
             {errors.namespace && <Box sx={{ color: 'red' }}>{errors.namespace}</Box>}
           </FormControl>
 
           <TextField
-            label="Name"
+            label={t('table.name')}
             variant="outlined"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -131,9 +133,9 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
           />
 
           <FormControl fullWidth>
-            <InputLabel>Source</InputLabel>
+            <InputLabel>{t('table.source')}</InputLabel>
             <Select
-              label="Source"
+              label={t('table.source')}
               value={source}
               onChange={(e) => setSource(e.target.value)}
               displayEmpty
@@ -148,7 +150,7 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
           </FormControl>
 
           <TextField
-            label="SourceResource"
+            label={t('table.sourceResource')}
             variant="outlined"
             value={sourceResource}
             onChange={(e) => setSourceResource(e.target.value)}
@@ -159,9 +161,9 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
           />
 
           <FormControl fullWidth>
-            <InputLabel>Target</InputLabel>
+            <InputLabel>{t('table.target')}</InputLabel>
             <Select
-              label="Target"
+              label={t('table.target')}
               value={target}
               onChange={(e) => setTarget(e.target.value)}
               displayEmpty
@@ -176,7 +178,7 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
           </FormControl>
 
           <TextField
-            label="TargetResource"
+            label={t('table.targetResource')}
             variant="outlined"
             value={targetResource}
             onChange={(e) => setTargetResource(e.target.value)}
@@ -187,7 +189,7 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
           />
 
           <TextField
-            label="Description"
+            label={t('table.description')}
             variant="outlined"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -200,10 +202,10 @@ const AddRuleDialog = ({ open, onClose, onSubmit }: AddRuleDialogProps) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
-          Cancel
+          {t('actions.cancel')}
         </Button>
         <Button onClick={handleSubmit} variant="contained">
-          Submit
+          {t('actions.submit')}
         </Button>
       </DialogActions>
     </Dialog>

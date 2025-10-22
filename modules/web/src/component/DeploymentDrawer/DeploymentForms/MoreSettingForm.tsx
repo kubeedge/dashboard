@@ -18,6 +18,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import CloseIcon from '@mui/icons-material/Close';
 import { Namespace } from '@/types/namespace';
+import { useI18n } from '@/hook/useI18n';
 
 interface MoreSettingFormProps {
   data: any;
@@ -33,6 +34,7 @@ const ShowValueOperators = new Set([
 ]);
 
 export default function MoreSettingForm({ data, onChange, namespaces }: MoreSettingFormProps) {
+  const { t } = useI18n();
   const handleAffinityValueChange = (affinity: string, index: number, field: string, value: any) => {
     const newData = [...(data?.[affinity] || [])];
     (newData[index] as any)[field] = value;
@@ -40,7 +42,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
   };
 
   const handleAddNodeSelector = () => {
-    const updatedData = [...(data.nodeSelectors || []), { }];
+    const updatedData = [...(data.nodeSelectors || []), {}];
     onChange('nodeSelectors', updatedData);
   }
 
@@ -86,10 +88,10 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
   return (
     <Box padding={2}>
       {/* Node Name */}
-      <Typography variant="h6">Node Name</Typography>
+      <Typography variant="h6">{t('table.nodeName')}</Typography>
       <TextField
         fullWidth
-        placeholder="Please enter name"
+        placeholder={t('form.pleaseEnterNamePlaceholder')}
         value={data?.nodeName}
         onChange={(e) => onChange('nodeName', e.target.value)}
         margin="normal"
@@ -97,7 +99,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
 
       {/* Node Selector */}
       <Box marginTop={2}>
-        <Typography variant="h6">Node Selector</Typography>
+        <Typography variant="h6">{t('table.nodeSelector')}</Typography>
         <Button
           variant="outlined"
           color="primary"
@@ -105,25 +107,25 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
           fullWidth
           onClick={handleAddNodeSelector}
         >
-          Add Node Selector
+          {t('table.addNodeSelector')}
         </Button>
         {(data?.nodeSelectors || []).map((selector: any, index: number) => (
           <Box key={index} marginTop={1} display="flex" alignItems="center">
             <TextField
-              label="Key"
+              label={t('table.key')}
               placeholder="Please input key"
               value={selector?.key}
               error={!selector?.key} // Add validation logic here
-              helperText={!selector?.key && "Missing key"}
+              helperText={!selector?.key && t('table.missingKey')}
               onChange={(e) => handleNodeSelectorChange(index, 'key', e.target.value)}
               margin="normal"
             />
             <TextField
-              label="Value"
+              label={t('table.value')}
               placeholder="Please input value"
               value={selector?.value}
               error={!selector?.value} // Add validation logic here
-              helperText={!selector?.value && "Missing value"}
+              helperText={!selector?.value && t('table.missingValue')}
               onChange={(e) => handleNodeSelectorChange(index, 'value', e.target.value)}
               margin="normal"
               style={{ marginLeft: 16 }}
@@ -142,7 +144,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
       {/* Strategy */}
       <FormControlLabel
         control={<Checkbox checked={!!data?.setStrategy} onChange={(e) => onChange('setStrategy', e.target.checked)} />}
-        label="Strategy"
+        label={t('table.strategy')}
         style={{ marginTop: 16 }}
       />
       {data?.setStrategy && (
@@ -219,7 +221,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
       {/* Node Affinity */}
       <FormControlLabel
         control={<Checkbox checked={!!data?.setNodeAffinity} onChange={(e) => onChange('setNodeAffinity', e.target.checked)} />}
-        label="Node Affinity"
+        label={t('table.nodeAffinity')}
         style={{ marginTop: 16 }}
       />
       {data?.setNodeAffinity && (
@@ -249,7 +251,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -293,7 +295,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                         handleAffinityValueChange('nodeAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
                       }}
                       style={{ marginLeft: 16 }}
-                      />
+                    />
                   )}
                   <IconButton
                     color="error"
@@ -319,7 +321,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchFields || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -363,7 +365,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                         handleAffinityValueChange('nodeAffinityRequiredConditions', condIndex, 'matchFields', updatedExprs);
                       }}
                       style={{ marginLeft: 16 }}
-                      />
+                    />
                   )}
                   <IconButton
                     color="error"
@@ -425,7 +427,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -469,7 +471,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                         handleAffinityValueChange('nodeAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
                       }}
                       style={{ marginLeft: 16 }}
-                      />
+                    />
                   )}
                   <IconButton
                     color="error"
@@ -495,7 +497,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchFields || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -539,7 +541,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                         handleAffinityValueChange('nodeAffinityPreferredConditions', condIndex, 'matchFields', updatedExprs);
                       }}
                       style={{ marginLeft: 16 }}
-                      />
+                    />
                   )}
                   <IconButton
                     color="error"
@@ -567,7 +569,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
 
       <FormControlLabel
         control={<Checkbox checked={!!data?.setPodAffinity} onChange={(e) => onChange('setPodAffinity', e.target.checked)} />}
-        label="Pod Affinity"
+        label={t('table.podAffinity')}
         style={{ marginTop: 16 }}
       />
       {data?.setPodAffinity && (
@@ -597,7 +599,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchLabels || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -620,7 +622,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                       handleAffinityValueChange('podAffinityRequiredConditions', condIndex, 'matchLabels', updatedExprs);
                     }}
                     style={{ marginLeft: 16 }}
-                    />
+                  />
                   <IconButton
                     color="error"
                     onClick={() => handleRemoveAffinityMatchCondition('podAffinityRequiredConditions', condIndex, 'matchLabels', exprIndex)}
@@ -645,7 +647,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -687,7 +689,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                         handleAffinityValueChange('podAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
                       }}
                       style={{ marginLeft: 16 }}
-                      />
+                    />
                   )}
                   <IconButton
                     color="error"
@@ -774,7 +776,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchLabels || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -797,7 +799,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                       handleAffinityValueChange('podAffinityPreferredConditions', condIndex, 'matchLabels', updatedExprs);
                     }}
                     style={{ marginLeft: 16 }}
-                    />
+                  />
                   <IconButton
                     color="error"
                     onClick={() => handleRemoveAffinityMatchCondition('podAffinityPreferredConditions', condIndex, 'matchLabels', exprIndex)}
@@ -822,7 +824,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -864,7 +866,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                         handleAffinityValueChange('podAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
                       }}
                       style={{ marginLeft: 16 }}
-                      />
+                    />
                   )}
                   <IconButton
                     color="error"
@@ -917,7 +919,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
 
       <FormControlLabel
         control={<Checkbox checked={!!data?.setPodAntiAffinity} onChange={(e) => onChange('setPodAntiAffinity', e.target.checked)} />}
-        label="Pod Anti Affinity"
+        label={t('table.podAntiAffinity')}
         style={{ marginTop: 16 }}
       />
       {data?.setPodAntiAffinity && (
@@ -947,7 +949,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchLabels || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -970,7 +972,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                       handleAffinityValueChange('podAntiAffinityRequiredConditions', condIndex, 'matchLabels', updatedExprs);
                     }}
                     style={{ marginLeft: 16 }}
-                    />
+                  />
                   <IconButton
                     color="error"
                     onClick={() => handleRemoveAffinityMatchCondition('podAntiAffinityRequiredConditions', condIndex, 'matchLabels', exprIndex)}
@@ -995,7 +997,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -1037,7 +1039,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                         handleAffinityValueChange('podAntiAffinityRequiredConditions', condIndex, 'matchExpressions', updatedExprs);
                       }}
                       style={{ marginLeft: 16 }}
-                      />
+                    />
                   )}
                   <IconButton
                     color="error"
@@ -1124,7 +1126,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchLabels || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -1147,7 +1149,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                       handleAffinityValueChange('podAntiAffinityPreferredConditions', condIndex, 'matchLabels', updatedExprs);
                     }}
                     style={{ marginLeft: 16 }}
-                    />
+                  />
                   <IconButton
                     color="error"
                     onClick={() => handleRemoveAffinityMatchCondition('podAntiAffinityPreferredConditions', condIndex, 'matchLabels', exprIndex)}
@@ -1172,7 +1174,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
               {(condition?.matchExpressions || []).map((expr: any, exprIndex: number) => (
                 <Box key={exprIndex} marginTop={1} display="flex" alignItems="center">
                   <TextField
-                    label="Key"
+                    label={t('table.key')}
                     fullWidth
                     placeholder="Please input key"
                     margin="normal"
@@ -1214,7 +1216,7 @@ export default function MoreSettingForm({ data, onChange, namespaces }: MoreSett
                         handleAffinityValueChange('podAntiAffinityPreferredConditions', condIndex, 'matchExpressions', updatedExprs);
                       }}
                       style={{ marginLeft: 16 }}
-                      />
+                    />
                   )}
                   <IconButton
                     color="error"

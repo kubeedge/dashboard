@@ -5,6 +5,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { useListNamespaces } from '@/api/namespace';
 import { PolicyRule, Role } from '@/types/role';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddRoleDialogProps {
   open?: boolean;
@@ -13,6 +14,7 @@ interface AddRoleDialogProps {
 }
 
 const AddRoleDialog = ({ open, onClose, onSubmit }: AddRoleDialogProps) => {
+  const { t } = useI18n();
   const [namespace, setNamespace] = useState<string>('');
   const [name, setName] = useState('');
   const [rules, setRules] = useState<PolicyRule[]>([{ verbs: [''], apiGroups: [''], resources: [''], resourceNames: [''] }]);
@@ -67,13 +69,13 @@ const AddRoleDialog = ({ open, onClose, onSubmit }: AddRoleDialogProps) => {
 
   return (
     <Dialog open={!!open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add Role</DialogTitle>
+      <DialogTitle>{t('actions.add')} {t('common.role')}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <TextField
             margin="dense"
-            label="Namespace"
-            placeholder="Please select namespace"
+            label={t('table.namespace')}
+            placeholder={t('form.namespacePlaceholder')}
             variant="outlined"
             select
             value={namespace}
@@ -85,64 +87,64 @@ const AddRoleDialog = ({ open, onClose, onSubmit }: AddRoleDialogProps) => {
             {data?.items?.map(item => (
               <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>
                 {item?.metadata?.name}
-                </MenuItem>
+              </MenuItem>
             ))}
           </TextField>
           <TextField
-            label="Name"
-            placeholder="Please enter name"
+            label={t('table.name')}
+            placeholder={t('form.namePlaceholder')}
             variant="outlined"
             value={name}
             onChange={handleNameChange}
             required
-            helperText={!name && 'Miss name'}
+            helperText={!name && t('table.missingName')}
           />
           <Box>
-            <Typography variant="subtitle1" sx={{ marginBottom: '8px' }}>Rules</Typography>
+            <Typography variant="subtitle1" sx={{ marginBottom: '8px' }}>{t('table.rules')}</Typography>
             {rules.map((rule, index) => (
               <Box key={index} sx={{ marginBottom: '16px' }}>
                 <Box sx={{ display: 'flex', gap: '8px' }}>
                   <TextField
-                    label="Verbs"
-                    placeholder="Please input verbs"
+                    label={t('table.verbs')}
+                    placeholder={t('table.pleaseEnterVerbs')}
                     variant="outlined"
                     value={rule.verbs}
                     onChange={(e) => handleRuleChange(index, 'verbs', e.target.value)}
                     required
                     sx={{ flex: 1 }}
-                    helperText={!rule.verbs && 'Verbs cannot be empty'}
+                    helperText={!rule.verbs && t('table.verbsCannotBeEmpty')}
                   />
                   <TextField
-                    label="ApiGroups"
-                    placeholder="Please input apiGroups"
+                    label={t('table.apiGroups')}
+                    placeholder={t('table.pleaseEnterApiGroups')}
                     variant="outlined"
                     value={rule.apiGroups}
                     onChange={(e) => handleRuleChange(index, 'apiGroups', e.target.value)}
                     required
                     sx={{ flex: 1 }}
-                    helperText={!rule.apiGroups && 'ApiGroups cannot be empty'}
+                    helperText={!rule.apiGroups && t('table.apiGroupsCannotBeEmpty')}
                   />
                 </Box>
                 <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
                   <TextField
-                    label="Resources"
-                    placeholder="Please input resources"
+                    label={t('table.resources')}
+                    placeholder={t('table.pleaseEnterResources')}
                     variant="outlined"
                     value={rule.resources}
                     onChange={(e) => handleRuleChange(index, 'resources', e.target.value)}
                     required
                     sx={{ flex: 1 }}
-                    helperText={!rule.resources && 'Resources cannot be empty'}
+                    helperText={!rule.resources && t('table.resourcesCannotBeEmpty')}
                   />
                   <TextField
-                    label="ResourceNames"
-                    placeholder="Please input resourceNames"
+                    label={t('table.resourceNames')}
+                    placeholder={t('table.pleaseEnterResourceNames')}
                     variant="outlined"
                     value={rule.resourceNames}
                     onChange={(e) => handleRuleChange(index, 'resourceNames', e.target.value)}
                     required
                     sx={{ flex: 1 }}
-                    helperText={!rule.resourceNames && 'ResourceNames cannot be empty'}
+                    helperText={!rule.resourceNames && t('table.resourceNamesCannotBeEmpty')}
                   />
                   {index === rules.length - 1 && (
                     <IconButton onClick={() => handleRemoveRule(index)} color="error">
@@ -153,12 +155,12 @@ const AddRoleDialog = ({ open, onClose, onSubmit }: AddRoleDialogProps) => {
               </Box>
             ))}
             <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleAddRule}>
-              Add Rule
+              {t('table.addRule')}
             </Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '16px' }}>
-            <Button onClick={handleClose}>Cancel</Button>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
+            <Button onClick={handleClose}>{t('actions.cancel')}</Button>
+            <Button variant="contained" color="primary" onClick={handleSubmit}>{t('actions.submit')}</Button>
           </Box>
         </Box>
       </DialogContent>

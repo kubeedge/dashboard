@@ -10,29 +10,31 @@ import AddRuleEndpointDialog from '@/component/AddRuleEndpointDialog';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<RuleEndpoint>[] = [
-  {
-    name: 'Namespace',
-    render: (ruleEndpoint) => ruleEndpoint?.metadata?.namespace,
-  },
-  {
-    name: 'Name',
-    render: (ruleEndpoint) => ruleEndpoint?.metadata?.name,
-  },
-  {
-    name: 'Creation time',
-    render: (ruleEndpoint) => ruleEndpoint.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
+import { useI18n } from '@/hook/useI18n';
 
 export default function RuleEndpointPage() {
   const { namespace } = useNamespace();
   const { data, mutate } = useListRuleEndpoints(namespace);
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<RuleEndpoint>[] = [
+    {
+      name: t('table.namespace'),
+      render: (ruleEndpoint) => ruleEndpoint?.metadata?.namespace,
+    },
+    {
+      name: t('table.name'),
+      render: (ruleEndpoint) => ruleEndpoint?.metadata?.name,
+    },
+    {
+      name: t('table.creationTime'),
+      render: (ruleEndpoint) => ruleEndpoint.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.operation'),
+      renderOperation: true,
+    },
+  ];
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
@@ -62,7 +64,7 @@ export default function RuleEndpointPage() {
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get RuleEndpoint');
+      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
     }
   };
 
@@ -72,17 +74,17 @@ export default function RuleEndpointPage() {
 
   const handleDeleteClick = (_: any, row: RuleEndpoint) => {
     showConfirmDialog({
-      title: 'Delete RuleEndpoint',
-      content: `Are you sure to delete RuleEndpoint ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.ruleEndpoint'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteRuleEndpoint(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete RuleEndpoint');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   };
 
@@ -90,8 +92,8 @@ export default function RuleEndpointPage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="RuleEndpoint"
-          addButtonLabel="Add RuleEndpoint"
+          title={t('common.ruleEndpoint')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.ruleEndpoint')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
@@ -100,14 +102,14 @@ export default function RuleEndpointPage() {
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="YAML"
-          deleteButtonLabel="Delete"
+          deleteButtonLabel={t('actions.delete')}
         />
       </Box>
       <AddRuleEndpointDialog
         open={addDialogOpen}
         onClose={handleAddDialogClose}
         onSubmit={handleFormSubmit}
-        />
+      />
       <YAMLViewerDialog open={yamlDialogOpen} onClose={handleYamlDialogClose} content={currentYamlContent} />
       {ConfirmDialogComponent}
     </Box>

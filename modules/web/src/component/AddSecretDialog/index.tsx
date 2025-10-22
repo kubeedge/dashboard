@@ -23,6 +23,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useListNamespaces } from '@/api/namespace';
 import { Secret } from '@/types/secret';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface AddSecretDialogProps {
   open?: boolean;
@@ -31,13 +32,14 @@ interface AddSecretDialogProps {
 }
 
 const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
+  const { t } = useI18n();
   const [namespace, setNamespace] = useState('');
   const [name, setName] = useState('');
   const [type, setType] = useState('Docker');
   const [dockerServer, setDockerServer] = useState('');
   const [dockerUsername, setDockerUsername] = useState('');
   const [dockerPassword, setDockerPassword] = useState('');
-  const [data, setData] = useState<{key: string, value: string}[]>([]);
+  const [data, setData] = useState<{ key: string, value: string }[]>([]);
   const namespaceData = useListNamespaces()?.data;
   const { setErrorMessage } = useAlert();
 
@@ -96,16 +98,16 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
 
   return (
     <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle>Add Secret</DialogTitle>
+      <DialogTitle>{t('actions.add')} {t('common.secret')}</DialogTitle>
       <DialogContent>
         <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <TextField
             select
             margin="dense"
-            label="Namespace"
+            label={t('table.namespace')}
             value={namespace}
             onChange={handleNamespaceChange}
-            helperText={!namespace ? 'Miss namespace' : ''}
+            helperText={!namespace ? t('table.missNamespace') : ''}
             error={!namespace}
             required
           >
@@ -116,10 +118,10 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
             ))}
           </TextField>
           <TextField
-            label="Name"
+            label={t('table.name')}
             value={name}
             onChange={handleNameChange}
-            helperText={!name ? 'Miss name' : ''}
+            helperText={!name ? t('table.missingName') : ''}
             error={!name}
             required
           />
@@ -131,27 +133,27 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
           {type === 'Docker' && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <TextField
-                label="Docker server"
+                label={t('table.dockerServer')}
                 value={dockerServer}
                 onChange={handleDockerServerChange}
-                helperText={!dockerServer ? 'Miss docker server' : ''}
+                helperText={!dockerServer ? t('table.missDockerServer') : ''}
                 error={!dockerServer}
                 required
               />
               <TextField
-                label="Docker username"
+                label={t('table.dockerUsername')}
                 value={dockerUsername}
                 onChange={handleDockerUsernameChange}
-                helperText={!dockerUsername ? 'Miss docker username' : ''}
+                helperText={!dockerUsername ? t('table.missDockerUsername') : ''}
                 error={!dockerUsername}
                 required
               />
               <TextField
-                label="Docker password"
+                label={t('table.dockerPassword')}
                 type="password"
                 value={dockerPassword}
                 onChange={handleDockerPasswordChange}
-                helperText={!dockerPassword ? 'Miss docker password' : ''}
+                helperText={!dockerPassword ? t('table.missDockerPassword') : ''}
                 error={!dockerPassword}
                 required
               />
@@ -163,9 +165,9 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Key</TableCell>
-                    <TableCell>Value</TableCell>
-                    <TableCell>Operation</TableCell>
+                    <TableCell>{t('table.key')}</TableCell>
+                    <TableCell>{t('table.value')}</TableCell>
+                    <TableCell>{t('table.operation')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -173,7 +175,7 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
                     <TableRow key={index}>
                       <TableCell>
                         <TextField
-                          placeholder="Please enter"
+                          placeholder={t('table.pleaseEnterKey')}
                           value={row.key}
                           onChange={(e) => {
                             const newData = [...data];
@@ -184,7 +186,7 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
                       </TableCell>
                       <TableCell>
                         <TextField
-                          placeholder="Please enter"
+                          placeholder={t('table.pleaseEnterValue')}
                           value={row.value}
                           onChange={(e) => {
                             const newData = [...data];
@@ -208,7 +210,7 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
                         startIcon={<AddIcon />}
                         fullWidth
                       >
-                        Add a row of data
+                        {t('table.addRowOfData')}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -219,10 +221,10 @@ const AddSecretDialog = ({ open, onClose, onSubmit }: AddSecretDialogProps) => {
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
             <Button onClick={handleClose}>
-              Cancel
+              {t('actions.cancel')}
             </Button>
             <Button onClick={handleSave} color="primary" variant="contained" sx={{ marginLeft: '16px' }}>
-              Save
+              {t('actions.save')}
             </Button>
           </Box>
         </Box>
