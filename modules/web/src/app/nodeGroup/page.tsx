@@ -1,6 +1,3 @@
-
-
-
 'use client';
 
 import React from 'react';
@@ -16,7 +13,6 @@ import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import AddNodegroupDialog from '@/components/Form/AddNodeGroupDialog';
 
-
 const columns: ColumnDefinition<NodeGroup>[] = [
   { name: 'Name', render: (row) => row?.metadata?.name },
   { name: 'Creation time', render: (row) => row?.metadata?.creationTimestamp },
@@ -31,7 +27,6 @@ export default function NodeGroupPage() {
   const { data, mutate } = useListNodeGroups();
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { error } = useAlert();
-
 
   const handleAddClick = () => setOpenAddNodeGroupDialog(true);
   const handleRefreshClick = () => mutate();
@@ -79,7 +74,6 @@ export default function NodeGroupPage() {
             deleteButtonLabel="Delete"
           />
         </Box>
-
 
         <YAMLViewerDialog open={openYamlDialog} onClose={() => setOpenYamlDialog(false)} content={selectedYaml} />
 

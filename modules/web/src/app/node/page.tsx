@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -50,7 +49,6 @@ export default function NodePage() {
   const { data, mutate } = useListNodes();
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { error, success } = useAlert();
-
 
   const [open, setOpen] = useState(false);
 

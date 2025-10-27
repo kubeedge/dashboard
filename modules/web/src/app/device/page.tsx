@@ -43,7 +43,6 @@ export default function DevicesPage() {
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { error, success } = useAlert();
 
-
   useEffect(() => {
     mutate();
   }, [namespace, mutate]);

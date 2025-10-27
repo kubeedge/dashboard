@@ -43,7 +43,6 @@ export default function ConfigmapPage() {
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { error, success } = useAlert();
 
-
   useEffect(() => {
     mutate();
   }, [namespace, mutate]);
@@ -71,7 +70,6 @@ export default function ConfigmapPage() {
     setSelectedConfigMap(null);
   };
 
-
   const handleSubmit = async (_: any, record: ConfigMap) => {
     try {
       await createConfigMap(record?.metadata?.namespace || namespace || 'default', record);
@@ -82,7 +80,6 @@ export default function ConfigmapPage() {
       error(e?.response?.data?.message || e?.message || 'Failed to create ConfigMap');
     }
   };
-
 
   const handleRefreshClick = () => {
     mutate();

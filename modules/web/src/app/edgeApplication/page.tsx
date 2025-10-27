@@ -44,7 +44,6 @@ export default function EdgeApplicationPage() {
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { error, success } = useAlert();
 
-
   useEffect(() => {
     mutate();
   }, [namespace, mutate]);

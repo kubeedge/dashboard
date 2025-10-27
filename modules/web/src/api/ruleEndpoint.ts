@@ -36,7 +36,6 @@ export function deleteRuleEndpoint(namespace: string, name: string) {
   });
 }
 
-
 export async function listRuleEndpoints(namespace?: string) {
 
   const url = namespace ? `/ruleEndpoint/${namespace}` : '/ruleEndpoint';

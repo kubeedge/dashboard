@@ -44,7 +44,6 @@ const LoginPage = () => {
     try {
       const resp = await getVersion(token);
 
-
       console.log('resp', resp);
 
       const user = await getServiceAccountName(token);;

@@ -39,7 +39,6 @@ export default function ServicePage() {
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { error, success } = useAlert();
 
-
   const handleAddClick = () => {
     setAddServiceDialogOpen(true);
   };

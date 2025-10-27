@@ -3,7 +3,6 @@ import { Status } from '@/types/common';
 import { ConfigMap, ConfigMapList } from '@/types/configMap';
 import { request } from '@/helper/request';
 
-
 export function useListConfigMaps(namespace?: string) {
   const url = namespace ? `/configmap/${namespace}` : '/configmap';
   return useQuery<ConfigMapList>('listConfigMaps', url, {

@@ -33,7 +33,6 @@ export default function ClusterrolesPage() {
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { error, success } = useAlert();
 
-
   const handleAddClick = () => {
     setAddDialogOpen(true);
   };

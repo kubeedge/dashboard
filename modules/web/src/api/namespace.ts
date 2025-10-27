@@ -8,7 +8,6 @@ export function useListNamespaces() {
   });
 }
 
-
 export async function listNamespaces() {
   const res = await request<NamespaceList>('/namespace', { method: 'GET' });
   return res;

@@ -30,7 +30,6 @@ export default function CrdPage() {
   const [ currentYamlContent, setCurrentYamlContent ] = React.useState<any>(undefined);
   const { error, success } = useAlert();
 
-
   const handleNameChange = (event: any) => {
     setName(event.target.value);
   };

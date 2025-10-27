@@ -39,7 +39,6 @@ export default function RolesPage() {
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { error, success } = useAlert();
 
-
   useEffect(() => {
     mutate();
   }, [namespace, mutate]);

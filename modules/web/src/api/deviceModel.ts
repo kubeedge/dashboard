@@ -3,8 +3,6 @@ import { Status } from '@/types/common';
 import { DeviceModel, DeviceModelList } from '@/types/deviceModel';
 import { request } from '@/helper/request';
 
-
-
 export function useListDeviceModels(namespace?: string) {
   const url = namespace ? `/devicemodel/${namespace}` : 'devicemodel';
   return useQuery<DeviceModelList>('listDeviceModels', url, {

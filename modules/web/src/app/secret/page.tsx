@@ -46,7 +46,6 @@ export default function SecretPage() {
   const { error, success } = useAlert();
   const [addOpen, setAddOpen] = React.useState(false);
 
-
   React.useEffect(() => {
     mutate();
   }, [namespace, mutate]);
@@ -68,7 +67,6 @@ export default function SecretPage() {
       Error(error?.response?.data?.message || error?.message || 'Failed to get Secret');
     }
   };
-
 
     const handleOnSubmit = async (_: any, record: Secret) => {
     try {
@@ -114,7 +112,6 @@ export default function SecretPage() {
         />
       </Box>
       <AddSecretDialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} onSubmit={handleOnSubmit}  />
-
 
       <SecretDetailDialog open={openDetailDialog} onClose={() => setOpenDetailDialog(false)} data={selectedSecret} />
       {ConfirmDialogComponent}

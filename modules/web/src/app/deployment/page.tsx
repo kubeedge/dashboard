@@ -49,7 +49,6 @@ export default function DeploymentPage() {
   const { data: podData, mutate: podMutate } = useListPods(namespace);
   const { error, success } = useAlert();
 
-
   useEffect(() => {
     mutate();
     podMutate()
