@@ -3,10 +3,10 @@ import { NextRequest } from 'next/server';
 export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
-    if (!process.env.API_SERVER) {
+  if (!process.env.API_SERVER) {
     return new Response('API_SERVER is not defined', { status: 500 });
   }
-  
+
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
   const encoder = new TextEncoder();
