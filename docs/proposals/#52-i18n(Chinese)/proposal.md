@@ -1,5 +1,3 @@
-# UI Optimization and i18n (Chinese) Support for Dashboard 
-
 ## Project Background: Current State & Pain Points
 
 - **Current State**

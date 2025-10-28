@@ -55,8 +55,8 @@ export function TableCard<T>({
   onDeleteClick,
   detailButtonLabel,
   deleteButtonLabel,
-  specialHandling = false, // 特殊处理标识
-  specialBtnHandling = false, // 按钮特殊处理标识
+  specialHandling = false, // Special Handling Identifier
+  specialBtnHandling = false, // Button Special Handling Identifier
   noTableHeader = false,
   noPagination = false,
 }: TableCardProps<T>) {
@@ -64,7 +64,7 @@ export function TableCard<T>({
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
-  // 记住用户的分页偏好
+  // Remember the user's pagination preferences
   React.useEffect(() => {
     const savedRowsPerPage = localStorage.getItem('tableRowsPerPage');
     if (savedRowsPerPage) {
@@ -80,7 +80,7 @@ export function TableCard<T>({
     const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage);
     setPage(0);
-    // 保存用户偏好
+    // Save user preferences
     localStorage.setItem('tableRowsPerPage', newRowsPerPage.toString());
   };
 
