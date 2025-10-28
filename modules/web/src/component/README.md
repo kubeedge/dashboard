@@ -1,99 +1,99 @@
-# 组件目录结构
+# Component Directory Structure
 
-本目录包含了所有React组件的模块化组织，按照功能职责进行清晰分类。
+This directory contains all React components, organized in a modular way and clearly categorized by functional responsibility.
 
-## 目录结构
+## Directory Overview
 
 ### 📁 Dialog/
-所有对话框和弹窗组件，包括详情查看和编辑对话框。
+All dialog and modal components, including detail viewers and edit dialogs.
 
-**包含组件：**
-- `YAMLViewerDialog` - YAML内容查看器
-- `SecretDetailDialog` - Secret详情对话框
-- `NodeDetailDialog` - Node详情对话框
-- `KeinkDialog` - Keink相关对话框
-- `DeviceModelDetailDialog` - 设备模型详情对话框
-- `DeviceDetailDialog` - 设备详情对话框
-- `DeploymentDetailDialog` - 部署详情对话框
-- `ConfigmapDetailDialog` - ConfigMap详情对话框
+**Includes components:**
+- `YAMLViewerDialog` - YAML content viewer  
+- `SecretDetailDialog` - Secret detail dialog  
+- `NodeDetailDialog` - Node detail dialog  
+- `KeinkDialog` - Keink-related dialog  
+- `DeviceModelDetailDialog` - Device model detail dialog  
+- `DeviceDetailDialog` - Device detail dialog  
+- `DeploymentDetailDialog` - Deployment detail dialog  
+- `ConfigmapDetailDialog` - ConfigMap detail dialog  
+
+---
 
 ### 📁 Form/
-所有表单和添加/编辑对话框组件。
+All form-related components, including add/edit dialogs.
 
-**包含组件：**
-- `AddServiceDialog` - 添加服务对话框
-- `AddServiceAccountDialog` - 添加服务账户对话框
-- `AddSecretDialog` - 添加密钥对话框
-- `AddRuleEndpointDialog` - 添加规则端点对话框
-- `AddRuleDialog` - 添加规则对话框
-- `AddRoleDialog` - 添加角色对话框
-- `AddRoleBindingDialog` - 添加角色绑定对话框
-- `AddNodeGroupDialog` - 添加节点组对话框
-- `AddNodeDialog` - 添加节点对话框
-- `AddEdgeApplicationDialog` - 添加边缘应用对话框
-- `AddDeviceModelDialog` - 添加设备模型对话框
-- `AddDeviceDialog` - 添加设备对话框
-- `AddConfigmapDialog` - 添加配置映射对话框
-- `AddClusterRoleDialog` - 添加集群角色对话框
-- `AddClusterRoleBindingDialog` - 添加集群角色绑定对话框
+**Includes components:**
+- `AddServiceDialog` - Add service dialog  
+- `AddServiceAccountDialog` - Add service account dialog  
+- `AddSecretDialog` - Add secret dialog  
+- `AddRuleEndpointDialog` - Add rule endpoint dialog  
+- `AddRuleDialog` - Add rule dialog  
+- `AddRoleDialog` - Add role dialog  
+- `AddRoleBindingDialog` - Add role binding dialog  
+- `AddNodeGroupDialog` - Add node group dialog  
+- `AddNodeDialog` - Add node dialog  
+- `AddEdgeApplicationDialog` - Add edge application dialog  
+- `AddDeviceModelDialog` - Add device model dialog  
+- `AddDeviceDialog` - Add device dialog  
+- `AddConfigmapDialog` - Add ConfigMap dialog  
+- `AddClusterRoleDialog` - Add cluster role dialog  
+- `AddClusterRoleBindingDialog` - Add cluster role binding dialog  
+
+---
 
 ### 📁 Table/
-所有表格相关组件。
+All table-related components.
 
-**包含组件：**
-- `VirtualTable` - 虚拟表格组件
-- `ProTable` - 专业表格组件
-- `PodTable` - Pod表格组件
+**Includes components:**
+- `VirtualTable` - Virtualized table component  
+- `ProTable` - Advanced table component  
+- `PodTable` - Pod table component  
+
+---
 
 ### 📁 Layout/
-所有布局相关组件。
+All layout-related components.
 
-**包含组件：**
-- `Layout` - 主布局组件
-- `AppHeader` - 应用头部组件
-- `SideNav` - 侧边导航组件
-- `AppContext` - 应用上下文组件
+**Includes components:**
+- `Layout` - Main layout component  
+- `AppHeader` - Application header  
+- `SideNav` - Sidebar navigation  
+- `AppContext` - Application context component  
+
+---
 
 ### 📁 Common/
-所有通用和可复用组件。
+All common and reusable components.
 
-**包含组件：**
-- `VersionCard` - 版本信息卡片
-- `TableCard` - 表格卡片容器
-- `StatusFeedback` - 状态反馈组件
-- `StatusCard` - 状态卡片
-- `SideNav` - 侧边导航
-- `SSEOutputArea` - SSE输出区域
-- `ProgressRing` - 进度环
-- `ProgressCard` - 进度卡片
-- `DeploymentDrawer` - 部署抽屉
-- `CascadeSelect` - 级联选择器
-- `AppHeader` - 应用头部
-- `AppContext` - 应用上下文
+**Includes components:**
+- `VersionCard` - Version info card  
+- `TableCard` - Table container card  
+- `StatusFeedback` - Status feedback component  
+- `StatusCard` - Status display card  
+- `SideNav` - Sidebar navigation  
+- `SSEOutputArea` - SSE output area  
+- `ProgressRing` - Progress ring  
+- `ProgressCard` - Progress card  
+- `DeploymentDrawer` - Deployment drawer  
+- `CascadeSelect` - Cascading selector  
+- `AppHeader` - Application header  
+- `AppContext` - Application context  
+
+---
 
 ### 📁 FormView/
-表单视图相关组件。
+Components related to form views.
 
-## 使用方式
+---
 
-### 导入组件
+## Usage
+
+### Importing Components
 ```typescript
-// 从特定模块导入
+// Import from specific modules
 import { YAMLViewerDialog } from '@/components/Dialog';
 import { AddServiceDialog } from '@/components/Form';
 import { ProTable } from '@/components/Table';
 
-// 从主索引导入
+// Import from the main index
 import { YAMLViewerDialog, AddServiceDialog, ProTable } from '@/components';
-```
-
-### 模块化优势
-1. **清晰的职责分离** - 每个目录都有明确的用途
-2. **易于维护** - 相关组件集中管理
-3. **更好的可扩展性** - 新增组件可以轻松归类
-4. **团队协作友好** - 不同开发者可以专注于不同模块
-5. **导入路径清晰** - 从路径就能看出组件类型
-
-## 迁移说明
-
-本结构是从原来的 `component/` 目录迁移而来，所有导入路径已自动更新为新的模块化路径。

@@ -13,8 +13,6 @@ interface ModelProperty {
 interface DeviceModelSpec {
   properties?: ModelProperty[];
   protocol: string
-
-
 }
 
 export interface DeviceModel extends TypeMeta {
