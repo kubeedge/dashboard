@@ -17,6 +17,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { ConfigMap } from '@/types/configMap';
 import { Secret } from '@/types/secret';
+import { useI18n } from '@/hook/useI18n';
 
 interface StorageMountFormProps {
   data: any;
@@ -26,8 +27,9 @@ interface StorageMountFormProps {
 }
 
 export default function StorageMountForm({ data, onChange, configMaps, secrets }: StorageMountFormProps) {
+  const { t } = useI18n();
   const handleAddVolume = () => {
-    const updatedData = [...(data.volumes || []), { }];
+    const updatedData = [...(data.volumes || []), {}];
     onChange('volumes', updatedData);
   }
 
@@ -64,8 +66,8 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
   const handleRemoveMountContainer = (index: number, conIndex: number) => {
     const newData = [...(data.volumes || [{}])];
     newData[index].mountContainers?.splice(conIndex, 1);
-    onChange('containers', newData);
-  }
+    onChange('volumes', newData);
+  };
 
   const renderVolumeForm = (volume: any, index: number) => (
     <Box key={volume.id} sx={{ display: 'flex', mb: 2 }}>
@@ -79,7 +81,7 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
         }}
       >
         <Typography variant="h6" color="white">
-          Volume
+          {t('table.volume')}
         </Typography>
         <Typography variant="subtitle1" color="white">
           {volume?.name || ''}
@@ -102,28 +104,28 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
         }}
       >
         <TextField
-          label="Name"
+          label={t('table.name')}
           required
           fullWidth
           margin="normal"
-          placeholder="Please enter name"
+          placeholder={t('form.pleaseEnterNamePlaceholder')}
           value={volume.name}
           onChange={(e) => handleValueChange(index, 'name', e.target.value)}
           error={!volume.name}
-          helperText={!volume.name ? 'Miss name' : ''}
+          helperText={!volume.name ? t('table.missName') : ''}
         />
 
         <FormControl component="fieldset" fullWidth margin="normal">
-          <FormLabel>Type</FormLabel>
+          <FormLabel>{t('table.type')}</FormLabel>
           <RadioGroup
             row
             value={volume?.type}
             onChange={(e) => handleValueChange(index, 'type', e.target.value)}
           >
-            <FormControlLabel value="EmptyDir" control={<Radio />} label="EmptyDir" />
-            <FormControlLabel value="HostPath" control={<Radio />} label="HostPath" />
-            <FormControlLabel value="ConfigMap" control={<Radio />} label="ConfigMap" />
-            <FormControlLabel value="Secret" control={<Radio />} label="Secret" />
+            <FormControlLabel value="EmptyDir" control={<Radio />} label={t('table.emptyDir')} />
+            <FormControlLabel value="HostPath" control={<Radio />} label={t('table.hostPath')} />
+            <FormControlLabel value="ConfigMap" control={<Radio />} label={t('table.configMap')} />
+            <FormControlLabel value="Secret" control={<Radio />} label={t('table.secret')} />
           </RadioGroup>
         </FormControl>
 
@@ -178,9 +180,9 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
         )}
         {volume.type === 'Secret' && (
           <FormControl fullWidth margin="normal">
-            <InputLabel>Secret Name</InputLabel>
+            <InputLabel>{t('table.secret')} {t('table.name')}</InputLabel>
             <Select
-              label="Secret Name"
+              label={`${t('table.secret')} ${t('table.name')}`}
               value={volume.secret || ''}
               onChange={(e) => handleValueChange(index, 'secret', e.target.value)}
               error={!volume.secret}
@@ -251,14 +253,14 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
             onClick={() => handleAddMountContainer(index)}
             fullWidth
           >
-            + Add Mount Container
+            + {t('table.addMountContainer')}
           </Button>
           {(volume?.mountContainers || []).map((container: any, conIndex: number) => (
             <Box key={conIndex} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
               <FormControl fullWidth margin="normal">
-                <InputLabel>Container</InputLabel>
+                <InputLabel>{t('table.container')}</InputLabel>
                 <Select
-                  label="Container"
+                  label={t('table.container')}
                   value={container.container}
                   onChange={(e) => {
                     const updatedContainers = [...(volume?.mountContainers || [{}])];
@@ -275,18 +277,18 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
                 </Select>
               </FormControl>
               <TextField
-                label="Mount Path"
+                label={t('table.mountPath')}
                 required
                 value={container.mountPath}
                 onChange={(e) => {
                   const updatedContainers = [...(volume?.mountContainers || [{}])];
-                    updatedContainers[conIndex].mountPath = e.target.value;
-                    handleValueChange(index, 'mountContainers', updatedContainers);
+                  updatedContainers[conIndex].mountPath = e.target.value;
+                  handleValueChange(index, 'mountContainers', updatedContainers);
                 }}
                 margin="normal"
                 placeholder="Please input mountPath"
                 error={!container.mountPath}
-                helperText={!container.mountPath ? 'Missing mountPath' : ''}
+                helperText={!container.mountPath ? t('table.missingMountPath') : ''}
               />
               <IconButton
                 color="error"
@@ -309,7 +311,7 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
         onClick={() => handleAddVolume()}
         fullWidth
       >
-        Add Volume
+        {t('table.addVolume')}
       </Button>
       {data?.volumes?.map(renderVolumeForm)}
     </Box>

@@ -10,32 +10,35 @@ import { DeviceModel } from '@/types/deviceModel';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
-
-const columns: ColumnDefinition<DeviceModel>[] = [
-  {
-    name: 'Name',
-    render: (deviceModel) => deviceModel?.metadata?.name,
-  },
-  {
-    name: 'Protocol',
-    render: (deviceModel) => deviceModel?.spec?.protocol,
-  },
-  {
-    name: 'Creation time',
-    render: (deviceModel) => deviceModel.metadata?.creationTimestamp,
-  },
-  {
-    name: 'Operation',
-    renderOperation: true,
-  },
-];
+import { useI18n } from '@/hook/useI18n';
 
 export default function DeviceModelPage() {
+  const { namespace } = useNamespace();
+  const { data, mutate } = useListDeviceModels(namespace);
+  const { t } = useI18n();
+
+  const columns: ColumnDefinition<DeviceModel>[] = [
+    {
+      name: t('table.name'),
+      render: (deviceModel) => deviceModel?.metadata?.name,
+    },
+    {
+      name: t('table.protocol'),
+      render: (deviceModel) => deviceModel?.spec?.protocol,
+    },
+    {
+      name: t('table.creationTime'),
+      render: (deviceModel) => deviceModel.metadata?.creationTimestamp,
+    },
+    {
+      name: t('table.operation'),
+      renderOperation: true,
+    },
+  ];
+
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = React.useState(false);
   const [selectedDeviceModel, setSelectedDeviceModel] = React.useState<DeviceModel | null>(null);
-  const { namespace } = useNamespace();
-  const { data, mutate } = useListDeviceModels();
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { setErrorMessage } = useAlert();
 
@@ -57,23 +60,23 @@ export default function DeviceModelPage() {
       setSelectedDeviceModel(resp?.data);
       setDetailDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get DeviceModel');
+      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
     }
   };
 
   const handleDeleteClick = (_: any, row: DeviceModel) => {
     showConfirmDialog({
-      title: 'Delete DeviceModel',
-      content: `Are you sure to delete DeviceModel ${row?.metadata?.name}?`,
+      title: t('actions.delete') + ' ' + t('common.deviceModel'),
+      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
       onConfirm: async () => {
         try {
           await deleteDeviceModel(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete DeviceModel');
+          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
         }
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   };
 
@@ -94,8 +97,8 @@ export default function DeviceModelPage() {
     <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
       <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
         <TableCard
-          title="DeviceModel"
-          addButtonLabel="Add Model"
+          title={t('common.deviceModel')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.deviceModel')}
           columns={columns}
           data={data?.items}
           onAddClick={handleAddClick}
@@ -103,7 +106,7 @@ export default function DeviceModelPage() {
           onDetailClick={handleDetailClick}
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="Details"
-          deleteButtonLabel="Delete"
+          deleteButtonLabel={t('actions.delete')}
         />
       </Box>
       <AddDeviceModelDialog

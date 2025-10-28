@@ -7,16 +7,18 @@ import { useListNodeGroups } from '@/api/nodeGroup';
 import { NodeGroup } from '@/types/nodeGroup';
 import { EdgeApplication } from '@/types/edgeApplication';
 import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 
 interface WorkloadTemplateFieldProps {
   index: number;
   onRemove: (index: number) => void;
   value: string;
   onChange: (value: string, index: number) => void;
+  t: (key: string) => string;
 }
 
 // Function to create a WorkloadTemplate field
-const WorkloadTemplateField = ({ index, onRemove, value, onChange }: WorkloadTemplateFieldProps) => (
+const WorkloadTemplateField = ({ index, onRemove, value, onChange, t }: WorkloadTemplateFieldProps) => (
   <Box sx={{ marginBottom: '16px' }}>
     <TextField
       fullWidth
@@ -24,13 +26,13 @@ const WorkloadTemplateField = ({ index, onRemove, value, onChange }: WorkloadTem
       rows={4}
       value={value}
       onChange={(event) => onChange(event.target.value, index)}
-      placeholder="manifests yaml"
+      placeholder={t('table.manifestsYaml')}
       required
       error={false} // Add validation error if needed
-      helperText="Missing workloadTemplate manifests yaml" // Error message if needed
+      helperText={t('table.missingWorkloadTemplate')} // Error message if needed
       sx={{ marginBottom: '8px' }}
     />
-    <Button variant="outlined" color="error" onClick={() => onRemove(index)}>− Remove WorkloadTemplate</Button>
+    <Button variant="outlined" color="error" onClick={() => onRemove(index)}>− {t('table.removeWorkloadTemplate')}</Button>
   </Box>
 );
 
@@ -40,16 +42,17 @@ interface TargetNodeGroupFieldProps {
   nodeGroups?: NodeGroup[];
   value: { name: string, overrides: string };
   onChange: (index: number, field: string, value: string) => void;
+  t: (key: string) => string;
 }
 
 // Function to create a TargetNodeGroup field
-const TargetNodeGroupField = ({ index, onRemove, nodeGroups, value, onChange }: TargetNodeGroupFieldProps) => (
+const TargetNodeGroupField = ({ index, onRemove, nodeGroups, value, onChange, t }: TargetNodeGroupFieldProps) => (
   <Box sx={{ marginBottom: '16px' }}>
     <TextField
       fullWidth
       select
-      placeholder="name"
-      label="Name"
+      placeholder={t('table.name')}
+      label={t('table.name')}
       margin="dense"
       value={value?.name}
       onChange={(event) => onChange(index, 'name', event.target.value)}
@@ -65,12 +68,12 @@ const TargetNodeGroupField = ({ index, onRemove, nodeGroups, value, onChange }: 
       rows={4}
       value={value?.overrides}
       onChange={(event) => onChange(index, 'overrides', event.target.value)}
-      placeholder="overriders yaml"
+      placeholder={t('table.overridersYaml')}
       required
       error={false} // Add validation error if needed
-      helperText="Missing targetNodeGroup overrides yaml" // Error message if needed
+      helperText={t('table.missingTargetNodeGroup')} // Error message if needed
     />
-    <Button variant="outlined" color="error" onClick={() => onRemove(index)}>− Remove TargetNodeGroup</Button>
+    <Button variant="outlined" color="error" onClick={() => onRemove(index)}>− {t('table.removeTargetNodeGroup')}</Button>
   </Box>
 );
 
@@ -81,10 +84,11 @@ interface AddEdgeApplicationDialogProps {
 }
 
 const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicationDialogProps) => {
+  const { t } = useI18n();
   const [namespace, setNamespace] = useState('');
   const [name, setName] = useState('');
   const [workloadTemplates, setWorkloadTemplates] = useState<string[]>([]);
-  const [targetNodeGroups, setTargetNodeGroups] = useState<{name: string, overrides: string}[]>([]);
+  const [targetNodeGroups, setTargetNodeGroups] = useState<{ name: string, overrides: string }[]>([]);
   const namespaceData = useListNamespaces()?.data;
   const nodeGroupData = useListNodeGroups()?.data;
   const { setErrorMessage } = useAlert();
@@ -94,9 +98,9 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
   };
 
   const handleChangeWorkloadTemplate = (value: string, index: number) => {
-      const templates = [...workloadTemplates];
-      (templates as any)[index] = value;
-      setWorkloadTemplates(templates);
+    const templates = [...workloadTemplates];
+    (templates as any)[index] = value;
+    setWorkloadTemplates(templates);
   }
 
   const handleRemoveWorkloadTemplate = (index: number) => {
@@ -129,8 +133,8 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
         spec: {
           workloadScope: {
             targetNodeGroups: targetNodeGroups?.map((nodeGroup) => ({
-                name: nodeGroup.name,
-                overrides: parse(nodeGroup.overrides),
+              name: nodeGroup.name,
+              overrides: parse(nodeGroup.overrides),
             })),
           },
           workloadTemplate: {
@@ -157,18 +161,18 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
 
   return (
     <Dialog open={!!open} onClose={handleClose} fullWidth maxWidth="md">
-      <DialogTitle>Add EdgeApplication</DialogTitle>
+      <DialogTitle>{t('table.addEdgeApplication')}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <TextField
             fullWidth
             select
-            label="Namespace"
+            label={t('table.namespace')}
             margin="dense"
             value={namespace}
             onChange={(e) => setNamespace(e.target.value)}
             required
-            placeholder="namespace"
+            placeholder={t('form.namespacePlaceholder')}
           >
             {namespaceData?.items?.map((item) => (
               <MenuItem key={item?.metadata?.uid} value={item?.metadata?.name}>{item?.metadata?.name}</MenuItem>
@@ -176,11 +180,11 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
           </TextField>
           <TextField
             fullWidth
-            label="Name"
+            label={t('table.name')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            placeholder="name"
+            placeholder={t('form.namePlaceholder')}
           />
           <Box>
             <Button
@@ -188,7 +192,7 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
               onClick={handleAddWorkloadTemplate}
               sx={{ width: '100%', marginBottom: '8px' }}
             >
-              + Add WorkloadTemplate
+              + {t('table.addWorkloadTemplate')}
             </Button>
             {workloadTemplates.map((v, index) => (
               <WorkloadTemplateField
@@ -197,6 +201,7 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
                 value={v}
                 onChange={handleChangeWorkloadTemplate}
                 onRemove={handleRemoveWorkloadTemplate}
+                t={t}
               />
             ))}
           </Box>
@@ -206,7 +211,7 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
               onClick={handleAddTargetNodeGroup}
               sx={{ width: '100%', marginBottom: '8px' }}
             >
-              + Add TargetNodeGroup
+              + {t('table.addTargetNodeGroup')}
             </Button>
             {targetNodeGroups.map((v, index) => (
               <TargetNodeGroupField
@@ -216,14 +221,15 @@ const AddEdgeApplicationDialog = ({ open, onClose, onSubmit }: AddEdgeApplicatio
                 onChange={handleUpdateTargetNodeGroup}
                 nodeGroups={nodeGroupData?.items}
                 onRemove={handleRemoveTargetNodeGroup}
+                t={t}
               />
             ))}
           </Box>
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained">Submit</Button>
+        <Button onClick={handleClose}>{t('actions.cancel')}</Button>
+        <Button onClick={handleSubmit} variant="contained">{t('actions.confirm')}</Button>
       </DialogActions>
     </Dialog>
   );
