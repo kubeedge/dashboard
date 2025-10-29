@@ -35,3 +35,9 @@ export function deleteDeviceModel(namespace: string, name: string) {
     method: 'DELETE',
   });
 }
+
+export async function listDeviceModels(namespace?: string): Promise<DeviceModelList> {
+  const url = namespace ? `/devicemodel/${namespace}` : 'devicemodel';
+  const res = await request<DeviceModelList>(url, { method: 'GET' });
+  return res.data;
+}

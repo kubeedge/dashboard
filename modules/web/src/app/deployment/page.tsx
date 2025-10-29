@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
+import { ColumnDefinition, TableCard } from '@/components/Common/TableCard';
 import { Box, TextField, Button } from '@mui/material';
 import { createDeployment, deleteDeployment, getDeployment, useListDeployments } from '@/api/deployment';
 import { Deployment } from '@/types/deployment';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
-import DeploymentDrawer from '@/component/DeploymentDrawer';
-import DeploymentDetailDialog from '@/component/DeploymentDetailDialog';
+import DeploymentDrawer from '@/components/Common/DeploymentDrawer';
+import DeploymentDetailDialog from '@/components/Dialog/DeploymentDetailDialog';
 import { useListPods } from '@/api/pod';
 import { useAlert } from '@/hook/useAlert';
 
@@ -47,7 +47,7 @@ export default function DeploymentPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [currentDeployment, setCurrentDeployment] = useState<Deployment | null>(null);
   const { data: podData, mutate: podMutate } = useListPods(namespace);
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -65,7 +65,7 @@ export default function DeploymentPage() {
       setCurrentDeployment(resp?.data);
       setDetailOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get Deployment');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get Deployment');
     }
 
   };
@@ -83,7 +83,7 @@ export default function DeploymentPage() {
           await deleteDeployment(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Deployment');
+          Error(error?.response?.data?.message || error?.message || 'Failed to delete Deployment');
         }
       },
       onCancel: () => {},
@@ -96,8 +96,8 @@ export default function DeploymentPage() {
   }
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title="Deployment"
           addButtonLabel="Add Deployment"

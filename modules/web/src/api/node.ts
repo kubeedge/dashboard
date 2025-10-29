@@ -27,3 +27,9 @@ export function deleteNode(name: string) {
     method: 'DELETE',
   });
 }
+
+export async function listNodes(namespace?: string): Promise<NodeList> {
+  const url = namespace ? `/node/${namespace}` : '/node';
+  const res = await request<NodeList>(url, { method: 'GET' });
+  return res.data;
+}

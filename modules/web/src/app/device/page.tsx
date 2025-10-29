@@ -3,11 +3,11 @@
 import React, { useEffect } from 'react';
 import { Box } from '@mui/material';
 import { createDevice, deleteDevice, getDevice, useListDevices } from '@/api/device';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
+import { ColumnDefinition, TableCard } from '@/components/Common/TableCard';
 import { Device } from '@/types/device';
 import { useNamespace } from '@/hook/useNamespace';
-import DeviceDetailDialog from '@/component/DeviceDetailDialog';
-import AddDeviceDialog from '@/component/AddDeviceDialog';
+import DeviceDetailDialog from '@/components/Dialog/DeviceDetailDialog';
+import AddDeviceDialog from '@/components/Form/AddDeviceDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 
@@ -41,7 +41,7 @@ export default function DevicesPage() {
   const [selectedDevice, setSelectedDevice] = React.useState<Device | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -60,7 +60,7 @@ export default function DevicesPage() {
       setSelectedDevice(resp?.data);
       setIsDetailDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get Device');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get Device');
     }
   };
 
@@ -73,7 +73,7 @@ export default function DevicesPage() {
           await deleteDevice(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Device');
+          Error(error?.response?.data?.message || error?.message || 'Failed to delete Device');
         }
       },
       onCancel: () => {},
@@ -95,8 +95,8 @@ export default function DevicesPage() {
   }
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title="Devices"
           addButtonLabel="Add Devices"
@@ -118,7 +118,7 @@ export default function DevicesPage() {
       <AddDeviceDialog
         open={isAddDeviceDialogOpen}
         onClose={handleCloseAddDeviceDialog}
-        onSubmit={handleSubmit}
+
       />
       {ConfirmDialogComponent}
     </Box>

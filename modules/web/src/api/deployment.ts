@@ -3,7 +3,6 @@ import { Status } from '@/types/common';
 import { Deployment, DeploymentList } from '@/types/deployment';
 import { request } from '@/helper/request';
 
-
 export function useListDeployments(namespace?: string) {
   const url = namespace ? `/deployment/${namespace}` : '/deployment';
   return useQuery<DeploymentList>('listDeployments', url, {

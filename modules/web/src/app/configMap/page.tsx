@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
+import { ColumnDefinition, TableCard } from '@/components/Common/TableCard';
 import { Box, TextField, Button } from '@mui/material';
 import { createConfigMap, deleteConfigMap, getConfigMap, useListConfigMaps } from '@/api/configMap';
 import { ConfigMap } from '@/types/configMap';
 import { useNamespace } from '@/hook/useNamespace';
-import AddConfigmapDialog from '@/component/AddConfigmapDialog';
-import ConfigmapDetailDialog from '@/component/ConfigmapDetailDialog';
+import AddConfigmapDialog from '@/components/Form/AddConfigmapDialog';
+import ConfigmapDetailDialog from '@/components/Dialog/ConfigmapDetailDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 
@@ -41,7 +41,7 @@ export default function ConfigmapPage() {
   const { namespace } = useNamespace();
   const { data, mutate } = useListConfigMaps(namespace);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -61,7 +61,7 @@ export default function ConfigmapPage() {
       setSelectedConfigMap(resp?.data);
       setDetailDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get ConfigMap');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get ConfigMap');
     }
   };
 
@@ -71,9 +71,15 @@ export default function ConfigmapPage() {
   };
 
   const handleSubmit = async (_: any, record: ConfigMap) => {
-    await createConfigMap(record?.metadata?.namespace || namespace || 'default', record);
-    mutate();
-  }
+    try {
+      await createConfigMap(record?.metadata?.namespace || namespace || 'default', record);
+      success('ConfigMap created');
+      setDialogOpen(false);
+      mutate();
+    } catch (e: any) {
+      error(e?.response?.data?.message || e?.message || 'Failed to create ConfigMap');
+    }
+  };
 
   const handleRefreshClick = () => {
     mutate();
@@ -88,7 +94,7 @@ export default function ConfigmapPage() {
           await deleteConfigMap(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete ConfigMap');
+          Error(error?.response?.data?.message || error?.message || 'Failed to delete ConfigMap');
         }
       },
       onCancel: () => {},
@@ -96,8 +102,8 @@ export default function ConfigmapPage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title="Configmap"
           addButtonLabel="Add Configmap"
@@ -112,7 +118,8 @@ export default function ConfigmapPage() {
           specialHandling={false}
         />
       </Box>
-      <AddConfigmapDialog open={dialogOpen} onClose={handleCloseDialog} onSubmit={handleSubmit} />
+      <AddConfigmapDialog open={dialogOpen} onClose={handleCloseDialog} onSubmit={handleSubmit}  />
+
       <ConfigmapDetailDialog open={detailDialogOpen} onClose={handleCloseDetailDialog} data={selectedConfigMap} />
       {ConfirmDialogComponent}
     </Box>

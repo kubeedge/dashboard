@@ -1,9 +1,8 @@
-// src/pages/NodePage.js
 'use client';
 
 import React, { useState } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
-import { NodeDetailDialog } from '@/component/NodeDetailDialog';
+import { ColumnDefinition, TableCard } from '@/components/Common/TableCard';
+import { NodeDetailDialog } from '@/components/Dialog/NodeDetailDialog';
 import {
   Box,
   TextField,
@@ -14,7 +13,7 @@ import { deleteNode, getNode, useListNodes } from '@/api/node';
 import { Editor } from '@tinymce/tinymce-react';
 import { Node } from '@/types/node';
 import { getNodeStatus } from '@/helper/status';
-import AddNodeDialog from '@/component/AddNodeDialog';
+import AddNodeDialog from '@/components/Form/AddNodeDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 
@@ -49,7 +48,7 @@ const columns: ColumnDefinition<Node>[] = [{
 export default function NodePage() {
   const { data, mutate } = useListNodes();
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   const [open, setOpen] = useState(false);
 
@@ -70,7 +69,7 @@ export default function NodePage() {
       setSelectedNode(resp?.data);
       setDetailDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get Node');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get Node');
     }
   };
 
@@ -88,7 +87,7 @@ export default function NodePage() {
           await deleteNode(row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Node');
+          Error(error?.response?.data?.message || error?.message || 'Failed to delete Node');
         }
       },
       onCancel: () => {},
@@ -96,8 +95,8 @@ export default function NodePage() {
   }
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title="Nodes"
           addButtonLabel="Add Node"

@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
+import { ColumnDefinition, TableCard } from '@/components/Common/TableCard';
 import { Box } from '@mui/material';
 import { createRule, deleteRule, getRule, useListRules } from '@/api/rule';
-import AddRuleDialog from '@/component/AddRuleDialog';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
+import AddRuleDialog from '@/components/Form/AddRuleDialog';
+import YAMLViewerDialog from '@/components/Dialog/YAMLViewerDialog';
 import { Rule } from '@/types/rule';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
@@ -53,7 +53,7 @@ export default function RulePage() {
   const { namespace } = useNamespace();
   const { data, mutate } = useListRules(namespace);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -77,7 +77,7 @@ export default function RulePage() {
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get Rule');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get Rule');
     }
 
   }
@@ -104,7 +104,7 @@ export default function RulePage() {
           await deleteRule(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
         } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to delete Rule');
+          Error(error?.response?.data?.message || error?.message || 'Failed to delete Rule');
         }
       },
       onCancel: () => {},
@@ -112,8 +112,8 @@ export default function RulePage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title="Rule"
           addButtonLabel="Add Rule"
