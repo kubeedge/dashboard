@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ColumnDefinition, TableCard } from '@/component/TableCard';
-import { Box } from '@mui/material';
+import { Box, TextField, MenuItem, Pagination } from '@mui/material';
 import { createRuleEndpoint, deleteRuleEndpoint, getRuleEndpoint, useListRuleEndpoints } from '@/api/ruleEndpoint';
 import YAMLViewerDialog from '@/component/YAMLViewerDialog';
 import { RuleEndpoint } from '@/types/ruleEndpoint';
@@ -11,18 +11,22 @@ import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 
-const columns: ColumnDefinition<RuleEndpoint>[] = [
+const columns: ColumnDefinition<RuleEndpoint | any>[] = [
   {
     name: 'Namespace',
-    render: (ruleEndpoint) => ruleEndpoint?.metadata?.namespace,
+    render: (ruleEndpoint) => ruleEndpoint?.metadata?.namespace || ruleEndpoint?.namespace,
   },
   {
     name: 'Name',
-    render: (ruleEndpoint) => ruleEndpoint?.metadata?.name,
+    render: (ruleEndpoint) => ruleEndpoint?.metadata?.name || ruleEndpoint?.name,
+  },
+  {
+    name: 'RuleEndpoint Type',
+    render: (ruleEndpoint) => ruleEndpoint?.spec?.ruleEndpointType || ruleEndpoint?.ruleEndpointType,
   },
   {
     name: 'Creation time',
-    render: (ruleEndpoint) => ruleEndpoint.metadata?.creationTimestamp,
+    render: (ruleEndpoint) => ruleEndpoint?.metadata?.creationTimestamp || ruleEndpoint?.creationTimestamp,
   },
   {
     name: 'Operation',
@@ -32,16 +36,34 @@ const columns: ColumnDefinition<RuleEndpoint>[] = [
 
 export default function RuleEndpointPage() {
   const { namespace } = useNamespace();
-  const { data, mutate } = useListRuleEndpoints(namespace);
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { setErrorMessage } = useAlert();
 
+  // New pagination state
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [sort, setSort] = useState('name');
+  const [order, setOrder] = useState('asc');
+  const [name, setName] = useState('');
+
+
+  const params = useMemo(() => ({
+    namespace,
+    page,
+    pageSize,
+    sort,
+    order,
+    name: name ? `*${name}*` : undefined,
+  }), [namespace, page, pageSize, sort, order, name]);
+
+  const { data, mutate } = useListRuleEndpoints(params);
+
   useEffect(() => {
     mutate();
-  }, [namespace, mutate]);
+  }, [params, mutate]);
 
   const handleAddClick = () => {
     setAddDialogOpen(true);
@@ -101,7 +123,72 @@ export default function RuleEndpointPage() {
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="YAML"
           deleteButtonLabel="Delete"
+          noPagination={true}
         />
+
+        {/* New pagination controls */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2, flexWrap: 'wrap' }}>
+          <TextField
+            select
+            size="small"
+            label="Rows per page"
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
+            sx={{ minWidth: 120 }}
+          >
+            <MenuItem value={5}>5</MenuItem>
+            <MenuItem value={10}>10</MenuItem>
+            <MenuItem value={20}>20</MenuItem>
+            <MenuItem value={50}>50</MenuItem>
+          </TextField>
+
+          <TextField
+            select
+            size="small"
+            label="Sort"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            sx={{ minWidth: 120 }}
+          >
+            <MenuItem value="name">Name</MenuItem>
+            <MenuItem value="ruleEndpointType">RuleEndpoint Type</MenuItem>
+            <MenuItem value="creationTimestamp">Creation Time</MenuItem>
+          </TextField>
+
+          <TextField
+            select
+            size="small"
+            label="Order"
+            value={order}
+            onChange={(e) => setOrder(e.target.value)}
+            sx={{ minWidth: 100 }}
+          >
+            <MenuItem value="asc">Ascending</MenuItem>
+            <MenuItem value="desc">Descending</MenuItem>
+          </TextField>
+
+          <TextField
+            size="small"
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Filter by name..."
+            sx={{ minWidth: 200 }}
+          />
+
+
+
+          <Pagination
+            count={data?.total ? Math.ceil(data.total / pageSize) : 1}
+            page={page}
+            onChange={(_, newPage) => setPage(newPage)}
+            color="primary"
+            sx={{ ml: 'auto' }}
+          />
+        </Box>
       </Box>
       <AddRuleEndpointDialog
         open={addDialogOpen}
