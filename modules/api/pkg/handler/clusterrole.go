@@ -23,14 +23,15 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/clusterrole"
+	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/errors"
 )
 
 func (apiHandler *APIHandler) addClusterRoleRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/clusterrole").To(apiHandler.handleGetClusterRoles).
-			Writes(rbacv1.ClusterRoleList{}).
-			Returns(http.StatusOK, "OK", rbacv1.ClusterRoleList{}))
+			Writes(ListResponse[clusterrole.ClusterRoleListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[clusterrole.ClusterRoleListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/clusterrole/{name}").To(apiHandler.handleGetClusterRole).
 			Param(apiV1Ws.PathParameter("name", "Name of the ClusterRole")).
@@ -60,12 +61,24 @@ func (apiHandler *APIHandler) handleGetClusterRoles(request *restful.Request, re
 		return
 	}
 
-	result, err := clusterrole.GetClusterRoleList(k8sClient)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: clusterrole.SortableFields, FilterableFields: clusterrole.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	response.WriteHeaderAndEntity(http.StatusOK, result)
+
+	rawList, err := clusterrole.GetClusterRoleList(k8sClient)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	items := rawList.Items
+
+	items = common.FilterItems(items, toCommonFilterClauses(query.Filters), clusterrole.ClusterRoleFieldGetter)
+	common.SortItems(items, query.Sort, query.Order, clusterrole.ClusterRoleComparators())
+	pageItems, total, _ := common.Paginate(items, query.Page, query.PageSize)
+	view := common.Project(pageItems, clusterrole.ClusterRoleToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetClusterRole(request *restful.Request, response *restful.Response) {

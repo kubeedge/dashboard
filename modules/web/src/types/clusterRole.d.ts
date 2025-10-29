@@ -18,4 +18,11 @@ export interface ClusterRole extends TypeMeta {
   rules?: PolicyRule[];
 }
 
-export interface ClusterRoleList extends ResourceList<ClusterRole> {}
+export interface ClusterRoleList extends ResourceList<ClusterRole> {
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+  sort?: string;
+  order?: string;
+}

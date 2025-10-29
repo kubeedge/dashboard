@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ColumnDefinition, TableCard } from '@/component/TableCard';
-import { Box, TextField, Button } from '@mui/material';
+import { Box, TextField, MenuItem, Pagination } from '@mui/material';
 import { createServiceAccount, deleteServiceAccount, getServiceAccount, useListServiceAccounts } from '@/api/serviceAccount';
 import YAMLViewerDialog from '@/component/YAMLViewerDialog';
 import { ServiceAccount } from '@/types/serviceAccount';
@@ -11,22 +11,28 @@ import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 
-const columns: ColumnDefinition<ServiceAccount>[] = [
+const columns: ColumnDefinition<ServiceAccount | any>[] = [
   {
     name: 'Namespace',
-    render: (account) => account?.metadata?.namespace,
+    render: (account) => account?.metadata?.namespace || account?.namespace,
   },
   {
     name: 'Name',
-    render: (account) => account?.metadata?.name,
+    render: (account) => account?.metadata?.name || account?.name,
   },
   {
     name: 'Secrets',
-    render: (account) => account.secrets?.map(secret => secret.name)?.join(', ') || '-',
+    render: (account) => {
+      // Handle both original and transformed data
+      if (typeof account?.secrets === 'number') {
+        return account.secrets;
+      }
+      return account?.secrets?.map(secret => secret.name)?.join(', ') || '-';
+    },
   },
   {
     name: 'Creation time',
-    render: (account) => account.metadata?.creationTimestamp,
+    render: (account) => account?.metadata?.creationTimestamp || account?.creationTimestamp,
   },
   {
     name: 'Operation',
@@ -36,7 +42,22 @@ const columns: ColumnDefinition<ServiceAccount>[] = [
 
 export default function ServiceAccountsPage() {
   const { namespace } = useNamespace();
-  const { data, mutate } = useListServiceAccounts(namespace);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [sort, setSort] = useState('name');
+  const [order, setOrder] = useState('asc');
+  const [name, setName] = useState('');
+  
+  const params = useMemo(() => ({
+    namespace,
+    page,
+    pageSize,
+    sort,
+    order,
+    ...(name && { 'name': `*${name}*` }),
+  }), [namespace, page, pageSize, sort, order, name]);
+  
+  const { data, mutate } = useListServiceAccounts(params);
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
@@ -45,7 +66,7 @@ export default function ServiceAccountsPage() {
 
   useEffect(() => {
     mutate();
-  }, [namespace, mutate]);
+  }, [params, mutate]);
 
   const handleAddClick = () => {
     setAddDialogOpen(true);
@@ -108,7 +129,71 @@ export default function ServiceAccountsPage() {
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="YAML"
           deleteButtonLabel="Delete"
+          noPagination={true}
         />
+        
+        {/* New pagination controls */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <TextField
+              select
+              label="Rows per page"
+              value={pageSize}
+              onChange={(e) => setPageSize(Number(e.target.value))}
+              size="small"
+              sx={{ minWidth: 120 }}
+            >
+              <MenuItem value={5}>5</MenuItem>
+              <MenuItem value={10}>10</MenuItem>
+              <MenuItem value={20}>20</MenuItem>
+              <MenuItem value={50}>50</MenuItem>
+            </TextField>
+            
+            <TextField
+              select
+              label="Sort"
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              size="small"
+              sx={{ minWidth: 120 }}
+            >
+              <MenuItem value="name">Name</MenuItem>
+              <MenuItem value="namespace">Namespace</MenuItem>
+              <MenuItem value="secrets">Secrets</MenuItem>
+              <MenuItem value="creationTimestamp">Creation Time</MenuItem>
+            </TextField>
+            
+            <TextField
+              select
+              label="Order"
+              value={order}
+              onChange={(e) => setOrder(e.target.value)}
+              size="small"
+              sx={{ minWidth: 100 }}
+            >
+              <MenuItem value="asc">Ascending</MenuItem>
+              <MenuItem value="desc">Descending</MenuItem>
+            </TextField>
+            
+            <TextField
+              label="Name filter"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              size="small"
+              placeholder="Search by name..."
+              sx={{ minWidth: 150 }}
+            />
+          </Box>
+          
+          <Pagination
+            count={data?.total ? Math.ceil(data.total / pageSize) : 1}
+            page={page}
+            onChange={(_, newPage) => setPage(newPage)}
+            color="primary"
+            showFirstButton
+            showLastButton
+          />
+        </Box>
       </Box>
       <YAMLViewerDialog
         open={yamlDialogOpen}
