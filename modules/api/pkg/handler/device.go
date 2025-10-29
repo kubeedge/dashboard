@@ -21,6 +21,7 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 	devicev1beta1 "github.com/kubeedge/api/apis/devices/v1beta1"
+	"github.com/kubeedge/api/client/clientset/versioned" //  kubeedge clientset interface
 
 	"github.com/kubeedge/dashboard/api/pkg/resource/device"
 	"github.com/kubeedge/dashboard/errors"
@@ -64,89 +65,89 @@ func (apiHandler *APIHandler) addDeviceRoutes(apiV1Ws *restful.WebService) *APIH
 	return apiHandler
 }
 
-func (apiHandler *APIHandler) handleGetDevices(request *restful.Request, response *restful.Response) {
+// withKubeEdgeClient is a helper to reduce duplicated code for obtaining
+// kubeedge client and handling the initial error. The provided handler
+// function will only be executed if the client is successfully retrieved.
+func (apiHandler *APIHandler) withKubeEdgeClient(
+	request *restful.Request,
+	response *restful.Response,
+	handler func(kubeedgeClient versioned.Interface),
+) {
 	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
 	if err != nil {
 		return
 	}
+	handler(kubeedgeClient)
+}
 
-	namespace := request.PathParameter("namespace")
-	result, err := device.GetDeviceList(kubeedgeClient, namespace)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	response.WriteEntity(result)
+func (apiHandler *APIHandler) handleGetDevices(request *restful.Request, response *restful.Response) {
+	apiHandler.withKubeEdgeClient(request, response, func(kubeedgeClient versioned.Interface) {
+		namespace := request.PathParameter("namespace")
+		result, err := device.GetDeviceList(kubeedgeClient, namespace)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		response.WriteEntity(result)
+	})
 }
 
 func (apiHandler *APIHandler) handleGetDevice(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
-	if err != nil {
-		return
-	}
-
-	namespace := request.PathParameter("namespace")
-	name := request.PathParameter("name")
-	result, err := device.GetDevice(kubeedgeClient, namespace, name)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	response.WriteEntity(result)
+	apiHandler.withKubeEdgeClient(request, response, func(kubeedgeClient versioned.Interface) {
+		namespace := request.PathParameter("namespace")
+		name := request.PathParameter("name")
+		result, err := device.GetDevice(kubeedgeClient, namespace, name)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		response.WriteEntity(result)
+	})
 }
 
 func (apiHandler *APIHandler) handleCreateDevice(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
-	if err != nil {
-		return
-	}
-
-	namespace := request.PathParameter("namespace")
-	data := new(devicev1beta1.Device)
-	if err := request.ReadEntity(data); err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	result, err := device.CreateDevice(kubeedgeClient, namespace, data)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	response.WriteEntity(result)
+	apiHandler.withKubeEdgeClient(request, response, func(kubeedgeClient versioned.Interface) {
+		namespace := request.PathParameter("namespace")
+		data := new(devicev1beta1.Device)
+		if err := request.ReadEntity(data); err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		result, err := device.CreateDevice(kubeedgeClient, namespace, data)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		response.WriteEntity(result)
+	})
 }
 
 func (apiHandler *APIHandler) handleUpdateDevice(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
-	if err != nil {
-		return
-	}
-
-	namespace := request.PathParameter("namespace")
-	data := new(devicev1beta1.Device)
-	if err := request.ReadEntity(data); err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	result, err := device.UpdateDevice(kubeedgeClient, namespace, data)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	response.WriteEntity(result)
+	apiHandler.withKubeEdgeClient(request, response, func(kubeedgeClient versioned.Interface) {
+		namespace := request.PathParameter("namespace")
+		data := new(devicev1beta1.Device)
+		if err := request.ReadEntity(data); err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		result, err := device.UpdateDevice(kubeedgeClient, namespace, data)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		response.WriteEntity(result)
+	})
 }
 
 func (apiHandler *APIHandler) handleDeleteDevice(request *restful.Request, response *restful.Response) {
-	kubeedgeClient, err := apiHandler.getKubeEdgeClient(request, response)
-	if err != nil {
-		return
-	}
-
-	namespace := request.PathParameter("namespace")
-	name := request.PathParameter("name")
-	err = device.DeleteDevice(kubeedgeClient, namespace, name)
-	if err != nil {
-		errors.HandleInternalError(response, err)
-		return
-	}
-	response.WriteHeader(http.StatusNoContent)
+	apiHandler.withKubeEdgeClient(request, response, func(kubeedgeClient versioned.Interface) {
+		namespace := request.PathParameter("namespace")
+		name := request.PathParameter("name")
+		err := device.DeleteDevice(kubeedgeClient, namespace, name)
+		if err != nil {
+			errors.HandleInternalError(response, err)
+			return
+		}
+		response.WriteHeader(http.StatusNoContent)
+	})
 }
