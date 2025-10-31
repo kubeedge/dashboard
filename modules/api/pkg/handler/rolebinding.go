@@ -22,6 +22,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	rbacv1 "k8s.io/api/rbac/v1"
 
+	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/rolebinding"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +30,13 @@ import (
 func (apiHandler *APIHandler) addRoleBindingRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/rolebinding").To(apiHandler.handleGetRoleBindings).
-			Writes(rbacv1.RoleBindingList{}).
-			Returns(http.StatusOK, "OK", rbacv1.RoleBindingList{}))
+			Writes(ListResponse[rolebinding.RoleBindingListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[rolebinding.RoleBindingListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/rolebinding/{namespace}").To(apiHandler.handleGetRoleBindings).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
-			Writes(rbacv1.RoleBindingList{}).
-			Returns(http.StatusOK, "OK", rbacv1.RoleBindingList{}))
+			Writes(ListResponse[rolebinding.RoleBindingListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[rolebinding.RoleBindingListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/rolebinding/{namespace}/{name}").To(apiHandler.handleGetRoleBinding).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
@@ -69,14 +70,26 @@ func (apiHandler *APIHandler) handleGetRoleBindings(request *restful.Request, re
 		return
 	}
 
-	namespace := request.PathParameter("namespace")
-	result, err := rolebinding.GetRoleBindingList(k8sClient, namespace)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: rolebinding.SortableFields, FilterableFields: rolebinding.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
 
-	response.WriteEntity(result)
+	namespace := request.PathParameter("namespace")
+	
+	rawList, err := rolebinding.GetRoleBindingList(k8sClient, namespace)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	items := rawList.Items
+
+	items = common.FilterItems(items, toCommonFilterClauses(query.Filters), rolebinding.RoleBindingFieldGetter)
+	common.SortItems(items, query.Sort, query.Order, rolebinding.RoleBindingComparators())
+	pageItems, total, _ := common.Paginate(items, query.Page, query.PageSize)
+	view := common.Project(pageItems, rolebinding.RoleBindingToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetRoleBinding(request *restful.Request, response *restful.Response) {

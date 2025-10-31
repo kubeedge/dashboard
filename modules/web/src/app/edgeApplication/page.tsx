@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ColumnDefinition, TableCard } from '@/component/TableCard';
-import { Box, TextField, Button } from '@mui/material';
+import { Box, TextField, Button, MenuItem, Pagination } from '@mui/material';
 import { createEdgeApplication, deleteEdgeApplication, getEdgeApplication, useListEdgeApplications } from '@/api/edgeApplication';
 import YAMLViewerDialog from '@/component/YAMLViewerDialog';
 import AddEdgeApplicationDialog from '@/component/AddEdgeApplicationDialog';
@@ -13,9 +13,8 @@ import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
 
 export default function EdgeApplicationPage() {
-  const [name, setName] = React.useState('');
+  const [name, setName] = useState('');
   const { namespace } = useNamespace();
-  const { data, mutate } = useListEdgeApplications(namespace);
   const { t } = useI18n();
 
   const columns: ColumnDefinition<EdgeApplication>[] = [
@@ -40,6 +39,21 @@ export default function EdgeApplicationPage() {
       renderOperation: true,
     },
   ];
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sort, setSort] = useState<string | undefined>('creationTimestamp');
+  const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
+  const [mock, setMock] = useState<number | undefined>(undefined);
+  const params = useMemo(() => ({
+    namespace,
+    page,
+    pageSize,
+    sort,
+    order,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
+    mock,
+  }), [namespace, page, pageSize, sort, order, name, mock]);
+  const { data, mutate } = useListEdgeApplications(params);
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
@@ -120,7 +134,37 @@ export default function EdgeApplicationPage() {
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="YAML"
           deleteButtonLabel={t('actions.delete')}
+          noPagination={true}
         />
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
+          <TextField size="small" select label="Rows per page" value={pageSize}
+            onChange={(e) => { const v = Number(e.target.value)||10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
+            <MenuItem value={5}>5</MenuItem>
+            <MenuItem value={10}>10</MenuItem>
+            <MenuItem value={20}>20</MenuItem>
+            <MenuItem value={50}>50</MenuItem>
+          </TextField>
+          <TextField size="small" select label="Sort" value={sort||''} onChange={(e) => setSort(e.target.value||undefined)} sx={{ minWidth: 180 }}>
+            <MenuItem value="">Default</MenuItem>
+            <MenuItem value="name">name</MenuItem>
+            <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
+          </TextField>
+          <TextField size="small" select label="Order" value={order||''} onChange={(e) => setOrder((e.target.value as any)||undefined)} sx={{ minWidth: 140 }}>
+            <MenuItem value="">Default</MenuItem>
+            <MenuItem value="asc">asc</MenuItem>
+            <MenuItem value="desc">desc</MenuItem>
+          </TextField>
+          <TextField size="small" label="Name" value={name||''} onChange={(e) => setName(e.target.value)} placeholder="supports * wildcards" />
+          {/* mock control removed in PR branch; automatic fetch on change, no apply button */}
+          <Box sx={{ flexGrow: 1 }} />
+          <Pagination
+            page={page}
+            onChange={(_, value) => { setPage(value); mutate(); }}
+            count={Math.max(1, Math.ceil(((data?.total ?? 0) as number) / (pageSize || 1)))}
+            size="small"
+            color="primary"
+          />
+        </Box>
       </Box>
       <YAMLViewerDialog
         open={yamlDialogOpen}

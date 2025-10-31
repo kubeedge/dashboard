@@ -3,8 +3,21 @@ import { Status } from '@/types/common';
 import { Rule, RuleList } from '@/types/rule';
 import { request } from '@/helper/request';
 
-export function useListRules(namespace?: string) {
-  const url = namespace ? `/rule/${namespace}` : '/rule';
+export function useListRules(params?: Record<string, string | number | undefined>) {
+  const searchParams = new URLSearchParams();
+  
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== '' && key !== 'namespace') {
+        searchParams.append(key, value.toString());
+      }
+    });
+  }
+  
+  const namespace = params?.namespace as string;
+  const baseUrl = namespace ? `/rule/${namespace}` : '/rule';
+  const url = searchParams.toString() ? `${baseUrl}?${searchParams.toString()}` : baseUrl;
+  
   return useQuery<RuleList>('listRules', url, {
     method: 'GET',
   });

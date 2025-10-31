@@ -100,9 +100,12 @@ const AddNodeGroupDialog = ({ open, onClose, onSubmit }: AddNodeGroupDialogProps
               placeholder={t('form.nodes')}
               sx={{ minWidth: 300 }}
             >
-              {data?.items?.map((node) => (
-                <MenuItem key={node?.metadata?.uid} value={node?.metadata?.name || ''}>
-                  {node?.metadata?.name || ''}
+              {data?.items?.map((node: any) => (
+                <MenuItem
+                  key={((node?.metadata?.uid ?? node?.uid) ?? '') as string}
+                  value={(((node?.metadata?.name ?? node?.name)) ?? '') as string}
+                >
+                  {(((node?.metadata?.name ?? node?.name)) ?? '') as string}
                 </MenuItem>
               ))}
             </Select>

@@ -20,7 +20,7 @@ const AddServiceAccountDialog = ({ open, onClose, onSubmit }: AddServiceAccountD
   const [secrets, setSecrets] = React.useState<string[]>([]);
   const [formErrors, setFormErrors] = React.useState<any>({});
   const namespaceData = useListNamespaces()?.data;
-  const { data, mutate } = useListSecrets(namespace);
+  const { data, mutate } = useListSecrets({ namespace });
   const { setErrorMessage } = useAlert();
 
   useEffect(() => {

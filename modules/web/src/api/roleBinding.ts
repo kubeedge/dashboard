@@ -3,9 +3,25 @@ import { Status } from '@/types/common';
 import { RoleBinding, RoleBindingList } from '@/types/roleBinding';
 import { request } from '@/helper/request';
 
-export function useListRoleBindings(namespace?: string) {
-  const url = namespace ? `/rolebinding/${namespace}` : '/rolebinding';
-  return useQuery<RoleBindingList>('listRoleBindings', url, {
+export function useListRoleBindings(params?: Record<string, string | number | undefined>) {
+  const searchParams = new URLSearchParams();
+  let url = '/rolebinding';
+  
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && key !== 'namespace') {
+        searchParams.append(key, String(value));
+      }
+    });
+    
+    if (params.namespace) {
+      url = `/rolebinding/${params.namespace}`;
+    }
+  }
+  
+  const finalUrl = searchParams.toString() ? `${url}?${searchParams.toString()}` : url;
+  
+  return useQuery<RoleBindingList>('listRoleBindings', finalUrl, {
     method: 'GET',
   });
 }

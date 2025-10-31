@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ColumnDefinition, TableCard } from '@/component/TableCard';
-import { Box, TextField, Button } from '@mui/material';
+import { Box, TextField, MenuItem, Pagination } from '@mui/material';
 import { createDeviceModel, deleteDeviceModel, getDeviceModel, useListDeviceModels } from '@/api/deviceModel';
 import AddDeviceModelDialog from '@/component/AddDeviceModelDialog';
 import DeviceModelDetailDialog from '@/component/DeviceModelDetailDialog';
@@ -13,22 +13,20 @@ import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
 
 export default function DeviceModelPage() {
-  const { namespace } = useNamespace();
-  const { data, mutate } = useListDeviceModels(namespace);
   const { t } = useI18n();
 
-  const columns: ColumnDefinition<DeviceModel>[] = [
+  const columns: ColumnDefinition<DeviceModel | any>[] = [
     {
       name: t('table.name'),
-      render: (deviceModel) => deviceModel?.metadata?.name,
+      render: (deviceModel) => (deviceModel as any)?.metadata?.name ?? (deviceModel as any)?.name,
     },
     {
       name: t('table.protocol'),
-      render: (deviceModel) => deviceModel?.spec?.protocol,
+      render: (deviceModel) => (deviceModel as any)?.spec?.protocol ?? (deviceModel as any)?.protocol,
     },
     {
       name: t('table.creationTime'),
-      render: (deviceModel) => deviceModel.metadata?.creationTimestamp,
+      render: (deviceModel) => (deviceModel as any)?.metadata?.creationTimestamp ?? (deviceModel as any)?.creationTimestamp,
     },
     {
       name: t('table.operation'),
@@ -36,9 +34,25 @@ export default function DeviceModelPage() {
     },
   ];
 
-  const [addDialogOpen, setAddDialogOpen] = React.useState(false);
-  const [detailDialogOpen, setDetailDialogOpen] = React.useState(false);
-  const [selectedDeviceModel, setSelectedDeviceModel] = React.useState<DeviceModel | null>(null);
+  const { namespace } = useNamespace();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sort, setSort] = useState<string | undefined>('creationTimestamp');
+  const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
+  const [name, setName] = useState<string | undefined>(undefined);
+  const params = useMemo(() => ({
+    namespace,
+    page,
+    pageSize,
+    sort,
+    order,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
+  }), [namespace, page, pageSize, sort, order, name]);
+  const { data, mutate } = useListDeviceModels(params);
+
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedDeviceModel, setSelectedDeviceModel] = useState<DeviceModel | null>(null);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { setErrorMessage } = useAlert();
 
@@ -107,7 +121,37 @@ export default function DeviceModelPage() {
           onDeleteClick={handleDeleteClick}
           detailButtonLabel="Details"
           deleteButtonLabel={t('actions.delete')}
+          noPagination={true}
         />
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
+          <TextField size="small" select label="Rows per page" value={pageSize}
+            onChange={(e) => { const v = Number(e.target.value)||10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
+            <MenuItem value={5}>5</MenuItem>
+            <MenuItem value={10}>10</MenuItem>
+            <MenuItem value={20}>20</MenuItem>
+            <MenuItem value={50}>50</MenuItem>
+          </TextField>
+          <TextField size="small" select label="Sort" value={sort||''} onChange={(e) => setSort(e.target.value||undefined)} sx={{ minWidth: 180 }}>
+            <MenuItem value="">Default</MenuItem>
+            <MenuItem value="name">name</MenuItem>
+            <MenuItem value="protocol">protocol</MenuItem>
+            <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
+          </TextField>
+          <TextField size="small" select label="Order" value={order||''} onChange={(e) => setOrder((e.target.value as any)||undefined)} sx={{ minWidth: 140 }}>
+            <MenuItem value="">Default</MenuItem>
+            <MenuItem value="asc">asc</MenuItem>
+            <MenuItem value="desc">desc</MenuItem>
+          </TextField>
+          <TextField size="small" label="Name" value={name||''} onChange={(e) => setName(e.target.value||undefined)} placeholder="supports * wildcards" />
+          <Box sx={{ flexGrow: 1 }} />
+          <Pagination
+            page={page}
+            onChange={(_, value) => { setPage(value); mutate(); }}
+            count={Math.max(1, Math.ceil(((data?.total ?? 0) as number) / (pageSize || 1)))}
+            size="small"
+            color="primary"
+          />
+        </Box>
       </Box>
       <AddDeviceModelDialog
         open={addDialogOpen}

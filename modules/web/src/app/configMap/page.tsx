@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ColumnDefinition, TableCard } from '@/component/TableCard';
-import { Box, TextField, Button } from '@mui/material';
+import { Box, TextField, Button, MenuItem, Pagination } from '@mui/material';
 import { createConfigMap, deleteConfigMap, getConfigMap, useListConfigMaps } from '@/api/configMap';
 import { ConfigMap } from '@/types/configMap';
 import { useNamespace } from '@/hook/useNamespace';
@@ -13,37 +13,52 @@ import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
 
 export default function ConfigmapPage() {
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [detailDialogOpen, setDetailDialogOpen] = React.useState(false);
-  const [selectedConfigMap, setSelectedConfigMap] = React.useState<ConfigMap | null>(null);
   const { namespace } = useNamespace();
-  const { data, mutate } = useListConfigMaps(namespace);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sort, setSort] = useState<string | undefined>('creationTimestamp');
+  const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
+  const [name, setName] = useState<string | undefined>(undefined);
+  const [mock, setMock] = useState<number | undefined>(undefined);
+  const params = useMemo(() => ({
+    namespace,
+    page,
+    pageSize,
+    sort,
+    order,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
+    mock,
+  }), [namespace, page, pageSize, sort, order, name, mock]);
+  const { data, mutate } = useListConfigMaps(params);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const { setErrorMessage } = useAlert();
   const { t } = useI18n();
 
-  const columns: ColumnDefinition<ConfigMap>[] = [
+  const columns: ColumnDefinition<ConfigMap | any>[] = [
     {
       name: t('table.namespace'),
-      render: (configMap) => configMap?.metadata?.namespace,
+      render: (configMap) => (configMap as any)?.metadata?.namespace ?? (configMap as any)?.namespace,
     },
     {
       name: t('table.name'),
-      render: (configMap) => configMap?.metadata?.name,
+      render: (configMap) => (configMap as any)?.metadata?.name ?? (configMap as any)?.name,
     },
     {
-      name: t('form.labels'),
-      render: (configMap) => JSON.stringify(configMap.metadata?.labels),
+      name: t('table.labels'),
+      render: (configMap) => JSON.stringify((configMap as any)?.metadata?.labels ?? (configMap as any)?.labels),
     },
     {
-      name: t('table.age'),
-      render: (configMap) => configMap.metadata?.creationTimestamp,
+      name: t('table.creationTime'),
+      render: (configMap) => (configMap as any)?.metadata?.creationTimestamp ?? (configMap as any)?.creationTimestamp,
     },
     {
-      name: t('table.actions'),
+      name: t('table.operation'),
       renderOperation: true,
     },
   ];
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedConfigMap, setSelectedConfigMap] = useState<ConfigMap | null>(null);
 
   useEffect(() => {
     mutate();
@@ -112,7 +127,37 @@ export default function ConfigmapPage() {
           detailButtonLabel={t('actions.view')}
           deleteButtonLabel={t('actions.delete')}
           specialHandling={false}
+          noPagination={true}
         />
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
+          <TextField size="small" select label="Rows per page" value={pageSize}
+            onChange={(e) => { const v = Number(e.target.value)||10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
+            <MenuItem value={5}>5</MenuItem>
+            <MenuItem value={10}>10</MenuItem>
+            <MenuItem value={20}>20</MenuItem>
+            <MenuItem value={50}>50</MenuItem>
+          </TextField>
+          <TextField size="small" select label="Sort" value={sort||''} onChange={(e) => setSort(e.target.value||undefined)} sx={{ minWidth: 180 }}>
+            <MenuItem value="">Default</MenuItem>
+            <MenuItem value="name">name</MenuItem>
+            <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
+          </TextField>
+          <TextField size="small" select label="Order" value={order||''} onChange={(e) => setOrder((e.target.value as any)||undefined)} sx={{ minWidth: 140 }}>
+            <MenuItem value="">Default</MenuItem>
+            <MenuItem value="asc">asc</MenuItem>
+            <MenuItem value="desc">desc</MenuItem>
+          </TextField>
+          <TextField size="small" label="Name" value={name||''} onChange={(e) => setName(e.target.value||undefined)} placeholder="supports * wildcards" />
+          {/* mock control removed in PR branch; automatic fetch on change, no apply button */}
+          <Box sx={{ flexGrow: 1 }} />
+          <Pagination
+            page={page}
+            onChange={(_, value) => { setPage(value); mutate(); }}
+            count={Math.max(1, Math.ceil(((data?.total ?? 0) as number) / (pageSize || 1)))}
+            size="small"
+            color="primary"
+          />
+        </Box>
       </Box>
       <AddConfigmapDialog open={dialogOpen} onClose={handleCloseDialog} onSubmit={handleSubmit} />
       <ConfigmapDetailDialog open={detailDialogOpen} onClose={handleCloseDetailDialog} data={selectedConfigMap} />

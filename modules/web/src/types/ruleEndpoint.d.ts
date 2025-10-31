@@ -10,4 +10,11 @@ export interface RuleEndpoint extends TypeMeta {
   spec?: RuleEndpointSpec;
 }
 
-export interface RuleEndpointList extends ResourceList<RuleEndpoint> {}
+export interface RuleEndpointList extends ResourceList<RuleEndpoint> {
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+  sort?: string;
+  order?: string;
+}
