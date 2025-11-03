@@ -1,18 +1,24 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
-import { Box } from '@mui/material';
+import { TextField, MenuItem, Button, Pagination } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { createNodeGroup, deleteNodeGroup, getNodeGroup, useListNodeGroups } from '@/api/nodeGroup';
-import { TextField, MenuItem, Button, Pagination } from '@mui/material';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
-import AddNodeGroupDialog from '@/component/AddNodeGroupDialog';
+import { Box } from '@mui/material';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
+import { deleteNodeGroup, getNodeGroup, useListNodeGroups } from '@/api/nodeGroup';
+import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
+import AddNodeGroupDialog from '@/component/Form/AddNodeGroupDialog';
 import type { NodeGroup } from '@/types/nodeGroup';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+
+const columns: ColumnDefinition<NodeGroup>[] = [
+  { name: 'Name', render: (row) => row?.metadata?.name },
+  { name: 'Creation time', render: (row) => row?.metadata?.creationTimestamp },
+  { name: 'Operation', renderOperation: true },
+];
 
 export default function NodeGroupPage() {
   const { t } = useI18n();
@@ -52,23 +58,18 @@ export default function NodeGroupPage() {
   const [openAddNodeGroupDialog, setOpenAddNodeGroupDialog] = React.useState(false);
   const { data, mutate } = useListNodeGroups(params);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error } = useAlert();
 
-  const handleAddClick = () => {
-    setOpenAddNodeGroupDialog(true);
-  };
-
-  const handleRefreshClick = () => {
-    mutate();
-  };
+  const handleAddClick = () => setOpenAddNodeGroupDialog(true);
+  const handleRefreshClick = () => mutate();
 
   const handleDetailClick = async (_: any, row: any) => {
     try {
       const resp = await getNodeGroup((row?.metadata?.name ?? row?.name) || '');
       setSelectedYaml(resp?.data);
       setOpenYamlDialog(true);
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
@@ -80,32 +81,18 @@ export default function NodeGroupPage() {
         try {
           await deleteNodeGroup((row?.metadata?.name ?? row?.name) || '');
           mutate();
-        } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
-        }
-
+          } catch (e: any) {
+            error(e?.response?.data?.message || e?.message || 'Failed to delete NodeGroup');
+          }
       },
-      onCancel: () => { },
-    })
-  };
-
-  const handleCloseYamlDialog = () => {
-    setOpenYamlDialog(false);
-  };
-
-  const handleCloseAddNodeGroupDialog = () => {
-    setOpenAddNodeGroupDialog(false);
-  };
-
-  const handleAddNodeGroup = async (_: any, record: NodeGroup) => {
-    await createNodeGroup(record);
-    mutate();
+      onCancel: () => {},
+    });
   };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-        <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+      <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+        <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
           <TableCard
             title={t('common.nodeGroup')}
             addButtonLabel={t('actions.add') + ' ' + t('common.nodeGroup')}
@@ -149,16 +136,15 @@ export default function NodeGroupPage() {
             />
           </Box>
         </Box>
-        <YAMLViewerDialog
-          open={openYamlDialog}
-          onClose={handleCloseYamlDialog}
-          content={selectedYaml}
-        />
+
+        <YAMLViewerDialog open={openYamlDialog} onClose={() => setOpenYamlDialog(false)} content={selectedYaml} />
+
         <AddNodeGroupDialog
-          open={openAddNodeGroupDialog}
-          onClose={handleCloseAddNodeGroupDialog}
-          onSubmit={handleAddNodeGroup}
+        open={openAddNodeGroupDialog}
+        onClose={() => setOpenAddNodeGroupDialog(false)}
+        onCreated={() => mutate()}
         />
+
         {ConfirmDialogComponent}
       </Box>
     </LocalizationProvider>

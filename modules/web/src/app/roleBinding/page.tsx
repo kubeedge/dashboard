@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
 import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createRoleBinding, deleteRoleBinding, getRoleBinding, useListRoleBindings } from '@/api/roleBinding';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
-import AddRoleBindingDialog from '@/component/AddRoleBindingDialog';
+import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
+import AddRoleBindingDialog from '@/component/Form/AddRoleBindingDialog';
 import { RoleBinding } from '@/types/roleBinding';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
@@ -59,7 +59,7 @@ export default function RoleBindingPage() {
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addRoleBindingDialogOpen, setAddRoleBindingDialogOpen] = React.useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -73,7 +73,7 @@ export default function RoleBindingPage() {
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get RoleBinding');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get RoleBinding');
     }
   };
 
@@ -93,8 +93,8 @@ export default function RoleBindingPage() {
         try {
           await deleteRoleBinding(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
-        } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+        } catch (err: any) {
+          error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
       onCancel: () => { },
@@ -102,8 +102,8 @@ export default function RoleBindingPage() {
   }
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.roleBinding')}
           addButtonLabel={t('actions.add') + ' ' + t('common.roleBinding')}
@@ -188,7 +188,7 @@ export default function RoleBindingPage() {
       <AddRoleBindingDialog
         open={addRoleBindingDialogOpen}
         onClose={handleAddRoleBindingDialogClose}
-        onSubmit={handleOnSubmit}
+        // onSubmit={handleOnSubmit}
       />
       {ConfirmDialogComponent}
     </Box>

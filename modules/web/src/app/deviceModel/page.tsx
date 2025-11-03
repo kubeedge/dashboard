@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
 import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createDeviceModel, deleteDeviceModel, getDeviceModel, useListDeviceModels } from '@/api/deviceModel';
-import AddDeviceModelDialog from '@/component/AddDeviceModelDialog';
-import DeviceModelDetailDialog from '@/component/DeviceModelDetailDialog';
+import AddDeviceModelDialog from '@/component/Form/AddDeviceModelDialog';
+import DeviceModelDetailDialog from '@/component/Dialog/DeviceModelDetailDialog';
 import { DeviceModel } from '@/types/deviceModel';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
@@ -54,7 +54,7 @@ export default function DeviceModelPage() {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedDeviceModel, setSelectedDeviceModel] = useState<DeviceModel | null>(null);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -73,8 +73,8 @@ export default function DeviceModelPage() {
       const resp = await getDeviceModel(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setSelectedDeviceModel(resp?.data);
       setDetailDialogOpen(true);
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
@@ -86,8 +86,8 @@ export default function DeviceModelPage() {
         try {
           await deleteDeviceModel(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
-        } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+        } catch (err: any) {
+          error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
       onCancel: () => { },
@@ -108,8 +108,8 @@ export default function DeviceModelPage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.deviceModel')}
           addButtonLabel={t('actions.add') + ' ' + t('common.deviceModel')}
@@ -156,7 +156,7 @@ export default function DeviceModelPage() {
       <AddDeviceModelDialog
         open={addDialogOpen}
         onClose={handleAddDialogClose}
-        onSubmit={handleAddDeviceModel}
+
       />
       <DeviceModelDetailDialog
         open={detailDialogOpen}

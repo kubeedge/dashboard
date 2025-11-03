@@ -3,11 +3,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, TextField, MenuItem, Pagination } from '@mui/material';
 import { createDevice, deleteDevice, getDevice, useListDevices } from '@/api/device';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { Device } from '@/types/device';
 import { useNamespace } from '@/hook/useNamespace';
-import DeviceDetailDialog from '@/component/DeviceDetailDialog';
-import AddDeviceDialog from '@/component/AddDeviceDialog';
+import DeviceDetailDialog from '@/component/Dialog/DeviceDetailDialog';
+import AddDeviceDialog from '@/component/Form/AddDeviceDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
@@ -65,7 +65,7 @@ export default function DevicePage() {
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -78,13 +78,14 @@ export default function DevicePage() {
   const handleRefreshClick = () => {
     mutate();
   };
+
   const handleDetailClick = async (_: any, row: Device) => {
     try {
       const resp = await getDevice(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setSelectedDevice(resp?.data);
       setIsDetailDialogOpen(true);
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
@@ -96,8 +97,8 @@ export default function DevicePage() {
         try {
           await deleteDevice(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
-        } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+        } catch (err: any) {
+          error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
       onCancel: () => { },
@@ -119,8 +120,8 @@ export default function DevicePage() {
   }
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.device')}
           addButtonLabel={t('actions.add') + ' ' + t('common.device')}
@@ -172,7 +173,7 @@ export default function DevicePage() {
       <AddDeviceDialog
         open={isAddDeviceDialogOpen}
         onClose={handleCloseAddDeviceDialog}
-        onSubmit={handleSubmit}
+
       />
       {ConfirmDialogComponent}
     </Box>

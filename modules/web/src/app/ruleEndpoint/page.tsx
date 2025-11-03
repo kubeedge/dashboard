@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
 import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createRuleEndpoint, deleteRuleEndpoint, getRuleEndpoint, useListRuleEndpoints } from '@/api/ruleEndpoint';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
+import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import { RuleEndpoint } from '@/types/ruleEndpoint';
-import AddRuleEndpointDialog from '@/component/AddRuleEndpointDialog';
+import AddRuleEndpointDialog from '@/component/Form/AddRuleEndpointDialog';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
@@ -61,7 +61,7 @@ export default function RuleEndpointPage() {
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -85,8 +85,8 @@ export default function RuleEndpointPage() {
       const resp = await getRuleEndpoint(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
@@ -102,8 +102,8 @@ export default function RuleEndpointPage() {
         try {
           await deleteRuleEndpoint(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
-        } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+        } catch (err: any) {
+          error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
       onCancel: () => { },
@@ -111,8 +111,8 @@ export default function RuleEndpointPage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.ruleEndpoint')}
           addButtonLabel={t('actions.add') + ' ' + t('common.ruleEndpoint')}

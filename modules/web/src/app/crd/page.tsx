@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
 import { Box, TextField, MenuItem, Pagination, Button } from '@mui/material';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { getCustomResourceDefinition, useListCustomResourceDefinitions } from '@/api/customResourceDefinition';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
+import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import { CustomResourceDefinition } from '@/types/customResourceDefinition';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
@@ -50,7 +50,7 @@ export default function CrdPage() {
   const { data, mutate } = useListCustomResourceDefinitions(params);
   const [ yamlDialogOpen, setYamlDialogOpen ] = React.useState(false);
   const [ currentYamlContent, setCurrentYamlContent ] = React.useState<any>(undefined);
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -61,8 +61,8 @@ export default function CrdPage() {
       const resp = await getCustomResourceDefinition(row?.metadata?.name || '');
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
@@ -71,12 +71,12 @@ export default function CrdPage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
       <Box
         sx={{
           height: '100px',
           width: '100%',
-          backgroundColor: 'white',
+          backgroundColor: 'background.default',
           display: 'flex',
           alignItems: 'center',
           padding: '0 20px',
@@ -111,7 +111,7 @@ export default function CrdPage() {
           </Button>
         </Box>
       </Box>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.crd')}
           columns={columns}

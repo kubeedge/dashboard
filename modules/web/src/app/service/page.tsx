@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
 import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createService, deleteService, getService, useListServices } from '@/api/service';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
-import AddServiceDialog from '@/component/AddServiceDialog';
+import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
+import AddServiceDialog from '@/component/Form/AddServiceDialog';
 import { Service } from '@/types/service';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useNamespace } from '@/hook/useNamespace';
@@ -83,7 +83,7 @@ export default function ServicePage() {
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addServiceDialogOpen, setAddServiceDialogOpen] = React.useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -103,7 +103,7 @@ export default function ServicePage() {
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get Service');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get Service');
     }
   };
 
@@ -128,8 +128,8 @@ export default function ServicePage() {
         try {
           await deleteService(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
-        } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+        } catch (err: any) {
+          error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
       onCancel: () => { },
@@ -137,8 +137,8 @@ export default function ServicePage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.service')}
           addButtonLabel={t('actions.add') + ' ' + t('common.service')}
@@ -224,7 +224,7 @@ export default function ServicePage() {
       <AddServiceDialog
         open={addServiceDialogOpen}
         onClose={handleAddServiceDialogClose}
-        onSubmit={handleSubmit}
+        // onSubmit={handleSubmit}
       />
       {ConfirmDialogComponent}
     </Box>

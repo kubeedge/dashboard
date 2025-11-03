@@ -2,10 +2,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Box, TextField, MenuItem, Pagination } from '@mui/material';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createClusterRole, deleteClusterRole, getClusterRole, useListClusterRoles } from '@/api/clusterRole';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
-import AddClusterRoleDialog from '@/component/AddClusterRoleDialog';
+import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
+import AddClusterRoleDialog from '@/component/Form/AddClusterRoleDialog';
 import { ClusterRole } from '@/types/clusterRole';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
@@ -48,7 +48,7 @@ export default function ClusterRolesPage() {
   const [currentYamlContent, setCurrentYamlContent] = useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   const handleAddClick = () => {
     setAddDialogOpen(true);
@@ -67,8 +67,8 @@ export default function ClusterRolesPage() {
       const resp = await getClusterRole(row?.metadata?.name || '');
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
@@ -93,8 +93,8 @@ export default function ClusterRolesPage() {
         try {
           await deleteClusterRole(row?.metadata?.name || '');
           mutate();
-        } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+        } catch (err: any) {
+          error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
 
       },
@@ -103,8 +103,8 @@ export default function ClusterRolesPage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.clusterRole')}
           addButtonLabel={t('actions.add') + ' ' + t('common.clusterRole')}
@@ -188,7 +188,7 @@ export default function ClusterRolesPage() {
       <AddClusterRoleDialog
         open={addDialogOpen}
         onClose={handleAddDialogClose}
-        onSubmit={handleSubmit}
+
       />
       {ConfirmDialogComponent}
     </Box>

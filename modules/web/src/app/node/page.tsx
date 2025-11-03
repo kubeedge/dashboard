@@ -1,9 +1,8 @@
-// 节点管理页面
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
-import { NodeDetailDialog } from '@/component/NodeDetailDialog';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
+import { NodeDetailDialog } from '@/component/Dialog/NodeDetailDialog';
 import {
   Box,
   TextField,
@@ -15,7 +14,7 @@ import { deleteNode, getNode, useListNodes } from '@/api/node';
 import { Editor } from '@tinymce/tinymce-react';
 import { Node } from '@/types/node';
 import { getNodeStatus } from '@/helper/status';
-import AddNodeDialog from '@/component/AddNodeDialog';
+import AddNodeDialog from '@/component/Form/AddNodeDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
@@ -42,7 +41,7 @@ export default function NodePage() {
 
   const { data, mutate } = useListNodes(params);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
   const { t, getCurrentLanguage } = useI18n();
   const currentLanguage = getCurrentLanguage();
 
@@ -115,7 +114,7 @@ export default function NodePage() {
       setSelectedNode(resp?.data);
       setDetailDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get Node');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get Node');
     }
   };
 
@@ -132,8 +131,8 @@ export default function NodePage() {
         try {
           await deleteNode(row?.metadata?.name || '');
           mutate();
-        } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+        } catch (err: any) {
+          error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
       onCancel: () => { },
@@ -141,8 +140,8 @@ export default function NodePage() {
   }
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.node')}
           addButtonLabel={t('actions.add') + ' ' + t('common.node')}

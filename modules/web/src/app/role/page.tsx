@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
 import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createRole, deleteRole, getRole, useListRoles } from '@/api/role';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
-import AddRoleDialog from '@/component/AddRoleDialog';
+import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
+import AddRoleDialog from '@/component/Form/AddRoleDialog';
 import { Role } from '@/types/role';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
@@ -55,7 +55,7 @@ export default function RolePage() {
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addRoleDialogOpen, setAddRoleDialogOpen] = React.useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   useEffect(() => {
     mutate();
@@ -75,7 +75,7 @@ export default function RolePage() {
       setCurrentYamlContent(resp.data);
       setYamlDialogOpen(true);
     } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to get Role');
+      Error(error?.response?.data?.message || error?.message || 'Failed to get Role');
     }
   };
 
@@ -91,8 +91,8 @@ export default function RolePage() {
         try {
           await deleteRole(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
-        } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+        } catch (err: any) {
+          error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
       onCancel: () => { },
@@ -109,8 +109,8 @@ export default function RolePage() {
   };
 
   return (
-    <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-      <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.role')}
           addButtonLabel={t('actions.add') + ' ' + t('common.role')}
@@ -195,7 +195,6 @@ export default function RolePage() {
       <AddRoleDialog
         open={addRoleDialogOpen}
         onClose={handleAddRoleDialogClose}
-        onSubmit={handleOnSubmit}
       />
       {ConfirmDialogComponent}
     </Box>

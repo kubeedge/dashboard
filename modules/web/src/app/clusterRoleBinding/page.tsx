@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { ColumnDefinition, TableCard } from '@/component/TableCard';
 import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { createClusterRoleBinding, deleteClusterRoleBinding, getClusterRoleBinding, useListClusterRoleBindings } from '@/api/clusterRoleBinding';
-import AddClusterRoleBindingDialog from '@/component/AddClusterRoleBindingDialog';
-import YAMLViewerDialog from '@/component/YAMLViewerDialog';
+import AddClusterRoleBindingDialog from '@/component/Form/AddClusterRoleBindingDialog';
+import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import { ClusterRoleBinding } from '@/types/clusterRoleBinding';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
@@ -54,7 +54,7 @@ export default function ClusterRoleBindingPage() {
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
   const [addDialogOpen, setAddDialogOpen] = React.useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { setErrorMessage } = useAlert();
+  const { error, success } = useAlert();
 
   const handleAddClick = () => {
     setAddDialogOpen(true);
@@ -82,8 +82,8 @@ export default function ClusterRoleBindingPage() {
       const resp = await getClusterRoleBinding(row?.metadata?.name || '');
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
@@ -97,8 +97,8 @@ export default function ClusterRoleBindingPage() {
         try {
           await deleteClusterRoleBinding(row?.metadata?.name || '');
           mutate();
-        } catch (error: any) {
-          setErrorMessage(error?.response?.data?.message || error?.message || t('messages.error'));
+        } catch (err: any) {
+          error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
 
       },
@@ -108,8 +108,8 @@ export default function ClusterRoleBindingPage() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ width: '100%', backgroundColor: '#f1f2f5' }}>
-        <Box sx={{ width: '100%', padding: '20px', minHeight: 350, backgroundColor: 'white' }}>
+      <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+        <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
           <TableCard
             title={t('common.clusterRoleBinding')}
             addButtonLabel={t('actions.add') + ' ' + t('common.clusterRoleBinding')}
@@ -190,7 +190,6 @@ export default function ClusterRoleBindingPage() {
         <AddClusterRoleBindingDialog
           open={addDialogOpen}
           onClose={handleAddDialogClose}
-          onSubmit={handleSubmit}
         />
         <YAMLViewerDialog
           open={yamlDialogOpen}
