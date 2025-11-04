@@ -1,4 +1,5 @@
 'use client';
+
 import * as React from 'react';
 import {
   AppBar, Toolbar, Typography, CssBaseline, Box, Drawer, List,
@@ -9,12 +10,13 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { useRouter } from 'next/navigation';
 import { menu } from '@/config/menu';
-import { useTheme } from "@mui/material/styles";
+import { useI18n } from '@/hook/useI18n';
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { useThemeMode } from "@/component/Layout/ThemeRegistry";
 import NamespaceSelector from './NamespaceSelector';
 import UserMenu from './UserMenu';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 const drawerWidth = 220;
 
@@ -22,6 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const { mode, setMode } = useThemeMode();
+  const { t } = useI18n();
 
   const [open, setOpen] = React.useState<Record<string, boolean>>({});
 
@@ -41,7 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <ListItemButton onClick={() =>group.items ? handleClick(group.nameKey) : router.push(group.link!)
         }
         >
-                <ListItemText primary={group.nameKey} />
+                <ListItemText primary={t(group.nameKey)} />
                 {group.items ? (open[group.nameKey] ? <ExpandLess /> : <ExpandMore />) : null}
               </ListItemButton>
             </ListItem>
@@ -54,7 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       sx={{ pl: 4 }}
                       onClick={() => router.push(child.link!)}
                     >
-                      <ListItemText primary={child.nameKey} />
+                      <ListItemText primary={t(child.nameKey)} />
                     </ListItemButton>
                   ))}
                 </List>
@@ -81,6 +84,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 'auto' }}>
             <NamespaceSelector />
+            <Box sx={{ '& .MuiSelect-select': { color: 'white' }, '& .MuiSelect-icon': { color: 'white' } }}>
+              <LanguageSwitcher variant="standard" showIcon={false} />
+            </Box>
             <UserMenu />
             <IconButton
               color="inherit"
