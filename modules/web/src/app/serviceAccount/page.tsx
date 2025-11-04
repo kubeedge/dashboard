@@ -84,8 +84,8 @@ export default function ServiceAccountPage() {
       const resp = await getServiceAccount(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setCurrentYamlContent(resp.data);
       setYamlDialogOpen(true);
-    } catch (error: any) {
-      Error(error?.response?.data?.message || error?.message || 'Failed to get ServiceAccount');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || 'Failed to get ServiceAccount');
     }
   };
 
@@ -101,8 +101,8 @@ export default function ServiceAccountPage() {
         try {
           await deleteServiceAccount(row?.metadata?.namespace || '', row?.metadata?.name || '');
           mutate();
-        } catch (error: any) {
-          Error(error?.response?.data?.message || error?.message || 'Failed to create ServiceAccount');
+        } catch (err: any) {
+          error(err?.response?.data?.message || err?.message || 'Failed to create ServiceAccount');
         }
       },
       onCancel: () => { },

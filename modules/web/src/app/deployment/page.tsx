@@ -86,8 +86,8 @@ export default function DeploymentPage() {
       const resp = await getDeployment(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setCurrentDeployment(resp?.data);
       setDetailOpen(true);
-    } catch (error: any) {
-      Error(error?.response?.data?.message || error?.message || 'Failed to get Deployment');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || 'Failed to get Deployment');
     }
 
   };

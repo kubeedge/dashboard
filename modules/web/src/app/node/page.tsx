@@ -113,8 +113,8 @@ export default function NodePage() {
       const resp = await getNode(node?.metadata?.name || '');
       setSelectedNode(resp?.data);
       setDetailDialogOpen(true);
-    } catch (error: any) {
-      Error(error?.response?.data?.message || error?.message || 'Failed to get Node');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || 'Failed to get Node');
     }
   };
 

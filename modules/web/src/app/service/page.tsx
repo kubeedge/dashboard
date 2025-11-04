@@ -102,8 +102,8 @@ export default function ServicePage() {
       const resp = await getService(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
-    } catch (error: any) {
-      Error(error?.response?.data?.message || error?.message || 'Failed to get Service');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || 'Failed to get Service');
     }
   };
 

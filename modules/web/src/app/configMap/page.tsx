@@ -77,8 +77,8 @@ export default function ConfigmapPage() {
       const resp = await getConfigMap(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setSelectedConfigMap(resp?.data);
       setDetailDialogOpen(true);
-    } catch (error: any) {
-      Error(error?.response?.data?.message || error?.message || 'Failed to get ConfigMap');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || 'Failed to get ConfigMap');
     }
   };
 

@@ -74,8 +74,8 @@ export default function RolePage() {
       const resp = await getRole(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setCurrentYamlContent(resp.data);
       setYamlDialogOpen(true);
-    } catch (error: any) {
-      Error(error?.response?.data?.message || error?.message || 'Failed to get Role');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || 'Failed to get Role');
     }
   };
 

@@ -79,8 +79,8 @@ export default function SecretPage() {
       const resp = await getSecret(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setSelectedSecret(resp?.data);
       setOpenDetailDialog(true);
-    } catch (error: any) {
-      Error(error?.response?.data?.message || error?.message || 'Failed to get Secret');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || 'Failed to get Secret');
     }
   };
 

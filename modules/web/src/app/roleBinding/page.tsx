@@ -72,8 +72,8 @@ export default function RoleBindingPage() {
       const resp = await getRoleBinding(row?.metadata?.namespace || '', row?.metadata?.name || '');
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
-    } catch (error: any) {
-      Error(error?.response?.data?.message || error?.message || 'Failed to get RoleBinding');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || 'Failed to get RoleBinding');
     }
   };
 
