@@ -1,4 +1,5 @@
 'use client';
+
 import { Controller } from 'react-hook-form';
 import { FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -7,7 +8,7 @@ export default function SelectField({ field, control }: any) {
   const [opts, setOpts] = useState<any[]>(Array.isArray(field.options) ? field.options : []);
   useEffect(() => {
     if (typeof field.options === 'function') field.options().then(setOpts).catch(() => setOpts([]));
-  }, [field.options]);
+  }, [field]);
 
   return (
     <Controller

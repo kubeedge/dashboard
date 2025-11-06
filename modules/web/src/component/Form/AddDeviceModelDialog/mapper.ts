@@ -11,7 +11,6 @@ function toPropertyType(t: string) {
     case 'boolean':
       return { boolean: {} };
     default:
-
       return { string: {} };
   }
 }
@@ -28,7 +27,6 @@ export function toDeviceModel(values: any): { ns: string; body: DeviceModel } {
     .map((row) => ({
       name: String(row.name),
       type: toPropertyType(row.type),
-
     }));
 
   const body: DeviceModel = {
@@ -37,16 +35,13 @@ export function toDeviceModel(values: any): { ns: string; body: DeviceModel } {
     metadata: {
       name: values.name,
       namespace: ns,
-
       annotations: {
         ...(values.description ? { 'dashboard.kubeedge.io/description': String(values.description) } : {}),
         ...(values.protocol ? { 'dashboard.kubeedge.io/protocol': String(values.protocol) } : {}),
       },
     },
-
     spec: {
       ...(properties.length ? { properties } : {}),
-
     } as any,
   };
 

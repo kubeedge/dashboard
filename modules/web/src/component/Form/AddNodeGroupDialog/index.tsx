@@ -15,7 +15,6 @@ type Props = {
   open: boolean;
   onClose: () => void;
   initial?: Record<string, any>;
-
   onSubmit?: (values: any) => void | Promise<void>;
   onCreated?: () => void;
 };
@@ -30,18 +29,15 @@ export default function AddNodeGroupDialog({
   const formId = 'addNodeGroupForm';
 
   const handleSubmit = async (values: any) => {
-
     if (onSubmit) {
       await onSubmit(values);
     }
     onCreated?.();
-
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Add NodeGroup</DialogTitle>
-
       <DialogContent
         dividers
         sx={{ '& .fv-actions': { display: 'none !important' } }}
@@ -58,7 +54,6 @@ export default function AddNodeGroupDialog({
           />
         </Box>
       </DialogContent>
-
       <DialogActions>
         <Button onClick={onClose}>CANCEL</Button>
         <Button type="submit" form={formId} variant="contained">

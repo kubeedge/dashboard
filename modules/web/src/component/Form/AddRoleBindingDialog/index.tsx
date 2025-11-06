@@ -15,28 +15,26 @@ export default function AddRoleBindingDialog({ open, onClose, onSuccess }: Props
   const formId = 'add-rolebinding-form';
 
   const handleSubmit = async (values: any) => {
-
     onSuccess?.();
     onClose();
   };
 
-return (
-  <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-    <DialogTitle>Add RoleBinding</DialogTitle>
-    <DialogContent dividers>
-      <FormView
-        formId={formId}
-        schema={addRoleBindingSchema}
-        initialValues={{ subjects: [] }}
-        onSubmit={handleSubmit}
-        hideActions
-      />
-    </DialogContent>
-
-    <DialogActions>
-      <Button onClick={onClose}>CANCEL</Button>
-      <Button type="submit" form={formId}>SUBMIT</Button>
-    </DialogActions>
-  </Dialog>
-);
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>Add RoleBinding</DialogTitle>
+      <DialogContent dividers>
+        <FormView
+          formId={formId}
+          schema={addRoleBindingSchema}
+          initialValues={{ subjects: [] }}
+          onSubmit={handleSubmit}
+          hideActions
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>CANCEL</Button>
+        <Button type="submit" form={formId}>SUBMIT</Button>
+      </DialogActions>
+    </Dialog>
+  );
 }

@@ -1,11 +1,11 @@
+import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import { RuleEndpoint, RuleEndpointList } from '@/types/ruleEndpoint';
-import { request } from '@/helper/request';
 
 export function useListRuleEndpoints(params?: Record<string, string | number | undefined>) {
   const searchParams = new URLSearchParams();
-  
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== '' && key !== 'namespace') {
@@ -13,11 +13,11 @@ export function useListRuleEndpoints(params?: Record<string, string | number | u
       }
     });
   }
-  
+
   const namespace = params?.namespace as string;
   const baseUrl = namespace ? `/ruleendpoint/${namespace}` : '/ruleendpoint';
   const url = searchParams.toString() ? `${baseUrl}?${searchParams.toString()}` : baseUrl;
-  
+
   return useQuery<RuleEndpointList>('listRuleEndpoints', url, {
     method: 'GET',
   });

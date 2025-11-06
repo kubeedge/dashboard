@@ -188,7 +188,6 @@ export default function ClusterRolesPage() {
       <AddClusterRoleDialog
         open={addDialogOpen}
         onClose={handleAddDialogClose}
-
       />
       {ConfirmDialogComponent}
     </Box>

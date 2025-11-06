@@ -92,7 +92,7 @@ function DeviceDetailDialog({ open, onClose, data }: DeviceDetailDialogProps) {
             </TableRow>
           </TableHead>
           <TableBody>
-          {(data?.status?.twins?.length || 0) > 0 ? (
+            {(data?.status?.twins?.length || 0) > 0 ? (
               data?.status?.twins?.map((item, index) => (
                 <TableRow key={index}>
                   <TableCell>{item?.propertyName}</TableCell>

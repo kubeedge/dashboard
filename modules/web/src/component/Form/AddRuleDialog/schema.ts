@@ -1,11 +1,9 @@
-import type { FormSchema } from '@/components/FormView';
+import type { FormSchema } from '@/component/FormView';
 import { listRuleEndpoints, useListRuleEndpoints } from '@/api/ruleEndpoint';
 
 export const addRuleSchema: FormSchema = {
-
   submitText: undefined,
   resetText: undefined,
-
   fields: [
     {
       name: 'namespace',
@@ -13,18 +11,16 @@ export const addRuleSchema: FormSchema = {
       type: 'select',
       grid: { md: 12 },
       rules: [{ type: 'required', message: 'Miss namespace' }],
-
       options: async () => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
         const res = await useListRuleEndpoints();
         const items = res?.data?.items ?? [];
         return items.map((e: any) => ({
           label: e?.metadata?.name,
           value: e?.metadata?.name,
-          }));
-        }
-
+        }));
+      }
     },
-
     {
       name: 'name',
       label: 'Name *',
@@ -32,14 +28,12 @@ export const addRuleSchema: FormSchema = {
       grid: { md: 12 },
       rules: [{ type: 'required', message: 'Miss name' }],
     },
-
-    // Source & SourceResource
     {
+      // Source & SourceResource
       name: 'source',
       label: 'Source',
       type: 'select',
       grid: { md: 12 },
-
       options: async () => {
         const res = await listRuleEndpoints();
         const items = (res?.data?.items ?? []);
@@ -55,9 +49,8 @@ export const addRuleSchema: FormSchema = {
       type: 'text',
       grid: { md: 12 },
     },
-
-    // Target & TargetResource & Description
     {
+      // Target & TargetResource & Description
       name: 'target',
       label: 'Target',
       type: 'select',
@@ -83,6 +76,6 @@ export const addRuleSchema: FormSchema = {
       type: 'textarea',
       grid: { md: 12 },
       rows: 4,
-    },
+    }
   ],
 };

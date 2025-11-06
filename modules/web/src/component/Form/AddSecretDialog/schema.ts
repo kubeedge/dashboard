@@ -1,12 +1,12 @@
-import type { FormSchema } from '@/components/FormView';
+import type { FormSchema } from '@/component/FormView';
 import { listNamespaces } from '@/api/namespace';
 
 export const secretSchema: FormSchema = {
   submitText: 'Save',
   resetText: 'Reset',
   fields: [
-    // Namespace
     {
+      // Namespace
       name: 'namespace',
       label: 'Namespace *',
       type: 'select',
@@ -20,20 +20,17 @@ export const secretSchema: FormSchema = {
           value: n?.metadata?.name,
         }));
       },
-
     },
-
-    // Name
     {
+      // Name
       name: 'name',
       label: 'Name *',
       type: 'text',
       rules: [{ type: 'required', message: 'Miss name' }],
       grid: { md: 6 },
     },
-
-    // Secret
     {
+      // Secret
       name: 'type',
       label: '',
       type: 'radio',
@@ -44,9 +41,8 @@ export const secretSchema: FormSchema = {
       ],
       grid: { md: 12 },
     },
-
-    // Docker
     {
+      // Docker
       name: 'dockerServer',
       label: 'Docker server *',
       type: 'text',
@@ -70,15 +66,14 @@ export const secretSchema: FormSchema = {
       grid: { md: 12 },
       visibleWhen: (v) => v.type === 'docker',
     },
-
-    // Opaque
     {
+      // Opaque
       name: 'data',
       label: 'Data items（Base64）',
       type: 'array',
       addText: 'ADD ONE LINE',
       itemSchema: [
-        { name: 'key',   label: 'Key *',   type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
+        { name: 'key', label: 'Key *', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
         { name: 'value', label: 'Value *', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
       ],
       grid: { md: 12 },

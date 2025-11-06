@@ -35,7 +35,6 @@ function safeLoadYaml(text: string) {
     const obj = yaml.load(text);
     return obj ?? {};
   } catch (e) {
-
     return {};
   }
 }

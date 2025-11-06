@@ -12,12 +12,7 @@ import {
   TableCell,
   TableBody,
   Button,
-  IconButton,
-  Box,
-  Pagination,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
 import { DeviceModel } from '@/types/deviceModel';
 
 interface DeviceModelDetailDialogProps {

@@ -29,10 +29,10 @@ export interface FieldSchema {
   defaultValue?: any;
   rules?: Rule[];
   options?:
-    | { label: string; value: any }[]
-    | (() => Promise<{ label: string; value: any }[]>)
-    | ((form: any, values: Record<string, any>) =>
-        Promise<{ label: string; value: any }[]>);
+  | { label: string; value: any }[]
+  | (() => Promise<{ label: string; value: any }[]>)
+  | ((form: any, values: Record<string, any>) =>
+    Promise<{ label: string; value: any }[]>);
   fullWidth?: boolean;
   grid?: { xs?: number; sm?: number; md?: number; lg?: number };
   visibleWhen?: (form: any) => boolean;

@@ -1,7 +1,7 @@
+import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import { ConfigMap } from '@/types/configMap';
-import { request } from '@/helper/request';
 
 export function useListConfigMaps(params?: Record<string, string | number | undefined>) {
   let path = '/configmap';

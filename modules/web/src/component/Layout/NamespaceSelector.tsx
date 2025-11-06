@@ -6,9 +6,9 @@ import { useNamespace } from '@/hook/useNamespace';
 import { MenuItem, Select } from '@mui/material';
 
 export default function NamespaceSelector() {
-  const {namespace, setNamespace} = useNamespace();
+  const { namespace, setNamespace } = useNamespace();
   const { data: namespaces } = useListNamespaces();
-   const { t } = useI18n();
+  const { t } = useI18n();
 
   return (
     <Select

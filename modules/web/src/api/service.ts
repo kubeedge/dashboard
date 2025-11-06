@@ -1,11 +1,11 @@
+import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import { Service, ServiceList } from '@/types/service';
-import { request } from '@/helper/request';
 
 export function useListServices(params?: Record<string, string | number | undefined>) {
   const searchParams = new URLSearchParams();
-  
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== '' && key !== 'namespace') {
@@ -13,11 +13,11 @@ export function useListServices(params?: Record<string, string | number | undefi
       }
     });
   }
-  
+
   const namespace = params?.namespace as string;
   const baseUrl = namespace ? `/service/${namespace}` : '/service';
   const url = searchParams.toString() ? `${baseUrl}?${searchParams.toString()}` : baseUrl;
-  
+
   return useQuery<ServiceList>('listServices', url, {
     method: 'GET',
   });

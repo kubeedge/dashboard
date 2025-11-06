@@ -48,8 +48,8 @@ export default function CrdPage() {
   }), [page, pageSize, sort, order, name]);
 
   const { data, mutate } = useListCustomResourceDefinitions(params);
-  const [ yamlDialogOpen, setYamlDialogOpen ] = React.useState(false);
-  const [ currentYamlContent, setCurrentYamlContent ] = React.useState<any>(undefined);
+  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
+  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(undefined);
   const { error, success } = useAlert();
 
   useEffect(() => {

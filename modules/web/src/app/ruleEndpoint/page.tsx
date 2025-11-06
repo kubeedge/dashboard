@@ -21,7 +21,6 @@ export default function RuleEndpointPage() {
   const [order, setOrder] = useState('asc');
   const [name, setName] = useState('');
 
-
   const params = useMemo(() => ({
     namespace,
     page,
@@ -180,8 +179,6 @@ export default function RuleEndpointPage() {
             placeholder="Filter by name..."
             sx={{ minWidth: 200 }}
           />
-
-
 
           <Pagination
             count={data?.total ? Math.ceil(data.total / pageSize) : 1}

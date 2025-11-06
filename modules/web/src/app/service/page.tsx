@@ -14,7 +14,7 @@ import { useI18n } from '@/hook/useI18n';
 
 export default function ServicePage() {
   const { namespace } = useNamespace();
-   // New pagination state
+  // New pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState('name');
@@ -224,7 +224,7 @@ export default function ServicePage() {
       <AddServiceDialog
         open={addServiceDialogOpen}
         onClose={handleAddServiceDialogClose}
-        // onSubmit={handleSubmit}
+      // onSubmit={handleSubmit}
       />
       {ConfirmDialogComponent}
     </Box>

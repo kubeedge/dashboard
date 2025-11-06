@@ -1,21 +1,33 @@
-// src/component/ConfigmapDetailDialog.js
+
 import React from 'react';
-import { Button,Dialog, DialogTitle, DialogContent, Box, Table, TableHead, TableRow, TableCell, TableBody, Typography } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Box,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Typography
+} from '@mui/material';
 import { ConfigMap } from '@/types/configMap';
 
-interface ConfigmapDetailDialogProps {
+interface ConfigMapDetailDialogProps {
   open?: boolean;
   onClose?: () => void;
   data?: ConfigMap | null;
 }
 
-const ConfigmapDetailDialog = ({ open, onClose, data }: ConfigmapDetailDialogProps) => {
+const ConfigMapDetailDialog = ({ open, onClose, data }: ConfigMapDetailDialogProps) => {
   return (
     <Dialog open={!!open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Configmap Detail</DialogTitle>
       <DialogContent>
         <Box sx={{ marginBottom: '16px' }}>
-          {/* <Typography variant="h6">Configmap Details</Typography> */}
+          {/* <Typography variant="h6">ConfigMap Details</Typography> */}
           <Box sx={{ marginTop: '16px' }}>
             <Typography><strong>Namespace:</strong> {data?.metadata?.namespace}</Typography>
             <Typography><strong>Name:</strong> {data?.metadata?.name}</Typography>
@@ -76,4 +88,4 @@ const ConfigmapDetailDialog = ({ open, onClose, data }: ConfigmapDetailDialogPro
   );
 };
 
-export default ConfigmapDetailDialog;
+export default ConfigMapDetailDialog;

@@ -143,10 +143,11 @@ export function TableCard<T>({
 
       {/* Table */}
       <TableContainer
-      sx={{backgroundColor: (theme) => theme.palette.background.paper,
-        color: (theme) => theme.palette.text.primary,
+        sx={{
+          backgroundColor: (theme) => theme.palette.background.paper,
+          color: (theme) => theme.palette.text.primary,
         }}
-        >
+      >
         <Table>
           <TableHead>
             <TableRow>

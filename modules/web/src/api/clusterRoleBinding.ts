@@ -1,12 +1,12 @@
+import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { ClusterRoleBinding, ClusterRoleBindingList } from '@/types/clusterRoleBinding';
 import { Status } from '@/types/common';
-import { request } from '@/helper/request';
 
 export function useListClusterRoleBindings(params?: Record<string, string | number | undefined>) {
   const searchParams = new URLSearchParams();
   let url = '/clusterrolebinding';
-  
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -14,9 +14,9 @@ export function useListClusterRoleBindings(params?: Record<string, string | numb
       }
     });
   }
-  
+
   const finalUrl = searchParams.toString() ? `${url}?${searchParams.toString()}` : url;
-  
+
   return useQuery<ClusterRoleBindingList>('listClusterRoleBindings', finalUrl, {
     method: 'GET',
   });

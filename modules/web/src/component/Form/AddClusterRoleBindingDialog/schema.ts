@@ -1,4 +1,4 @@
-import type { FormSchema } from '@/components/FormView';
+import type { FormSchema } from '@/component/FormView';
 import { listNamespaces } from '@/api/namespace';
 
 async function nsOptions() {
@@ -11,10 +11,9 @@ async function nsOptions() {
 }
 
 export const addClusterRoleBindingSchema: FormSchema = {
-
   fields: [
-    // Name
     {
+      // Name
       name: 'name',
       label: 'Name *',
       type: 'text',
@@ -22,13 +21,11 @@ export const addClusterRoleBindingSchema: FormSchema = {
       fullWidth: true,
       grid: { md: 12 },
     },
-
-    // RoleRef
     {
+      // RoleRef
       name: 'roleRefKind',
       label: 'Kind *',
       type: 'select',
-
       options: [{ label: 'ClusterRole', value: 'ClusterRole' }],
       defaultValue: 'ClusterRole',
       rules: [{ type: 'required', message: 'Missing roleRef kind' }],
@@ -49,9 +46,8 @@ export const addClusterRoleBindingSchema: FormSchema = {
       defaultValue: 'rbac.authorization.k8s.io',
       grid: { xs: 12, sm: 4, md: 5 },
     },
-
-    // Subjects
     {
+      // Subjects
       name: 'subjects',
       label: 'Subjects',
       type: 'array',
@@ -85,8 +81,8 @@ export const addClusterRoleBindingSchema: FormSchema = {
           options: nsOptions,
           rules: [{ type: 'required', message: 'Miss subject namespace' }],
           grid: { xs: 12, sm: 6, md: 4 },
-        },
+        }
       ],
-    },
+    }
   ],
 };

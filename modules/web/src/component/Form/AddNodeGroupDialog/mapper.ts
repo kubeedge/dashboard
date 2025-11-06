@@ -14,7 +14,6 @@ export function toNodeGroup(values: any /*): NodeGroup */) {
     kind: 'NodeGroup',
     metadata: {
       name: values.name,
-
     },
     spec: {
       nodes,

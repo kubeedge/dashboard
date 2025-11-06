@@ -65,7 +65,7 @@ const LoginPage = () => {
       onConfirm: () => {
         setShowKeinkDialog(true);
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   }
 

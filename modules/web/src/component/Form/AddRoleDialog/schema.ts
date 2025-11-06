@@ -1,19 +1,17 @@
-// modules/web/src/component/AddRoleDialog/schema.ts
-import type { FormSchema } from '@/components/FormView';
+import type { FormSchema } from '@/component/FormView';
 import { listNamespaces } from '@/api/namespace';
 
 export const addRoleSchema: FormSchema = {
   submitText: 'SUBMIT',
   fields: [
-    // Namespace *
     {
+      // Namespace *
       name: 'namespace',
       label: 'Namespace *',
       type: 'select',
       fullWidth: true,
       grid: { xs: 12, md: 12 },
       rules: [{ type: 'required', message: 'Miss namespace' }],
-
       options: async () => {
         const res = await listNamespaces();
         const items = (res?.data?.items ?? []) as any[];
@@ -23,26 +21,22 @@ export const addRoleSchema: FormSchema = {
         }));
       },
     },
-
-    // Name *
     {
+      // Name *
       name: 'name',
       label: 'Name *',
       type: 'text',
       fullWidth: true,
       grid: { xs: 12, md: 12 },
       rules: [{ type: 'required', message: 'Miss name' }],
-
     },
-
-    // Rules
     {
+      // Rules
       name: 'rules',
       label: 'Rules',
       type: 'array',
       addText: 'ADD RULE',
       removeText: 'REMOVE',
-
       itemSchema: [
         {
           name: 'verbs',

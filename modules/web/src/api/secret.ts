@@ -1,7 +1,7 @@
+import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { Secret } from '@/types/secret';
-import { request } from '@/helper/request';
+import { Secret, SecretList } from '@/types/secret';
 
 export function useListSecrets(params?: Record<string, string | number | undefined>) {
   let path = '/secret';

@@ -1,12 +1,12 @@
+import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { request } from '@/helper/request';
 import { ClusterRole, ClusterRoleList } from '@/types/clusterRole';
 
 export function useListClusterRoles(params?: Record<string, string | number | undefined>) {
   const searchParams = new URLSearchParams();
   let url = '/clusterrole';
-  
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -14,9 +14,9 @@ export function useListClusterRoles(params?: Record<string, string | number | un
       }
     });
   }
-  
+
   const finalUrl = searchParams.toString() ? `${url}?${searchParams.toString()}` : url;
-  
+
   return useQuery<ClusterRoleList>('listClusterRoles', finalUrl, {
     method: 'GET',
   });

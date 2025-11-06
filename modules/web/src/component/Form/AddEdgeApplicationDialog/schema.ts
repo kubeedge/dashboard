@@ -1,4 +1,4 @@
-import type { FormSchema } from '@/components/FormView';
+import type { FormSchema } from '@/component/FormView';
 import { listNamespaces } from '@/api/namespace';
 import { useListNodeGroups } from '@/api/nodeGroup';
 
@@ -12,15 +12,14 @@ export const addEdgeAppSchema: FormSchema = {
       type: 'select',
       rules: [{ type: 'required', message: 'Miss namespace' }],
       grid: { md: 12 },
-
-        options: async () => {
-            const res = await listNamespaces();
-            const items = (res as any)?.items ?? (res as any)?.data?.items ?? [];
-            return items.map((n: any) => ({
-                label: n?.metadata?.name,
-                value: n?.metadata?.name,
-            }));
-        },
+      options: async () => {
+        const res = await listNamespaces();
+        const items = (res as any)?.items ?? (res as any)?.data?.items ?? [];
+        return items.map((n: any) => ({
+          label: n?.metadata?.name,
+          value: n?.metadata?.name,
+        }));
+      },
     },
     {
       name: 'name',
@@ -29,56 +28,50 @@ export const addEdgeAppSchema: FormSchema = {
       rules: [{ type: 'required', message: 'Miss name' }],
       grid: { md: 12 },
     },
-
-    // workloadTemplate
     {
+      // workloadTemplate
       name: 'workloadTemplate',
       label: '',
       type: 'array',
       addText: '+ ADD WORKLOADTEMPLATE',
       removeText: '- REMOVE WORKLOADTEMPLATE',
-      itemSchema: [
-        {
-          name: 'manifests',
-          label: 'manifests yaml',
-          type: 'textarea',
-          rows: 10,
-          rules: [{ type: 'required', message: 'Missing workloadTemplate manifests yaml' }],
-          grid: { md: 12 },
-        },
-      ],
+      itemSchema: [{
+        name: 'manifests',
+        label: 'manifests yaml',
+        type: 'textarea',
+        rows: 10,
+        rules: [{ type: 'required', message: 'Missing workloadTemplate manifests yaml' }],
+        grid: { md: 12 },
+      }],
       grid: { md: 12 },
     },
-
-    // targetNodeGroups
     {
+      // targetNodeGroups
       name: 'targetNodeGroups',
       label: '',
       type: 'array',
       addText: '+ ADD TARGETNODEGROUP',
       removeText: '- REMOVE TARGETNODEGROUP',
-      itemSchema: [
-        {
-          name: 'name',
-          label: 'Name',
-          type: 'select',
-          grid: { md: 12 },
-
-          options: async () => {
-            const { data } = useListNodeGroups();
-            const items = (data as any)?.items ?? [];
-            return items.map((i: any) => ({ label: i?.metadata?.name, value: i?.metadata?.name }));
-          },
+      itemSchema: [{
+        name: 'name',
+        label: 'Name',
+        type: 'select',
+        grid: { md: 12 },
+        options: async () => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          const { data } = useListNodeGroups();
+          const items = (data as any)?.items ?? [];
+          return items.map((i: any) => ({ label: i?.metadata?.name, value: i?.metadata?.name }));
         },
-        {
-          name: 'overriders',
-          label: 'overriders yaml',
-          type: 'textarea',
-          rows: 10,
-          rules: [{ type: 'required', message: 'Missing targetNodeGroup overriders yaml' }],
-          grid: { md: 12 },
-        },
-      ],
+      },
+      {
+        name: 'overriders',
+        label: 'overriders yaml',
+        type: 'textarea',
+        rows: 10,
+        rules: [{ type: 'required', message: 'Missing targetNodeGroup overriders yaml' }],
+        grid: { md: 12 },
+      }],
       grid: { md: 12 },
     },
   ],

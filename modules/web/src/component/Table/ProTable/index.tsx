@@ -144,7 +144,7 @@ export function ProTable<T>({
         <StatusFeedback
           status={loading ? 'loading' : error ? 'error' : data.length === 0 ? 'empty' : 'idle'}
           error={error ? { message: error.message || 'Load failed' } : undefined}
-          errorAction={error ? { text: 'Retry', onClick: onRefresh || (() => {}) } : undefined}
+          errorAction={error ? { text: 'Retry', onClick: onRefresh || (() => { }) } : undefined}
           height={statusFeedback.height || 400}
           variant={statusFeedback.variant || 'default'}
         >

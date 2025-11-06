@@ -138,23 +138,23 @@ export default function EdgeApplicationPage() {
         />
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
           <TextField size="small" select label="Rows per page" value={pageSize}
-            onChange={(e) => { const v = Number(e.target.value)||10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
+            onChange={(e) => { const v = Number(e.target.value) || 10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
             <MenuItem value={5}>5</MenuItem>
             <MenuItem value={10}>10</MenuItem>
             <MenuItem value={20}>20</MenuItem>
             <MenuItem value={50}>50</MenuItem>
           </TextField>
-          <TextField size="small" select label="Sort" value={sort||''} onChange={(e) => setSort(e.target.value||undefined)} sx={{ minWidth: 180 }}>
+          <TextField size="small" select label="Sort" value={sort || ''} onChange={(e) => setSort(e.target.value || undefined)} sx={{ minWidth: 180 }}>
             <MenuItem value="">Default</MenuItem>
             <MenuItem value="name">name</MenuItem>
             <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
           </TextField>
-          <TextField size="small" select label="Order" value={order||''} onChange={(e) => setOrder((e.target.value as any)||undefined)} sx={{ minWidth: 140 }}>
+          <TextField size="small" select label="Order" value={order || ''} onChange={(e) => setOrder((e.target.value as any) || undefined)} sx={{ minWidth: 140 }}>
             <MenuItem value="">Default</MenuItem>
             <MenuItem value="asc">asc</MenuItem>
             <MenuItem value="desc">desc</MenuItem>
           </TextField>
-          <TextField size="small" label="Name" value={name||''} onChange={(e) => setName(e.target.value)} placeholder="supports * wildcards" />
+          <TextField size="small" label="Name" value={name || ''} onChange={(e) => setName(e.target.value)} placeholder="supports * wildcards" />
           {/* mock control removed in PR branch; automatic fetch on change, no apply button */}
           <Box sx={{ flexGrow: 1 }} />
           <Pagination

@@ -11,6 +11,6 @@ export { default as AddNodeDialog } from './AddNodeDialog';
 export { default as AddEdgeApplicationDialog } from './AddEdgeApplicationDialog';
 export { default as AddDeviceModelDialog } from './AddDeviceModelDialog';
 export { default as AddDeviceDialog } from './AddDeviceDialog';
-export { default as AddConfigmapDialog } from './AddConfigmapDialog';
+export { default as AddConfigMapDialog } from './AddConfigMapDialog';
 export { default as AddClusterRoleDialog } from './AddClusterRoleDialog';
 export { default as AddClusterRoleBindingDialog } from './AddClusterRoleBindingDialog';

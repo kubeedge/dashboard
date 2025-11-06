@@ -1,7 +1,6 @@
-import type { FormSchema } from '@/components/FormView';
+import type { FormSchema } from '@/component/FormView';
 
 export const addNodeGroupSchema: FormSchema = {
-
   fields: [
     {
       name: 'name',

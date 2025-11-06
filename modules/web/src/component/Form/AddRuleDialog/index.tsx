@@ -16,22 +16,21 @@ type Props = {
 
 export default function AddRuleDialog({ open, onClose, onSubmit }: Props) {
   const handleSubmit = async (values: any) => {
+    const { ns, body } = toRule(values);
 
-  const { ns, body } = toRule(values);
+    await createRule(ns, body);
 
-  await createRule(ns, body);
-
-  onClose?.();
-};
+    onClose?.();
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Add Rule</DialogTitle>
       <DialogContent dividers>
         <FormView
-        schema={addRuleSchema}
-        initialValues={{}}
-        onSubmit={handleSubmit}
+          schema={addRuleSchema}
+          initialValues={{}}
+          onSubmit={handleSubmit}
         />
       </DialogContent>
       <DialogActions>

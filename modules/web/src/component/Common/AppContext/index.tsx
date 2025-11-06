@@ -12,7 +12,7 @@ export const AppContext = createContext<{
 } | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
-  const [ namespace, setNamespace ] = useStorage('namespace');
+  const [namespace, setNamespace] = useStorage('namespace');
   const [open, setOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
 
@@ -49,7 +49,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setSuccessOpen(true);
   };
 
- return (
+  return (
     <AppContext.Provider
       value={{ namespace, setNamespace, setErrorMessage, setSuccessMessage }}
     >

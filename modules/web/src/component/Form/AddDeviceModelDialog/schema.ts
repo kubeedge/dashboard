@@ -1,4 +1,4 @@
-import type { FormSchema } from '@/components/FormView';
+import type { FormSchema } from '@/component/FormView';
 
 export const deviceModelSchema: FormSchema = {
   submitText: 'save',
@@ -6,11 +6,8 @@ export const deviceModelSchema: FormSchema = {
   fields: [
     { name: 'name', label: 'Name', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
     { name: 'namespace', label: 'Namespace', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
-
     { name: 'protocol', label: 'Protocol', type: 'text', grid: { md: 6 } },
-
     { name: 'description', label: 'Description', type: 'textarea', grid: { md: 12 } },
-
     {
       name: 'attributes',
       label: 'Attribute list',
@@ -27,7 +24,6 @@ export const deviceModelSchema: FormSchema = {
           name: 'type',
           label: 'Attribute Type',
           type: 'select',
-
           options: [
             { label: 'string', value: 'string' },
             { label: 'int', value: 'int' },

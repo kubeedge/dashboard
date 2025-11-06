@@ -1,4 +1,4 @@
-import type { FormSchema } from '@/components/FormView';
+import type { FormSchema } from '@/component/FormView';
 import { listNamespaces } from '@/api/namespace';
 
 export const addRuleEndpointSchema: FormSchema = {

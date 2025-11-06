@@ -32,7 +32,7 @@ interface ContainerInfoFormProps {
 const fieldRefValues = ['meta.name', 'meta.namespace', 'meta.labels', 'meta.annotations', 'spec.nodeName', 'spec.serviceAccountName', 'status.hostIP', 'status.podIP'];
 const resourceFieldRefValues = ['limits.cpu', 'limits.memory', 'requests.cpu', 'requests.memory'];
 
-export default function ContainerInfoForm({ data, onChange, configMaps, secrets, showValidation=false }: ContainerInfoFormProps) {
+export default function ContainerInfoForm({ data, onChange, configMaps, secrets, showValidation = false }: ContainerInfoFormProps) {
   const { t } = useI18n();
   const [refType, setRefType] = React.useState<string>('');
   const [keyRef, setKeyRef] = React.useState<string>('');

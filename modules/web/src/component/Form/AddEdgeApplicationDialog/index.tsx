@@ -41,20 +41,20 @@ export default function AddEdgeApplicationDialog({ open, onClose, initial, onCre
       <DialogTitle>Add EdgeApplication</DialogTitle>
       <DialogContent dividers>
         <FormView
-        schema={schemaNoActions}
-        formId="edgeapp-form"
-        initialValues={{
-          workloadTemplate: [],
-          targetNodeGroups: [],
-        }}
-        onSubmit={handleSubmit}
-      />
-    </DialogContent>
+          schema={schemaNoActions}
+          formId="edgeapp-form"
+          initialValues={{
+            workloadTemplate: [],
+            targetNodeGroups: [],
+          }}
+          onSubmit={handleSubmit}
+        />
+      </DialogContent>
 
-    <DialogActions>
-      <Button onClick={onClose}>CANCEL</Button>
-      <Button type="submit" form="edgeapp-form">SUBMIT</Button>
-    </DialogActions>
+      <DialogActions>
+        <Button onClick={onClose}>CANCEL</Button>
+        <Button type="submit" form="edgeapp-form">SUBMIT</Button>
+      </DialogActions>
 
     </Dialog>
   );

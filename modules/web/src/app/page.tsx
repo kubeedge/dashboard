@@ -159,7 +159,7 @@ export default function Home() {
   const { data, mutate } = useListPods(namespace);
   const versionDate = useGetK8sVersion()?.data;
   const nodeData = useListNodes()?.data;
-  const { data: appData, mutate: appMutate } = useListDeployments({namespace});
+  const { data: appData, mutate: appMutate } = useListDeployments({ namespace });
 
   useEffect(() => {
     mutate();

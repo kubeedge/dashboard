@@ -12,8 +12,6 @@ import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
 
-
-
 export default function RulePage() {
   const { t } = useI18n();
 

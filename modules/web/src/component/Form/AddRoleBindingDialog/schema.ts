@@ -1,11 +1,11 @@
-import type { FormSchema } from '@/components/FormView';
+import type { FormSchema } from '@/component/FormView';
 import { listNamespaces } from '@/api/namespace';
 
 export const addRoleBindingSchema: FormSchema = {
   submitText: 'SUBMIT',
   fields: [
-    // Namespace
     {
+      // Namespace
       name: 'namespace',
       label: 'Namespace',
       type: 'select',
@@ -21,9 +21,8 @@ export const addRoleBindingSchema: FormSchema = {
         }));
       },
     },
-
-    // Name
     {
+      // Name
       name: 'name',
       label: 'Name *',
       type: 'text',
@@ -31,9 +30,8 @@ export const addRoleBindingSchema: FormSchema = {
       grid: { md: 12 },
       rules: [{ type: 'required', message: 'Miss name' }],
     },
-
-    // RoleRef
     {
+      // RoleRef
       name: 'roleRefKind',
       label: 'Kind *',
       type: 'text',
@@ -55,13 +53,11 @@ export const addRoleBindingSchema: FormSchema = {
       name: 'roleRefApiGroup',
       label: 'ApiGroup',
       type: 'text',
-
       grid: { md: 4 },
       defaultValue: ' ',
     },
-
-    // Subjects
     {
+      // Subjects
       name: 'subjects',
       label: 'Subjects',
       type: 'array',

@@ -1,7 +1,7 @@
+import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import { DeviceModel, DeviceModelList } from '@/types/deviceModel';
-import { request } from '@/helper/request';
 
 export function useListDeviceModels(params?: Record<string, string | number | undefined>) {
   let path = '/devicemodel';

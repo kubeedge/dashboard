@@ -1,7 +1,7 @@
+import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import type { Node, NodeList } from '@/types/node';
-import { request } from '@/helper/request';
 
 export function useListNodes(params?: Record<string, string | number | undefined>) {
   let path = '/node';

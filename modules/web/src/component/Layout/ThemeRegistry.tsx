@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useMemo, useState, createContext, useContext } from 'react';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 
@@ -22,12 +23,10 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
       createTheme({
         palette: {
           mode,
-
           background: {
             default: mode === 'dark' ? '#121212' : '#f5f6f7',
             paper: mode === 'dark' ? '#1e1e1e' : '#ffffff',
           },
-
           text: {
             primary: mode === 'dark' ? '#ffffff' : '#000000',
             secondary: mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
@@ -41,7 +40,6 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
           values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
         },
         components: {
-
           MuiCssBaseline: {
             styleOverrides: (themeParam: any) => ({
               'html, body, #__next': {
@@ -50,7 +48,6 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
               },
             }),
           },
-
           MuiPaper: {
             styleOverrides: {
               root: ({ theme }) => ({
@@ -77,7 +74,6 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
               }),
             },
           },
-
           MuiTableHead: {
             styleOverrides: {
               root: ({ theme }) => ({
@@ -89,7 +85,6 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
               }),
             },
           },
-
           MuiTableContainer: {
             styleOverrides: {
               root: ({ theme }) => ({
@@ -98,7 +93,6 @@ export default function ThemeRegistry({ children }: { children: React.ReactNode 
               }),
             },
           },
-
           MuiTablePagination: {
             styleOverrides: {
               toolbar: ({ theme }) => ({

@@ -41,9 +41,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {menu.map((group) => (
           <React.Fragment key={group.nameKey}>
             <ListItem disablePadding>
-              <ListItemButton onClick={() =>group.items ? handleClick(group.nameKey) : router.push(group.link!)
-        }
-        >
+              <ListItemButton onClick={() => group.items ? handleClick(group.nameKey) : router.push(group.link!)
+              }
+              >
                 <ListItemText primary={t(group.nameKey)} />
                 {group.items ? (open[group.nameKey] ? <ExpandLess /> : <ExpandMore />) : null}
               </ListItemButton>
@@ -124,17 +124,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {drawer}
         </Drawer>
       </Box>
-        <Box
+      <Box
         component="main"
         sx={{
-            flexGrow: 1,
-            minHeight: '100vh',
-            bgcolor: (theme) => theme.palette.background.default,
+          flexGrow: 1,
+          minHeight: '100vh',
+          bgcolor: (theme) => theme.palette.background.default,
         }}
-        >
+      >
         <Toolbar />
         {children}
-        </Box>
+      </Box>
     </Box>
   );
 }

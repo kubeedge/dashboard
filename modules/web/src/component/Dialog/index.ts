@@ -6,4 +6,4 @@ export { default as KeinkDialog } from './KeinkDialog';
 export { default as DeviceModelDetailDialog } from './DeviceModelDetailDialog';
 export { default as DeviceDetailDialog } from './DeviceDetailDialog';
 export { default as DeploymentDetailDialog } from './DeploymentDetailDialog';
-export { default as ConfigmapDetailDialog } from './ConfigmapDetailDialog';
+export { default as ConfigmapDetailDialog } from './ConfigMapDetailDialog';

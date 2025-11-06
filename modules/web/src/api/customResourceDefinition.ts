@@ -5,7 +5,7 @@ import { CustomResourceDefinition, CustomResourceDefinitionList } from '@/types/
 export function useListCustomResourceDefinitions(params?: Record<string, string | number | undefined>) {
   const searchParams = new URLSearchParams();
   let url = '/crd';
-  
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -13,9 +13,9 @@ export function useListCustomResourceDefinitions(params?: Record<string, string 
       }
     });
   }
-  
+
   const finalUrl = searchParams.toString() ? `${url}?${searchParams.toString()}` : url;
-  
+
   return useQuery<CustomResourceDefinitionList>('listCustomResourceDefinitions', finalUrl, {
     method: 'GET',
   });

@@ -1,12 +1,10 @@
-import type { FormSchema } from '@/components/FormView';
+import type { FormSchema } from '@/component/FormView';
 
 export const addClusterRoleSchema: FormSchema = {
-
   submitText: undefined,
-
   fields: [
-    // Name *
     {
+      // Name *
       name: 'name',
       label: 'Name *',
       type: 'text',
@@ -14,15 +12,13 @@ export const addClusterRoleSchema: FormSchema = {
       rules: [{ type: 'required', message: 'Name is required' }],
       grid: { md: 12 },
     },
-
-    // Rules
     {
+      // Rules
       name: 'rules',
       label: 'Rules',
       type: 'array',
       addText: 'ADD RULE',
       removeText: 'REMOVE',
-
       itemSchema: [
         {
           name: 'verbs',
@@ -51,18 +47,16 @@ export const addClusterRoleSchema: FormSchema = {
           type: 'text',
           fullWidth: true,
           grid: { xs: 12, sm: 12, md: 12 },
-        },
+        }
       ],
     },
-
-    // Match Labels
     {
+      // Match Labels
       name: 'matchLabels',
       label: 'ClusterRole Selectors',
       type: 'array',
       addText: 'ADD MATCH LABELS',
       removeText: 'REMOVE',
-
       itemSchema: [
         {
           name: 'key',
@@ -77,9 +71,8 @@ export const addClusterRoleSchema: FormSchema = {
           type: 'text',
           fullWidth: true,
           grid: { xs: 12, sm: 6, md: 6 },
-        },
+        }
       ],
-    },
+    }
   ],
-
 };

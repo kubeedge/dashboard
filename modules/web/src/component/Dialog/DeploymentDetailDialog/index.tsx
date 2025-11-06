@@ -13,7 +13,6 @@ import {
   Tabs,
   Tab,
   Box,
-  tableCellClasses,
   Button,
   DialogActions,
 } from '@mui/material';
@@ -146,7 +145,7 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
                 </TableRow>
               </TableHead>
               <TableBody>
-              {(displayPods?.length || 0) > 0 ? (
+                {(displayPods?.length || 0) > 0 ? (
                   displayPods?.map((pod) => (
                     <TableRow key={pod?.metadata?.uid}>
                       <TableCell>
@@ -160,12 +159,12 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
                       <TableCell>{pod?.spec?.nodeName}</TableCell>
                       <TableCell>{pod?.status?.phase}</TableCell>
                       <TableCell>
-                      <div>
-                        <div style={{ fontSize: "12px" }}>CPU: {pod?.spec?.containers?.at(0)?.resources?.requests?.cpu}</div>
-                        <div style={{ fontSize: "12px" }}>
-                          Memory: {pod?.spec?.containers?.at(0)?.resources?.requests?.memory}
+                        <div>
+                          <div style={{ fontSize: "12px" }}>CPU: {pod?.spec?.containers?.at(0)?.resources?.requests?.cpu}</div>
+                          <div style={{ fontSize: "12px" }}>
+                            Memory: {pod?.spec?.containers?.at(0)?.resources?.requests?.memory}
+                          </div>
                         </div>
-                      </div>
                       </TableCell>
                       <TableCell>{pod?.metadata?.creationTimestamp}</TableCell>
                     </TableRow>
@@ -189,7 +188,7 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
                 </TableRow>
               </TableHead>
               <TableBody>
-              {(Object.keys(data?.metadata?.labels || {})?.length || 0) > 0 ? (
+                {(Object.keys(data?.metadata?.labels || {})?.length || 0) > 0 ? (
                   Object.entries(data?.metadata?.labels || {})?.map((pair) => (
                     <TableRow key={pair[0]}>
                       <TableCell>{pair[0]}</TableCell>
@@ -208,11 +207,11 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
           </TabPanel>
         </DialogContent>
         <DialogActions>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button onClick={handleYamlOpen} variant="contained">
-              YAML
-            </Button>
-          </DialogActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={handleYamlOpen} variant="contained">
+            YAML
+          </Button>
+        </DialogActions>
       </Dialog>
       <YAMLViewerDialog
         open={yamlDialogOpen}

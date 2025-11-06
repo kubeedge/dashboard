@@ -1,7 +1,7 @@
+import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import { Deployment } from '@/types/deployment';
-import { request } from '@/helper/request';
 
 export function useListDeployments(params?: Record<string, string | number | undefined>) {
   let path = '/deployment';

@@ -39,13 +39,10 @@ export default function AddNodeDialog({ open, onClose, initial }: Props) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>Add Node</DialogTitle>
-
       <DialogContent
         dividers
-
         sx={{ '& .fv-actions': { display: 'none !important' } }}
       >
-
         <Box>
           <FormView
             schema={addNodeSchema}
@@ -57,7 +54,6 @@ export default function AddNodeDialog({ open, onClose, initial }: Props) {
             {...({ actions: false } as any)}
           />
         </Box>
-
         <Stack spacing={1} mt={2}>
           <TextField
             label="Command"
@@ -70,7 +66,6 @@ export default function AddNodeDialog({ open, onClose, initial }: Props) {
           />
         </Stack>
       </DialogContent>
-
       <DialogActions>
         <Button onClick={onClose}>CANCEL</Button>
         <Button type="submit" form={formId} variant="contained">

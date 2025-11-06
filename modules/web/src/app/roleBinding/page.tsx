@@ -188,7 +188,7 @@ export default function RoleBindingPage() {
       <AddRoleBindingDialog
         open={addRoleBindingDialogOpen}
         onClose={handleAddRoleBindingDialogClose}
-        // onSubmit={handleOnSubmit}
+      // onSubmit={handleOnSubmit}
       />
       {ConfirmDialogComponent}
     </Box>

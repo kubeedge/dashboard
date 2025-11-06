@@ -1,4 +1,5 @@
 import type { Secret } from '@/types/secret';
+
 export function toSecret(values: any): { ns: string; body: Secret } {
   const ns = values.namespace;
   const data: Record<string, string> = {};
