@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { AppContext } from '@/component/AppContext'
+import { AppContext } from '@/component/Common/AppContext'
 
 export const useNamespace = () => {
   const context = useContext(AppContext);

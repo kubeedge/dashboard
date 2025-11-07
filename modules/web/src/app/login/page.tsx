@@ -11,14 +11,14 @@ import useCookie from '@/hook/useCookie';
 import { useAlert } from '@/hook/useAlert';
 import { useKeinkRunnable } from '@/api/keink';
 import useConfirmDialog from '@/hook/useConfirmDialog';
-import KeinkDialog from '@/component/KeinkDialog';
+import KeinkDialog from '@/component/Dialog/KeinkDialog';
 
 const LoginPage = () => {
   const [token, setToken] = useState('');
   const [tokenError, setTokenError] = useState('');
   const [storedToken, setStoredToken] = useStorage('token');
   const [cookie, setCookie] = useCookie('dashboard_user');
-  const { setErrorMessage } = useAlert();
+  const { error } = useAlert();
   const { data: keinkRes } = useKeinkRunnable();
   const [showKeinkDialog, setShowKeinkDialog] = useState(false);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
@@ -26,6 +26,8 @@ const LoginPage = () => {
   useEffect(() => {
     if (cookie && storedToken) {
       getVersion(storedToken).then(() => {
+
+
         window.location.href = '/';
       }).catch(() => {
         setCookie('');
@@ -41,6 +43,7 @@ const LoginPage = () => {
     }
     try {
       const resp = await getVersion(token);
+
       console.log('resp', resp);
 
       const user = await getServiceAccountName(token);;
@@ -50,7 +53,7 @@ const LoginPage = () => {
 
       window.location.href = '/';
     } catch (e: any) {
-      setErrorMessage(e?.response?.data?.message || e?.message || 'Failed to login');
+      error(e?.response?.data?.message || e?.message || 'Failed to login');
       setTokenError('Invalid token');
     }
   };
@@ -62,7 +65,7 @@ const LoginPage = () => {
       onConfirm: () => {
         setShowKeinkDialog(true);
       },
-      onCancel: () => {},
+      onCancel: () => { },
     })
   }
 

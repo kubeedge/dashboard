@@ -1,12 +1,19 @@
+import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import type { Node, NodeList } from '@/types/node';
-import { request } from '@/helper/request';
 
-export function useListNodes() {
-  return useQuery<NodeList>('listNodes', '/node', {
-    method: 'GET',
-  });
+export function useListNodes(params?: Record<string, string | number | undefined>) {
+  let path = '/node';
+  if (params) {
+    const search = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && `${v}` !== '') search.set(k, String(v));
+    });
+    const qs = search.toString();
+    if (qs) path += `?${qs}`;
+  }
+  return useQuery<any>(`listNodes:${path}`, path, { method: 'GET' });
 }
 
 export function getNode(name: string) {
@@ -26,4 +33,10 @@ export function deleteNode(name: string) {
   return request<Status>(`/node/${name}`, {
     method: 'DELETE',
   });
+}
+
+export async function listNodes(namespace?: string): Promise<NodeList> {
+  const url = namespace ? `/node/${namespace}` : '/node';
+  const res = await request<NodeList>(url, { method: 'GET' });
+  return res.data;
 }

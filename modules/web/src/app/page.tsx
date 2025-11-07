@@ -3,10 +3,10 @@
 import styles from "./page.module.css";
 import { Grid } from '@mui/material';
 import React, { useEffect } from 'react';
-import { ProgressCard } from '@/component/ProgressCard';
-import { StatusCard } from '@/component/StatusCard';
-import { VersionCard } from '@/component/VersionCard';
-import { PodsTable } from '@/component/PodTable';
+import { ProgressCard } from '@/component/Common/ProgressCard';
+import { StatusCard } from '@/component/Common/StatusCard';
+import { VersionCard } from '@/component/Common/VersionCard';
+import { PodsTable } from '@/component/Table/PodTable';
 import { useListPods } from "@/api/pod";
 import { useNamespace } from "@/hook/useNamespace";
 import { useGetK8sVersion } from "@/api/version";
@@ -37,9 +37,36 @@ const CardRow = (props: {
     unavailableApps += (app.status?.replicas || 0) - (app.status?.availableReplicas || 0);
   });
 
-  const kubeedgeVersionParts = props?.nodes?.find(node => node?.status?.nodeInfo?.kubeletVersion.includes('kubeedge'))?.status?.nodeInfo?.kubeletVersion?.split('-');
-  const kubeedgePartIndex = kubeedgeVersionParts?.findIndex(part => part === 'kubeedge') || -1;
-  const kubeedgeVersion = kubeedgePartIndex >= 0 && kubeedgeVersionParts?.[kubeedgePartIndex + 1];
+  const extractKubeEdgeVersion = (nodes?: Node[]) => {
+    if (!nodes || nodes.length === 0) return undefined;
+    // Regex: match 'kubeedge' followed by optional separators and an optional 'v', then capture version like 1.13.1
+    const re = /kubeedge[^0-9a-zA-Z]*v?([0-9]+(?:\.[0-9]+){1,3})/i;
+    for (const node of nodes) {
+      const info = node?.status?.nodeInfo;
+      const labels = (node as any)?.metadata?.labels || {};
+      const annotations = (node as any)?.metadata?.annotations || {};
+      const candidates: (string | undefined)[] = [
+        info?.kubeletVersion,
+        info?.containerRuntimeVersion,
+        info?.osImage,
+        labels['kubeedge.io/version'],
+        labels['keink.kubeedge.io/version'],
+        annotations['kubeedge.io/version'],
+        annotations['keink.kubeedge.io/version'],
+      ];
+      for (const text of candidates) {
+        if (!text) continue;
+        const m = text.match(re);
+        if (m && m[1]) {
+          const v = m[1];
+          return v.startsWith('v') ? v : `v${v}`;
+        }
+      }
+    }
+    return undefined;
+  };
+
+  const kubeedgeVersion = extractKubeEdgeVersion(props?.nodes);
 
   const cardData = [
     {
@@ -132,7 +159,7 @@ export default function Home() {
   const { data, mutate } = useListPods(namespace);
   const versionDate = useGetK8sVersion()?.data;
   const nodeData = useListNodes()?.data;
-  const { data: appData, mutate: appMutate } = useListDeployments(namespace);
+  const { data: appData, mutate: appMutate } = useListDeployments({ namespace });
 
   useEffect(() => {
     mutate();

@@ -22,6 +22,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	corev1 "k8s.io/api/core/v1"
 
+	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/service"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +30,13 @@ import (
 func (apiHandler *APIHandler) addServiceRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/service").To(apiHandler.getServiceList).
-			Writes(corev1.ServiceList{}).
-			Returns(http.StatusOK, "OK", corev1.ServiceList{}))
+			Writes(ListResponse[service.ServiceListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[service.ServiceListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/service/{namespace}").To(apiHandler.getServiceList).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
-			Writes(corev1.ServiceList{}).
-			Returns(http.StatusOK, "OK", corev1.ServiceList{}))
+			Writes(ListResponse[service.ServiceListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[service.ServiceListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/service/{namespace}/{name}").To(apiHandler.getService).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
@@ -69,13 +70,26 @@ func (apiHandler *APIHandler) getServiceList(request *restful.Request, response 
 		return
 	}
 
-	namespace := request.PathParameter("namespace")
-	result, err := service.GetServiceList(k8sClient, namespace)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: service.SortableFields, FilterableFields: service.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
-	response.WriteHeaderAndEntity(http.StatusOK, result)
+
+	namespace := request.PathParameter("namespace")
+	
+	rawList, err := service.GetServiceList(k8sClient, namespace)
+	if err != nil {
+		errors.HandleInternalError(response, err)
+		return
+	}
+	items := rawList.Items
+
+	items = common.FilterItems(items, toCommonFilterClauses(query.Filters), service.ServiceFieldGetter)
+	common.SortItems(items, query.Sort, query.Order, service.ServiceComparators())
+	pageItems, total, _ := common.Paginate(items, query.Page, query.PageSize)
+	view := common.Project(pageItems, service.ServiceToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) getService(request *restful.Request, response *restful.Response) {

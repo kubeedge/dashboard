@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 
 interface NoSSRProps {
-    children: React.ReactNode;
-    fallback?: React.ReactNode;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
 }
 
 /**
@@ -12,15 +12,15 @@ interface NoSSRProps {
  * Shows fallback content before client-side hydration completes
  */
 export default function NoSSR({ children, fallback = null }: NoSSRProps) {
-    const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-    if (!isMounted) {
-        return <>{fallback}</>;
-    }
+  if (!isMounted) {
+    return <>{fallback}</>;
+  }
 
-    return <>{children}</>;
+  return <>{children}</>;
 }

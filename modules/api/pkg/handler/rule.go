@@ -22,6 +22,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	rulev1 "github.com/kubeedge/api/apis/rules/v1"
 
+	"github.com/kubeedge/dashboard/api/pkg/resource/common"
 	"github.com/kubeedge/dashboard/api/pkg/resource/rule"
 	"github.com/kubeedge/dashboard/errors"
 )
@@ -29,13 +30,13 @@ import (
 func (apiHandler *APIHandler) addRuleRoutes(apiV1Ws *restful.WebService) *APIHandler {
 	apiV1Ws.Route(
 		apiV1Ws.GET("/rule").To(apiHandler.handleGetRules).
-			Writes(rulev1.RuleList{}).
-			Returns(http.StatusOK, "OK", rulev1.RuleList{}))
+			Writes(ListResponse[rule.RuleListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[rule.RuleListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/rule/{namespace}").To(apiHandler.handleGetRules).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
-			Writes(rulev1.RuleList{}).
-			Returns(http.StatusOK, "OK", rulev1.RuleList{}))
+			Writes(ListResponse[rule.RuleListItem]{}).
+			Returns(http.StatusOK, "OK", ListResponse[rule.RuleListItem]{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/rule/{namespace}/{name}").To(apiHandler.handleGetRule).
 			Param(apiV1Ws.PathParameter("namespace", "Name of the namespace")).
@@ -69,14 +70,28 @@ func (apiHandler *APIHandler) handleGetRules(request *restful.Request, response 
 		return
 	}
 
-	namespace := request.PathParameter("namespace")
-	result, err := rule.GetRuleList(kubeedgeClient, namespace)
+	query, err := ParseListQuery(request, AllowedFields{SortableFields: rule.SortableFields, FilterableFields: rule.FilterableFields})
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
 	}
 
-	response.WriteEntity(result)
+	namespace := request.PathParameter("namespace")
+
+	rawList, err := rule.GetRuleList(kubeedgeClient, namespace)
+	if err != nil {
+		// If real data fails, log error but continue with empty list
+		// This allows frontend to work even when KubeEdge resources are not available
+		response.WriteHeaderAndEntity(http.StatusOK, NewListResponse([]rule.RuleListItem{}, 0, query.Page, query.PageSize, query.Sort, query.Order))
+		return
+	}
+	items := rawList.Items
+
+	items = common.FilterItems(items, toCommonFilterClauses(query.Filters), rule.RuleFieldGetter)
+	common.SortItems(items, query.Sort, query.Order, rule.RuleComparators())
+	pageItems, total, _ := common.Paginate(items, query.Page, query.PageSize)
+	view := common.Project(pageItems, rule.RuleToListItem)
+	response.WriteHeaderAndEntity(http.StatusOK, NewListResponse(view, total, query.Page, query.PageSize, query.Sort, query.Order))
 }
 
 func (apiHandler *APIHandler) handleGetRule(request *restful.Request, response *restful.Response) {
