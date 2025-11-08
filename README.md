@@ -56,7 +56,7 @@ pnpm install
 You can start the backend server by running the following command:
 
 ```bash
-cd module/api
+cd modules/api
 go run main.go --apiserver-host=https://192.168.33.129:6443
 ```
 
@@ -85,6 +85,23 @@ cd module/web
 pnpm run build
 API_SERVER={api module address} pnpm run start
 Example: API_SERVER=http://127.0.0.1:8080 pnpm run dev
+```
+
+### Health check API
+
+Once the backend server is running, you can verify connectivity to the Kubernetes API using the health endpoint:
+
+```bash
+curl -H "Authorization: Bearer ${TOKEN}" http://127.0.0.1:8080/api/v1/healthz
+```
+
+Example response:
+
+```json
+{
+  "healthy": true,
+  "kubernetesVersion": "v1.29.3"
+}
 ```
 
 ### Login with token
