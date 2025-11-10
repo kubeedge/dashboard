@@ -2,8 +2,11 @@
 
 import { TextField } from '@mui/material';
 import { Controller } from 'react-hook-form';
+import { useI18n } from '@/hook/useI18n';
 
 export default function InputField({ field, control }: any) {
+  const { t } = useI18n();
+
   return (
     <Controller
       name={field.name}
@@ -12,11 +15,11 @@ export default function InputField({ field, control }: any) {
         <TextField
           {...rhf}
           type={field.type === 'password' ? 'password' : 'text'}
-          label={field.label}
-          placeholder={field.placeholder}
+          label={t(field.label)}
+          placeholder={t(field.placeholder)}
           fullWidth={field.fullWidth ?? true}
           error={!!error}
-          helperText={error?.message || field.helperText}
+          helperText={error?.message && `${t(field.label)} ${t(error?.message || field.helperText)}`}
         />
       )}
     />

@@ -38,16 +38,11 @@ export interface FieldSchema {
   visibleWhen?: (form: any) => boolean;
   disabledWhen?: (form: any) => boolean;
   itemSchema?: ArrayItemField[];
-
   addText?: string;
   removeText?: string;
-
   rows?: number;
-
   inlineRemove?: boolean;
-
   props?: Record<string, any>;
-
 }
 
 export interface FormSchema {

@@ -1,7 +1,7 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import type { Node, NodeList } from '@/types/node';
+import type { ConciseNodeList, Node, NodeList } from '@/types/node';
 
 export function useListNodes(params?: Record<string, string | number | undefined>) {
   let path = '/node';
@@ -13,7 +13,7 @@ export function useListNodes(params?: Record<string, string | number | undefined
     const qs = search.toString();
     if (qs) path += `?${qs}`;
   }
-  return useQuery<any>(`listNodes:${path}`, path, { method: 'GET' });
+  return useQuery<ConciseNodeList>(`listNodes:${path}`, path, { method: 'GET' });
 }
 
 export function getNode(name: string) {

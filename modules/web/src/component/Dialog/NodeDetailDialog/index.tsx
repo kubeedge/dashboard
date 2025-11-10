@@ -5,6 +5,8 @@ import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import { Node } from '@/types/node';
 import { getNodeStatus } from '@/helper/status';
 import { convertKiToGTM } from '@/helper/util';
+import { useI18n } from '@/hook/useI18n'
+import { formatRelativeTime, formatStatus, formatDateTime } from '@/helper/localization';
 
 interface NodeDetailDialogProps {
   open?: boolean;
@@ -15,6 +17,8 @@ interface NodeDetailDialogProps {
 export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps) {
   const [yamlDialogOpen, setYamlDialogOpen] = useState(false);
   const theme = useTheme();
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
 
   const handleYamlOpen = () => {
     setYamlDialogOpen(true);
@@ -27,7 +31,7 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
   return (
     <>
       <Dialog open={!!open} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>Node Detail</DialogTitle>
+        <DialogTitle>{t("common.node")} {t("actions.detail")}</DialogTitle>
         <DialogContent>
           <Box
             sx={{
@@ -53,55 +57,55 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
             }}
           >
             <Box className="row">
-              <Typography className="label">Name:</Typography>
+              <Typography className="label">{t("table.name")}:</Typography>
               <Typography className="value">{data?.metadata?.name}</Typography>
-              <Typography className="label">Status:</Typography>
-              <Typography className="value">{getNodeStatus(data)}</Typography>
+              <Typography className="label">{t("table.status")}:</Typography>
+              <Typography className="value">{formatStatus(getNodeStatus(data), currentLanguage)}</Typography>
             </Box>
             <Box className="row">
-              <Typography className="label">ID:</Typography>
+              <Typography className="label">{t("table.id")}:</Typography>
               <Typography className="value">{data?.metadata?.uid}</Typography>
-              <Typography className="label">Description:</Typography>
+              <Typography className="label">{t("table.description")}:</Typography>
               <Typography className="value">{data?.metadata?.annotations?.['node.alpha.kubernetes.io/ttl']}</Typography>
             </Box>
             <Box className="row">
-              <Typography className="label">Creation time:</Typography>
+              <Typography className="label">{t("table.creationTime")}:</Typography>
               <Typography className="value">{data?.metadata?.creationTimestamp}</Typography>
-              <Typography className="label">Hostname:</Typography>
+              <Typography className="label">{t("table.hostname")}:</Typography>
               <Typography className="value">{data?.status?.addresses?.find(address => address.type === 'Hostname')?.address}</Typography>
             </Box>
             <Box className="row">
-              <Typography className="label">System:</Typography>
+              <Typography className="label">{t("table.system")}:</Typography>
               <Typography className="value">
                 {data?.status?.nodeInfo?.osImage} |{" "}
                 {data?.status?.nodeInfo?.operatingSystem} |{" "}
                 {data?.status?.nodeInfo?.architecture} |{" "}
                 {data?.status?.nodeInfo?.kernelVersion}
               </Typography>
-              <Typography className="label">IP:</Typography>
+              <Typography className="label">{t("table.ip")}:</Typography>
               <Typography className="value">{data?.status?.addresses?.find(address => address.type === 'InternalIP')?.address}</Typography>
             </Box>
             <Box className="row">
-              <Typography className="label">Configuration:</Typography>
+              <Typography className="label">{t("table.configuration")}:</Typography>
               <Typography className="value">
                 {data?.status?.capacity?.cpu}Cpu |{" "}
                 {convertKiToGTM(data?.status?.capacity?.memory || "0")}
               </Typography>
             </Box>
             <Box className="row">
-              <Typography className="label">Container runtime version:</Typography>
+              <Typography className="label">{t("table.containerRuntimeVersion")}:</Typography>
               <Typography className="value">{data?.status?.nodeInfo?.containerRuntimeVersion}</Typography>
             </Box>
             <Box className="row">
-              <Typography className="label">Edge side software version:</Typography>
+              <Typography className="label">{t("table.kubeletVersion")}:</Typography>
               <Typography className="value">{data?.status?.nodeInfo?.kubeletVersion}</Typography>
             </Box>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onClose}>{t("actions.cancel")}</Button>
           <Button onClick={handleYamlOpen} variant="contained">
-            YAML
+            {t("actions.yaml")}
           </Button>
         </DialogActions>
       </Dialog>

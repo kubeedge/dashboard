@@ -4,32 +4,32 @@ export const addNodeSchema: FormSchema = {
   fields: [
     {
       name: 'cloudcore',
-      label: 'Cloud master node ip:port *',
+      label: 'table.labelCloudMasterIP',
       type: 'text',
       rules: [{ type: 'required' }],
       grid: { md: 12 },
     },
     {
       name: 'version',
-      label: 'KubeEdge version *',
+      label: 'table.kubeedgeVersion',
       type: 'text',
       rules: [{ type: 'required' }],
       grid: { md: 12 },
     },
     {
       name: 'runtime',
-      label: 'Runtime type *',
+      label: 'table.labelRuntimeType',
       type: 'select',
       rules: [{ type: 'required' }],
       grid: { md: 12 },
       options: [
-        { label: 'containerd', value: 'containerd' },
-        { label: 'docker', value: 'docker' },
+        { label: 'Containerd', value: 'containerd' },
+        { label: 'Docker', value: 'docker' },
       ],
     },
     {
       name: 'token',
-      label: 'Token *',
+      label: 'table.labelToken',
       type: 'text',
       rules: [{ type: 'required' }],
       grid: { md: 12 },

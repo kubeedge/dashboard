@@ -16,6 +16,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useI18n } from '@/hook/useI18n';
 
 export interface ColumnDefinition<T> {
   name?: string;
@@ -48,6 +49,7 @@ interface TableCardProps<T> {
     total: number;
   };
   onPaginationChange?: (page: number, pageSize: number) => void;
+  filter?: React.ReactNode;
   loading?: boolean;
 }
 
@@ -67,10 +69,12 @@ export function TableCard<T>({
   noTableHeader = false,
   noPagination = false,
   pagination,
+  filter,
   onPaginationChange,
 }: TableCardProps<T>) {
   const [internalPage, setInternalPage] = React.useState(0);
   const [internalRowsPerPage, setInternalRowsPerPage] = React.useState(10);
+  const { t } = useI18n();
 
   const handleChangePage = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent> | null,
@@ -138,6 +142,23 @@ export function TableCard<T>({
               <MoreVertIcon />
             </IconButton>
           </Box>
+        </Box>
+      )}
+
+      {/* Filter */}
+      {filter && (
+        <Box
+          sx={{
+            padding: '16px',
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'dark' ? '#2b2b2b' : '#f5f5f5',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            flexWrap: 'wrap',
+          }}
+        >
+          {filter}
         </Box>
       )}
 
@@ -214,6 +235,10 @@ export function TableCard<T>({
           page={currentPage}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage={t('table.rowsPerPage')}
+          labelDisplayedRows={(info) => {
+            return `${info.from}-${info.to} ${t('table.of')} ${info.count}`;
+          }}
         />
       )}
     </Paper>
