@@ -1,31 +1,58 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { TextField, MenuItem, Button, Pagination } from '@mui/material';
+import { TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Box } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
-import { deleteNodeGroup, getNodeGroup, useListNodeGroups } from '@/api/nodeGroup';
+import { deleteNodeGroup, getNodeGroup, useListNodeGroups, createNodeGroup } from '@/api/nodeGroup';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import AddNodeGroupDialog from '@/component/Form/AddNodeGroupDialog';
-import type { NodeGroup } from '@/types/nodeGroup';
+import type { ConciseNodeGroup, NodeGroup } from '@/types/nodeGroup';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 
 export default function NodeGroupPage() {
-  const { t } = useI18n();
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sort, setSort] = useState<string>('creationTimestamp');
+  const [order, setOrder] = useState<'asc' | 'desc' | string>('desc');
+  const [name, setName] = useState<string>('');
+  const [selectedYaml, setSelectedYaml] = React.useState<NodeGroup | null>(null);
+  const [openYamlDialog, setOpenYamlDialog] = React.useState(false);
+  const [openAddNodeGroupDialog, setOpenAddNodeGroupDialog] = React.useState(false);
+  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
+  const { error } = useAlert();
+  const params = useMemo(() => ({
+    page, pageSize, sort, order,
+    filter: [
+      name ? `name:${name}` : undefined,
+    ].filter(Boolean).join(','),
+  }), [page, pageSize, sort, order, name]);
+  const { data, mutate, isLoading } = useListNodeGroups(params);
 
-  // Compatible with full NodeGroup object and lightweight DTO from server
-  const columns: ColumnDefinition<any>[] = [
+  const columns: ColumnDefinition<ConciseNodeGroup>[] = [
     {
       name: t('table.name'),
-      render: (row: any) => row?.metadata?.name ?? row?.name,
+      render: (row) => row?.name || '-',
     },
     {
       name: t('table.creationTime'),
-      render: (row: any) => row?.metadata?.creationTimestamp ?? row?.creationTimestamp,
+      render: (node) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+            {formatDateTime(node?.creationTimestamp, currentLanguage)}
+          </Box>
+          <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+            {formatRelativeTime(node?.creationTimestamp, currentLanguage)}
+          </Box>
+        </Box>
+      )
     },
     {
       name: t('table.operation'),
@@ -33,29 +60,15 @@ export default function NodeGroupPage() {
     },
   ];
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
-  const [sort, setSort] = useState<string | undefined>('creationTimestamp');
-  const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
-  const [namespace, setNamespace] = useState<string | undefined>(undefined);
-  const [name, setName] = useState<string | undefined>(undefined);
-  // No mock controls in PR branch
-  const params = useMemo(() => ({
-    page, pageSize, sort, order,
-    filter: [
-      namespace ? `namespace:${namespace}` : undefined,
-      name ? `name:${name}` : undefined,
-    ].filter(Boolean).join(','),
-  }), [page, pageSize, sort, order, namespace, name]);
-  const [selectedYaml, setSelectedYaml] = React.useState<NodeGroup | null>(null);
-  const [openYamlDialog, setOpenYamlDialog] = React.useState(false);
-  const [openAddNodeGroupDialog, setOpenAddNodeGroupDialog] = React.useState(false);
-  const { data, mutate } = useListNodeGroups(params);
-  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error } = useAlert();
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
+  };
 
-  const handleAddClick = () => setOpenAddNodeGroupDialog(true);
-  const handleRefreshClick = () => mutate();
+  const handleAddNodeGroup = async (record: NodeGroup) => {
+    await createNodeGroup(record);
+    mutate();
+  };
 
   const handleDetailClick = async (_: any, row: any) => {
     try {
@@ -76,71 +89,84 @@ export default function NodeGroupPage() {
           await deleteNodeGroup((row?.metadata?.name ?? row?.name) || '');
           mutate();
         } catch (e: any) {
-          error(e?.response?.data?.message || e?.message || 'Failed to delete NodeGroup');
+          error(e?.response?.data?.message || e?.message || t('messages.error'));
         }
       },
-      onCancel: () => { },
     });
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
-        <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
-          <TableCard
-            title={t('common.nodeGroup')}
-            addButtonLabel={t('actions.add') + ' ' + t('common.nodeGroup')}
-            columns={columns}
-            data={data?.items}
-            onAddClick={handleAddClick}
-            onRefreshClick={handleRefreshClick}
-            onDetailClick={handleDetailClick}
-            onDeleteClick={handleDeleteClick}
-            detailButtonLabel="YAML"
-            deleteButtonLabel={t('actions.delete')}
-            noPagination
-          />
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
-            <TextField size="small" select label="Rows per page" value={pageSize}
-              onChange={(e) => { const v = Number(e.target.value) || 10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
-              <MenuItem value={5}>5</MenuItem>
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={20}>20</MenuItem>
-              <MenuItem value={50}>50</MenuItem>
-            </TextField>
-            <TextField size="small" select label="Sort" value={sort || ''} onChange={(e) => setSort(e.target.value || undefined)} sx={{ minWidth: 180 }}>
-              <MenuItem value="">Default</MenuItem>
-              <MenuItem value="name">name</MenuItem>
-              <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
-            </TextField>
-            <TextField size="small" select label="Order" value={order || ''} onChange={(e) => setOrder((e.target.value as any) || undefined)} sx={{ minWidth: 140 }}>
-              <MenuItem value="">Default</MenuItem>
-              <MenuItem value="asc">asc</MenuItem>
-              <MenuItem value="desc">desc</MenuItem>
-            </TextField>
-            <TextField size="small" label="Namespace" value={namespace || ''} onChange={(e) => setNamespace(e.target.value || undefined)} />
-            <TextField size="small" label="Name" value={name || ''} onChange={(e) => setName(e.target.value || undefined)} placeholder="supports * wildcards" />
-            <Box sx={{ flexGrow: 1 }} />
-            <Pagination
-              page={page}
-              onChange={(_, value) => { setPage(value); mutate(); }}
-              count={Math.max(1, Math.ceil(((data?.total ?? 0) as number) / (pageSize || 1)))}
-              size="small"
-              color="primary"
-            />
-          </Box>
-        </Box>
-
-        <YAMLViewerDialog open={openYamlDialog} onClose={() => setOpenYamlDialog(false)} content={selectedYaml} />
-
-        <AddNodeGroupDialog
-          open={openAddNodeGroupDialog}
-          onClose={() => setOpenAddNodeGroupDialog(false)}
-          onCreated={() => mutate()}
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
+        <TableCard
+          title={t('common.nodeGroup')}
+          addButtonLabel={`${t('actions.add')} ${t('common.nodeGroup')}`}
+          columns={columns}
+          data={data?.items}
+          onAddClick={() => setOpenAddNodeGroupDialog(true)}
+          onRefreshClick={() => mutate()}
+          onDetailClick={handleDetailClick}
+          onDeleteClick={handleDeleteClick}
+          detailButtonLabel={t('actions.yaml')}
+          deleteButtonLabel={t('actions.delete')}
+          loading={isLoading}
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          filter={(
+            <>
+              <FormControl>
+                <InputLabel shrink>{t('table.labelSort')}</InputLabel>
+                <Select
+                  size='small'
+                  label={t('table.labelSort')}
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value || '')}
+                  sx={{ minWidth: 180 }}
+                  displayEmpty
+                >
+                  <MenuItem value=''>{t('table.default')}</MenuItem>
+                  <MenuItem value='name'>{t('table.name')}</MenuItem>
+                  <MenuItem value='creationTimestamp'>{t('table.creationTime')}</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl>
+                <InputLabel shrink>{t('table.labelOrder')}</InputLabel>
+                <Select
+                  size='small'
+                  label={t('table.labelOrder')}
+                  value={order || ''}
+                  onChange={(e) => setOrder(e.target.value || '')}
+                  sx={{ minWidth: 140 }}
+                  displayEmpty
+                >
+                  <MenuItem value=''>{t('table.default')}</MenuItem>
+                  <MenuItem value='asc'>{t('table.orderAsc')}</MenuItem>
+                  <MenuItem value='desc'>{t('table.orderDesc')}</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                size="small"
+                label={t('table.name')}
+                value={name || ''}
+                onChange={(e) => setName(e.target.value || '')}
+                placeholder={t('table.textWildcardHelp')}
+              />
+            </>
+          )}
         />
-
-        {ConfirmDialogComponent}
       </Box>
-    </LocalizationProvider>
+      <YAMLViewerDialog open={openYamlDialog} onClose={() => setOpenYamlDialog(false)} content={selectedYaml} />
+      <AddNodeGroupDialog
+        open={openAddNodeGroupDialog}
+        onClose={() => setOpenAddNodeGroupDialog(false)}
+        onCreated={() => setOpenAddNodeGroupDialog(false)}
+        onSubmit={handleAddNodeGroup}
+      />
+      {ConfirmDialogComponent}
+    </Box>
   );
 }

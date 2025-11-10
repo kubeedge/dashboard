@@ -60,6 +60,7 @@
     "operation": "操作",
     "hostname": "主机名/IP",
     "version": "KubeEdge版本",
+    "node": "节点",
     "nodeGroups": "节点组",
     "roleRef": "角色引用",
     "group": "组",
@@ -201,11 +202,9 @@
     "default": "默认",
     "orderAsc": "升序",
     "orderDesc": "降序",
-    "textWildcardHelp": "支持 * 通配符",
-    "labelCloudMasterIP": "云端主节点 (ip:port)",
-    "labelKubeedgeVersion": "KubeEdge 版本",
-    "labelRuntimeType": "运行时类型",
-    "labelToken": "令牌"
+    "matchLabels": "匹配标签",
+    "labelAddMatchLabels": "添加匹配标签",
+    "labelAddOne": "添加一项"
   },
   "status": {
     "all": "全部",

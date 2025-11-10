@@ -36,7 +36,7 @@ export default function NodePage() {
       name ? `name:${name}` : undefined,
     ].filter(Boolean).join(','),
   }), [page, pageSize, sort, order, status, name]);
-  const { data, mutate } = useListNodes(params);
+  const { data, mutate, isLoading } = useListNodes(params);
 
   const columns: ColumnDefinition<ConciseNode>[] = [{
     name: `${t('table.name')}/${t('table.id')}`,
@@ -143,6 +143,7 @@ export default function NodePage() {
             total: data?.total || 0,
           }}
           onPaginationChange={handlePaginationChange}
+          loading={isLoading}
           filter={(
             <>
               <FormControl>

@@ -4,7 +4,7 @@ export const addNodeSchema: FormSchema = {
   fields: [
     {
       name: 'cloudcore',
-      label: 'table.labelCloudMasterIP',
+      label: 'table.cloudMasterIP',
       type: 'text',
       rules: [{ type: 'required' }],
       grid: { md: 12 },
@@ -18,7 +18,7 @@ export const addNodeSchema: FormSchema = {
     },
     {
       name: 'runtime',
-      label: 'table.labelRuntimeType',
+      label: 'table.runtimeType',
       type: 'select',
       rules: [{ type: 'required' }],
       grid: { md: 12 },
@@ -29,7 +29,7 @@ export const addNodeSchema: FormSchema = {
     },
     {
       name: 'token',
-      label: 'table.labelToken',
+      label: 'table.token',
       type: 'text',
       rules: [{ type: 'required' }],
       grid: { md: 12 },

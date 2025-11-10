@@ -5,16 +5,18 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useFieldArray, Controller } from 'react-hook-form';
 import InputField from './InputField';
 import SelectField from './SelectField';
+import { useI18n } from '@/hook/useI18n';
 
 export default function ArrayField({ field, control }: any) {
   const name = field.name;
   const { fields, append, remove } = useFieldArray({ control, name });
   const subFields: any[] = field.itemsSchema ?? field.itemSchema ?? [];
+  const { t } = useI18n();
 
   return (
     <Stack spacing={1}>
       {!!field.label && (
-        <Typography variant="subtitle2">{field.label}</Typography>
+        <Typography variant="subtitle2">{t(field.label)}</Typography>
       )}
 
       {fields.map((row, idx) => {
@@ -70,7 +72,7 @@ export default function ArrayField({ field, control }: any) {
       })}
 
       <Button size="small" onClick={() => append({})}>
-        {field.addText ?? 'Add one line'}
+        {(field.addText && t(field.addText)) || t('table.labelAddOne')}
       </Button>
     </Stack>
   );

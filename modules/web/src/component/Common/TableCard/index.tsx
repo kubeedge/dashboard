@@ -12,6 +12,7 @@ import {
   TableHead,
   TableRow,
   TablePagination,
+  CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -71,6 +72,7 @@ export function TableCard<T>({
   pagination,
   filter,
   onPaginationChange,
+  loading,
 }: TableCardProps<T>) {
   const [internalPage, setInternalPage] = React.useState(0);
   const [internalRowsPerPage, setInternalRowsPerPage] = React.useState(10);
@@ -184,7 +186,15 @@ export function TableCard<T>({
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData?.map((row, rowIndex) => (
+            {loading ? (
+              <TableRow>
+                <TableCell align="center" colSpan={columns?.length || 1}>
+                  <Box sx={{ p: 3 }}>
+                    <CircularProgress size={24} />
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ) : paginatedData?.map((row, rowIndex) => (
               <TableRow key={rowIndex}>
                 {columns?.map((col, colIndex) => {
                   if (col.renderOperation) {

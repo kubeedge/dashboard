@@ -60,6 +60,7 @@
     "operation": "Operation",
     "hostname": "Hostname/IP",
     "version": "KubeEdge Version",
+    "node": "Node",
     "nodeGroups": "Node Groups",
     "roleRef": "Role Ref",
     "group": "Group",
@@ -201,10 +202,9 @@
     "orderAsc": "Asc",
     "orderDesc": "Desc",
     "textWildcardHelp": "Supports * wildcards",
-    "labelCloudMasterIP": "Cloud Master Node (ip:port)",
-    "labelKubeedgeVersion": "KubeEdge Version",
-    "labelRuntimeType": "Runtime Type",
-    "labelToken": "Token"
+    "matchLabels": "MatchLabels",
+    "labelAddMatchLabels": "Add MatchLabels",
+    "labelAddOne": "Add One"
   },
   "status": {
     "all": "All",
