@@ -6,7 +6,7 @@ import { Node } from '@/types/node';
 import { getNodeStatus } from '@/helper/status';
 import { convertKiToGTM } from '@/helper/util';
 import { useI18n } from '@/hook/useI18n'
-import { formatRelativeTime, formatStatus, formatDateTime } from '@/helper/localization';
+import { formatStatus, formatDateTime } from '@/helper/localization';
 
 interface NodeDetailDialogProps {
   open?: boolean;
@@ -70,7 +70,7 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
             </Box>
             <Box className="row">
               <Typography className="label">{t("table.creationTime")}:</Typography>
-              <Typography className="value">{data?.metadata?.creationTimestamp}</Typography>
+              <Typography className="value">{formatDateTime(data?.metadata?.creationTimestamp, currentLanguage)}</Typography>
               <Typography className="label">{t("table.hostname")}:</Typography>
               <Typography className="value">{data?.status?.addresses?.find(address => address.type === 'Hostname')?.address}</Typography>
             </Box>

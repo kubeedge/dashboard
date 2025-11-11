@@ -204,7 +204,15 @@
     "textWildcardHelp": "Supports * wildcards",
     "matchLabels": "MatchLabels",
     "labelAddMatchLabels": "Add MatchLabels",
-    "labelAddOne": "Add One"
+    "labelAddOne": "Add One",
+    "deploymentStatusRatio": "Available/Total",
+    "resource": "Resource",
+    "pods": "Pods",
+    "labels": "Labels",
+    "availableReplicas": "Available Replicas",
+    "unavailableReplicas": "Unavailable Replicas",
+    "cpu": "CPU",
+    "memory": "Memory"
   },
   "status": {
     "all": "All",

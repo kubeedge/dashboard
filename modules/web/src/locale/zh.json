@@ -199,12 +199,21 @@
     "kubeletVersion": "边缘侧软件版本",
     "labelSort": "排序",
     "labelOrder": "排序方式",
+    "textWildcardHelp": "支持 * 通配符",
     "default": "默认",
     "orderAsc": "升序",
     "orderDesc": "降序",
     "matchLabels": "匹配标签",
     "labelAddMatchLabels": "添加匹配标签",
-    "labelAddOne": "添加一项"
+    "labelAddOne": "添加一项",
+    "deploymentStatusRatio": "可用/总数",
+    "resource": "资源",
+    "pods": "Pods",
+    "labels": "标签",
+    "availableReplicas": "可用副本数",
+    "unavailableReplicas": "不可用副本数",
+    "cpu": "CPU",
+    "memory": "内存"
   },
   "status": {
     "all": "全部",

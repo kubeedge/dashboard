@@ -28,10 +28,10 @@ export function formatDateTime(dateString: string | undefined, language: string)
 
     if (language.startsWith('zh')) {
       // Chinese format: 2024年1月15日 14:30
-      return format(date, 'yyyy年M月d日 HH:mm', { locale });
+      return format(date, 'yyyy年M月d日 HH:mm:ss', { locale });
     } else {
       // English format: Jan 15, 2024 2:30 PM
-      return format(date, 'MMM dd, yyyy h:mm a', { locale });
+      return format(date, 'MMM dd, yyyy h:mm:ss a', { locale });
     }
   } catch (error) {
     return dateString;
