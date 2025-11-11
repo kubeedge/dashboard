@@ -1,44 +1,26 @@
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Box, TextField, MenuItem, Pagination, Button } from '@mui/material';
+import { Box, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { getCustomResourceDefinition, useListCustomResourceDefinitions } from '@/api/customResourceDefinition';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
-import { CustomResourceDefinition } from '@/types/customResourceDefinition';
+import { ConciseCustomResourceDefinition } from '@/types/customResourceDefinition';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 
 export default function CrdPage() {
-  const [time, setTime] = React.useState('');
-  const { t } = useI18n();
-
-  const columns: ColumnDefinition<CustomResourceDefinition | any>[] = [{
-    name: t('table.name'),
-    render: (row) => row?.metadata?.name || row?.name,
-  }, {
-    name: t('table.group'),
-    render: (row) => row?.spec?.group || row?.group,
-  }, {
-    name: 'Kind',
-    render: (row) => row?.spec?.names?.kind || row?.kind,
-  }, {
-    name: 'Scope',
-    render: (row) => row?.spec?.scope || row?.scope,
-  }, {
-    name: t('table.creationTime'),
-    render: (row) => row?.metadata?.creationTimestamp || row?.creationTimestamp,
-  }, {
-    name: t('table.operation'),
-    renderOperation: true,
-  }];
-
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState('name');
   const [order, setOrder] = useState('asc');
   const [name, setName] = useState('');
-
+  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
+  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(undefined);
+  const { error } = useAlert();
   const params = useMemo(() => ({
     page,
     pageSize,
@@ -46,19 +28,49 @@ export default function CrdPage() {
     order,
     ...(name && { 'name': `*${name}*` }),
   }), [page, pageSize, sort, order, name]);
+  const { data, mutate, isLoading } = useListCustomResourceDefinitions(params);
 
-  const { data, mutate } = useListCustomResourceDefinitions(params);
-  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
-  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(undefined);
-  const { error, success } = useAlert();
+  const columns: ColumnDefinition<ConciseCustomResourceDefinition | any>[] = [{
+    name: t('table.name'),
+    render: (row) => row?.name,
+  }, {
+    name: t('table.group'),
+    render: (row) => row?.group,
+  }, {
+    name: t('table.kind'),
+    render: (row) => row?.kind,
+  }, {
+    name: t('table.scope'),
+    render: (row) => row?.scope === 'Namespaced' ? t('table.namespaced') : t('table.cluster'),
+  }, {
+    name: t('table.creationTime'),
+    render: (row) => (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+          {formatDateTime(row?.creationTimestamp, currentLanguage)}
+        </Box>
+        <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+          {formatRelativeTime(row?.creationTimestamp, currentLanguage)}
+        </Box>
+      </Box>
+    )
+  }, {
+    name: t('table.operation'),
+    renderOperation: true,
+  }];
 
   useEffect(() => {
     mutate();
   }, [params, mutate]);
 
-  const handleYamlClick = async (_: any, row: CustomResourceDefinition) => {
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
+  };
+
+  const handleYamlClick = async (_: any, row: ConciseCustomResourceDefinition) => {
     try {
-      const resp = await getCustomResourceDefinition(row?.metadata?.name || '');
+      const resp = await getCustomResourceDefinition(row?.name || '');
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (err: any) {
@@ -66,51 +78,8 @@ export default function CrdPage() {
     }
   };
 
-  const handleYamlDialogClose = () => {
-    setYamlDialogOpen(false);
-  };
-
   return (
     <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
-      <Box
-        sx={{
-          height: '100px',
-          width: '100%',
-          backgroundColor: 'background.default',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 20px',
-          boxSizing: 'border-box',
-          margin: '0 0 20px 0',
-        }}
-      >
-        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <TextField
-            label={t('table.name')}
-            placeholder={t('form.namePlaceholder')}
-            variant="outlined"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            sx={{ flex: 1, maxWidth: '320px' }}
-          />
-          <TextField
-            label={t('table.time')}
-            placeholder={t('form.timePlaceholder')}
-            variant="outlined"
-            value={time}
-            onChange={(event) => setTime(event.target.value)}
-            sx={{ flex: 1, maxWidth: '320px' }}
-          />
-        </Box>
-        <Box sx={{ display: 'flex', gap: '16px' }}>
-          <Button
-            variant="outlined"
-            sx={{ color: 'black', borderColor: 'black', width: '100px', height: '40px' }}
-          >
-            {t('actions.search')}
-          </Button>
-        </Box>
-      </Box>
       <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.crd')}
@@ -118,77 +87,61 @@ export default function CrdPage() {
           data={data?.items}
           onQueryClick={() => mutate()}
           onDetailClick={handleYamlClick}
-          detailButtonLabel="YAML"
-          noPagination={true}
+          detailButtonLabel={t('actions.yaml')}
+          noAddButton
+          loading={isLoading}
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          filter={(
+            <>
+              <FormControl>
+                <InputLabel shrink>{t('table.labelSort')}</InputLabel>
+                <Select
+                  size='small'
+                  label={t('table.labelSort')}
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value || '')}
+                  sx={{ minWidth: 180 }}
+                  displayEmpty
+                >
+                  <MenuItem value=''>{t('table.default')}</MenuItem>
+                  <MenuItem value='name'>{t('table.name')}</MenuItem>
+                  <MenuItem value='creationTimestamp'>{t('table.creationTime')}</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl>
+                <InputLabel shrink>{t('table.labelOrder')}</InputLabel>
+                <Select
+                  size='small'
+                  label={t('table.labelOrder')}
+                  value={order || ''}
+                  onChange={(e) => setOrder(e.target.value || '')}
+                  sx={{ minWidth: 140 }}
+                  displayEmpty
+                >
+                  <MenuItem value=''>{t('table.default')}</MenuItem>
+                  <MenuItem value='asc'>{t('table.orderAsc')}</MenuItem>
+                  <MenuItem value='desc'>{t('table.orderDesc')}</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                size="small"
+                label={t('table.name')}
+                value={name || ''}
+                onChange={(e) => setName(e.target.value || '')}
+                placeholder={t('table.textWildcardHelp')}
+              />
+            </>
+          )}
         />
-
-        {/* New pagination controls */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, gap: 2 }}>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <TextField
-              select
-              label="Rows per page"
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              size="small"
-              sx={{ minWidth: 120 }}
-            >
-              <MenuItem value={5}>5</MenuItem>
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={20}>20</MenuItem>
-              <MenuItem value={50}>50</MenuItem>
-            </TextField>
-
-            <TextField
-              select
-              label="Sort"
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              size="small"
-              sx={{ minWidth: 120 }}
-            >
-              <MenuItem value="name">Name</MenuItem>
-              <MenuItem value="group">Group</MenuItem>
-              <MenuItem value="kind">Kind</MenuItem>
-              <MenuItem value="scope">Scope</MenuItem>
-              <MenuItem value="creationTimestamp">Creation Time</MenuItem>
-            </TextField>
-
-            <TextField
-              select
-              label="Order"
-              value={order}
-              onChange={(e) => setOrder(e.target.value)}
-              size="small"
-              sx={{ minWidth: 100 }}
-            >
-              <MenuItem value="asc">Ascending</MenuItem>
-              <MenuItem value="desc">Descending</MenuItem>
-            </TextField>
-
-            <TextField
-              label="Name filter"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              size="small"
-              placeholder="Search by name..."
-              sx={{ minWidth: 150 }}
-            />
-          </Box>
-
-          <Pagination
-            count={data?.total ? Math.ceil(data.total / pageSize) : 1}
-            page={page}
-            onChange={(_, newPage) => setPage(newPage)}
-            color="primary"
-            showFirstButton
-            showLastButton
-          />
-        </Box>
       </Box>
       <YAMLViewerDialog
         open={yamlDialogOpen}
-        onClose={handleYamlDialogClose}
+        onClose={() => setYamlDialogOpen(false)}
         content={currentYamlContent}
       />
     </Box>

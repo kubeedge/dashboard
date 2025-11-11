@@ -39,18 +39,36 @@ interface TableCardProps<T> {
   onDeleteClick?: (event: React.MouseEvent, data: T, index: number) => void;
   showAddButton?: boolean;
   specialHandling?: boolean;
-  specialBtnHandling?: boolean;
   detailButtonLabel?: string;
   deleteButtonLabel?: string;
   noTableHeader?: boolean;
+  /**
+   * If true, pagination controls will not be displayed.
+   */
   noPagination?: boolean;
+  /**
+   * If true, the "Add" button will not be displayed.
+   */
+  noAddButton?: boolean;
+  /**
+   * Pagination information. If provided, the component will use this for pagination instead of internal state.
+   */
   pagination?: {
     current: number;
     pageSize: number;
     total: number;
   };
+  /**
+   * Callback when pagination changes (page or page size).
+   */
   onPaginationChange?: (page: number, pageSize: number) => void;
+  /**
+   * Filter component to be displayed above the table.
+   */
   filter?: React.ReactNode;
+  /**
+   * Loading state for the table data.
+   */
   loading?: boolean;
 }
 
@@ -66,7 +84,7 @@ export function TableCard<T>({
   onDeleteClick,
   detailButtonLabel,
   deleteButtonLabel,
-  specialBtnHandling = false,
+  noAddButton = false,
   noTableHeader = false,
   noPagination = false,
   pagination,
@@ -128,7 +146,7 @@ export function TableCard<T>({
         >
           <Typography variant="h6">{title}</Typography>
           <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
-            {!specialBtnHandling && (
+            {!noAddButton && (
               <Button
                 onClick={onAddClick}
                 variant="contained"

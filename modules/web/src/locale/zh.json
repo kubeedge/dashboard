@@ -213,7 +213,10 @@
     "availableReplicas": "可用副本数",
     "unavailableReplicas": "不可用副本数",
     "cpu": "CPU",
-    "memory": "内存"
+    "memory": "内存",
+    "scope": "范围",
+    "cluster": "集群",
+    "namespaced": "命名空间"
   },
   "status": {
     "all": "全部",

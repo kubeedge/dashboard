@@ -212,7 +212,10 @@
     "availableReplicas": "Available Replicas",
     "unavailableReplicas": "Unavailable Replicas",
     "cpu": "CPU",
-    "memory": "Memory"
+    "memory": "Memory",
+    "scope": "Scope",
+    "cluster": "Cluster",
+    "namespaced": "Namespaced"
   },
   "status": {
     "all": "All",
