@@ -1,5 +1,5 @@
 // src/component/SecretDetailDialog.js
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -12,8 +12,13 @@ import {
   TableCell,
   TableBody,
   TextField,
+  DialogActions,
+  Button,
 } from '@mui/material';
 import { Secret } from '@/types/secret';
+import { useI18n } from '@/hook/useI18n';
+import { YAMLViewerDialog } from '@/component';
+import { formatDateTime } from '@/helper/localization';
 
 interface SecretDetailDialogProps {
   open?: boolean;
@@ -22,67 +27,89 @@ interface SecretDetailDialogProps {
 }
 
 const SecretDetailDialog = ({ open, onClose, data }: SecretDetailDialogProps) => {
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+  const [yamlDialogOpen, setYamlDialogOpen] = useState(false);
+
   const renderDockerInformation = (secretData?: Record<string, any>) => {
-    const dockerData = JSON.parse(atob(secretData?.['.dockerconfigjson']))
+    const dockerConfigJSON = secretData?.['.dockerconfigjson'] ? atob(secretData?.['.dockerconfigjson']) : '{}';
+    const dockerData = JSON.parse(dockerConfigJSON);
     const server = Object.keys(dockerData)[0];
     const username = dockerData?.[server]?.username;
     const password = dockerData?.[server]?.password;
 
     return (
       <Box sx={{ marginBottom: '16px' }}>
-        <Typography variant="h6">Docker Information</Typography>
+        <Typography variant="h6">{t('table.dockerInformation')}</Typography>
         <Box sx={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <TextField label="Docker server" value={server} InputProps={{ readOnly: true }} />
-          <TextField label="Docker username" value={username} InputProps={{ readOnly: true }} />
-          <TextField label="Docker password" value={password} InputProps={{ readOnly: true }} />
+          <TextField label={t('table.dockerServer')} value={server} InputProps={{ readOnly: true }} />
+          <TextField label={t('table.dockerUsername')} value={username} InputProps={{ readOnly: true }} />
+          <TextField label={t('table.dockerPassword')} value={password} InputProps={{ readOnly: true }} />
         </Box>
       </Box>
     );
   }
 
   return (
-    <Dialog open={!!open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Secret Detail</DialogTitle>
-      <DialogContent>
-        <Box sx={{ marginBottom: '16px' }}>
-          <Typography variant="h6">General Information</Typography>
-          <Box sx={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <TextField label="Namespace" value={data?.metadata?.namespace} InputProps={{ readOnly: true }} />
-            <TextField label="Name" value={data?.metadata?.name} InputProps={{ readOnly: true }} />
-            <TextField label="Creation Time" value={data?.metadata?.creationTimestamp} InputProps={{ readOnly: true }} />
-            <TextField label="Type" value={data?.type} InputProps={{ readOnly: true }} />
+    <>
+      <Dialog open={!!open} onClose={onClose} fullWidth maxWidth="md">
+        <DialogTitle>{`${t('common.secret')} ${t('actions.detail')}`}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ marginBottom: '16px' }}>
+            <Typography variant="h6">{t('table.generalInformation')}</Typography>
+            <Box sx={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <TextField label={t('table.namespace')} value={data?.metadata?.namespace} InputProps={{ readOnly: true }} />
+              <TextField label={t('table.name')} value={data?.metadata?.name} InputProps={{ readOnly: true }} />
+              <TextField
+                label={t('table.creationTime')}
+                value={formatDateTime(data?.metadata?.creationTimestamp, currentLanguage)}
+                InputProps={{ readOnly: true }}
+              />
+              <TextField label={t('table.type')} value={data?.type} InputProps={{ readOnly: true }} />
+            </Box>
           </Box>
-        </Box>
 
-        {data?.type === 'kubernetes.io/dockerconfigjson' && renderDockerInformation(data?.data)}
+          {data?.type === 'kubernetes.io/dockerconfigjson' && renderDockerInformation(data?.data)}
 
-        {data?.type === 'Opaque' && (
-          <Box>
-            <Typography variant="h6">Data</Typography>
-            {Object.keys(data).length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Key</TableCell>
-                    <TableCell>Value</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {Object.entries(data?.data || {}).map(([key, value]) => (
-                    <TableRow key={key}>
-                      <TableCell>{key}</TableCell>
-                      <TableCell>{value}</TableCell>
+          {data?.type === 'Opaque' && (
+            <Box>
+              <Typography variant="h6">{t('table.data')}</Typography>
+              {Object.keys(data).length > 0 ? (
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>{t('table.key')}</TableCell>
+                      <TableCell>{t('table.value')}</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <Typography>No data</Typography>
-            )}
-          </Box>
-        )}
-      </DialogContent>
-    </Dialog>
+                  </TableHead>
+                  <TableBody>
+                    {Object.entries(data?.data || {}).map(([key, value]) => (
+                      <TableRow key={key}>
+                        <TableCell>{key}</TableCell>
+                        <TableCell sx={{ whiteSpace: 'normal', lineBreak: 'anywhere' }}>{value}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Typography>No data</Typography>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>{t("actions.cancel")}</Button>
+          <Button onClick={() => setYamlDialogOpen(true)} variant="contained">
+            {t("actions.yaml")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <YAMLViewerDialog
+        open={yamlDialogOpen}
+        onClose={() => setYamlDialogOpen(false)}
+        content={data} // Pass YAML content
+      />
+    </>
   );
 };
 

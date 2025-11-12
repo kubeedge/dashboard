@@ -8,6 +8,7 @@ import SelectField from './fields/SelectField';
 import SwitchField from './fields/SwitchField';
 import ArrayField from './fields/ArrayField';
 import RadioField from './fields/RadioField';
+import { useI18n } from '@/hook/useI18n';
 
 const registry: Record<string, (p: any) => JSX.Element> = {
   text: (p) => <InputField {...p} />,
@@ -55,13 +56,13 @@ export default function FormView({
   formId?: string;
   hideActions?: boolean;
 }) {
+  const { t } = useI18n();
   const form = useFormState(schema, initialValues);
   const { handleSubmit, control, watch, reset } = form;
   const values = watch();
-  // const showActions = !!(schema.submitText || schema.resetText);
 
   return (
-    <form id={formId} onSubmit={handleSubmit(onSubmit)}> {/*  id */}
+    <form id={formId} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={2}>
         {schema.fields.map(f => renderField(f, control, values))}
       </Grid>
@@ -70,12 +71,12 @@ export default function FormView({
         <Stack direction="row" justifyContent="flex-end" spacing={1} mt={2}>
           {schema.resetText && (
             <Button type="reset" onClick={() => reset(initialValues || {})}>
-              {schema.resetText}
+              {t(schema.resetText)}
             </Button>
           )}
           {schema.submitText && (
             <Button type="submit" disabled={submitting}>
-              {schema.submitText}
+              {t(schema.submitText)}
             </Button>
           )}
         </Stack>

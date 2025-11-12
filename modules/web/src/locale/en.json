@@ -48,7 +48,8 @@
     "generateCommand": "Generate Command",
     "yaml": "YAML",
     "ok": "Ok",
-    "detail": "Detail"
+    "detail": "Detail",
+    "addOneItem": "Add One Item"
   },
   "table": {
     "name": "Name",
@@ -215,7 +216,12 @@
     "memory": "Memory",
     "scope": "Scope",
     "cluster": "Cluster",
-    "namespaced": "Namespaced"
+    "namespaced": "Namespaced",
+    "generalInformation": "General Information",
+    "dockerInformation": "Docker Information",
+    "docker": "Docker",
+    "opaque": "Opaque",
+    "base64DataItems": "Data items (Base64)"
   },
   "status": {
     "all": "All",

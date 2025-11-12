@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import { Box, TextField, MenuItem, Pagination, FormControl, Select, InputLabel } from '@mui/material';
 import { createSecret, deleteSecret, getSecret, useListSecrets } from '@/api/secret';
-import { Secret } from '@/types/secret';
+import { ConciseSecret, Secret } from '@/types/secret';
 import { useNamespace } from '@/hook/useNamespace';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import AddSecretDialog from '@/component/Form/AddSecretDialog';
@@ -11,15 +11,22 @@ import SecretDetailDialog from '@/component/Dialog/SecretDetailDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 
 export default function SecretPage() {
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
   const { namespace } = useNamespace();
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openDetailDialog, setOpenDetailDialog] = useState(false);
+  const [selectedSecret, setSelectedSecret] = useState<Secret | null>(null);
+  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
+  const { error, success } = useAlert();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
-  const [sort, setSort] = useState<string | undefined>('creationTimestamp');
-  const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
-  const [name, setName] = useState<string | undefined>(undefined);
-  const [mock, setMock] = useState<number | undefined>(undefined);
+  const [sort, setSort] = useState<string>('creationTimestamp');
+  const [order, setOrder] = useState<'asc' | 'desc' | string>('desc');
+  const [name, setName] = useState<string>('');
   const params = useMemo(() => ({
     namespace,
     page,
@@ -27,27 +34,34 @@ export default function SecretPage() {
     sort,
     order,
     filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
-    mock,
-  }), [namespace, page, pageSize, sort, order, name, mock]);
-  const { data, mutate } = useListSecrets(params);
-  const { t } = useI18n();
+  }), [namespace, page, pageSize, sort, order, name]);
+  const { data, mutate, isLoading } = useListSecrets(params);
 
-  const columns: ColumnDefinition<Secret | any>[] = [
+  const columns: ColumnDefinition<ConciseSecret>[] = [
     {
       name: t('table.namespace'),
-      render: (secret) => (secret as any)?.metadata?.namespace ?? (secret as any)?.namespace,
+      render: (secret) => secret?.namespace,
     },
     {
       name: t('table.name'),
-      render: (secret) => (secret as any)?.metadata?.name ?? (secret as any)?.name,
+      render: (secret) => secret?.name,
     },
     {
       name: t('table.type'),
-      render: (secret) => (secret as any)?.type ?? (secret as any)?.secretType,
+      render: (secret) => secret?.type,
     },
     {
       name: t('table.creationTime'),
-      render: (secret) => (secret as any)?.metadata?.creationTimestamp ?? (secret as any)?.creationTimestamp,
+      render: (account) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+            {formatDateTime(account?.creationTimestamp, currentLanguage)}
+          </Box>
+          <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+            {formatRelativeTime(account?.creationTimestamp, currentLanguage)}
+          </Box>
+        </Box>
+      )
     },
     {
       name: t('table.operation'),
@@ -55,59 +69,42 @@ export default function SecretPage() {
     },
   ];
 
-  const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [openDetailDialog, setOpenDetailDialog] = useState(false);
-  const [selectedSecret, setSelectedSecret] = useState<Secret | null>(null);
-  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error, success } = useAlert();
-  const [addOpen, setAddOpen] = React.useState(false);
-
   useEffect(() => {
     mutate();
-  }, [namespace, mutate]);
+  }, [namespace, params, mutate]);
 
-  const handleAddClick = async () => {
-    setOpenAddDialog(true);
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
   };
 
-  const handleRefreshClick = () => {
-    mutate();
-  };
-
-  const handleDetailClick = async (_: any, row: Secret) => {
+  const handleDetailClick = async (_: any, row: ConciseSecret) => {
     try {
-      const resp = await getSecret(row?.metadata?.namespace || '', row?.metadata?.name || '');
+      const resp = await getSecret(row?.namespace || '', row?.name || '');
       setSelectedSecret(resp?.data);
       setOpenDetailDialog(true);
     } catch (err: any) {
-      error(err?.response?.data?.message || err?.message || 'Failed to get Secret');
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
-  const handleOnSubmit = async (_: any, record: Secret) => {
-    try {
-      await createSecret(record?.metadata?.namespace || namespace || 'default', record);
-      success('Secret created');
-      setOpenAddDialog(false);
-      mutate();
-    } catch (e: any) {
-      error(e?.response?.data?.message || e?.message || 'Failed to create Secret');
-    }
+  const handleOnSubmit = async (record: Secret) => {
+    await createSecret(record?.metadata?.namespace || namespace || 'default', record);
+    mutate();
   };
 
-  const handleDeleteClick = (_: any, row: Secret) => {
+  const handleDeleteClick = (_: any, row: ConciseSecret) => {
     showConfirmDialog({
       title: t('actions.delete') + ' ' + t('common.secret'),
-      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
+      content: t('messages.deleteConfirm') + ` ${row?.name}?`,
       onConfirm: async () => {
         try {
-          await deleteSecret(row?.metadata?.namespace || '', row?.metadata?.name || '');
+          await deleteSecret(row?.namespace || '', row?.name || '');
           mutate();
         } catch (err: any) {
           error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
-      onCancel: () => { },
     })
   };
 
@@ -116,50 +113,70 @@ export default function SecretPage() {
       <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.secret')}
-          addButtonLabel={t('actions.add') + ' ' + t('common.secret')}
+          addButtonLabel={`${t('actions.add')} ${t('common.secret')}`}
           columns={columns}
           data={data?.items}
-          onAddClick={handleAddClick}
-          onRefreshClick={handleRefreshClick}
+          onAddClick={() => setOpenAddDialog(true)}
+          onRefreshClick={() => mutate()}
           onDetailClick={handleDetailClick}
           onDeleteClick={handleDeleteClick}
           detailButtonLabel={t('actions.view')}
           deleteButtonLabel={t('actions.delete')}
-          noPagination={true}
+          loading={isLoading}
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          filter={(
+            <>
+              <FormControl>
+                <InputLabel shrink>{t('table.labelSort')}</InputLabel>
+                <Select
+                  size='small'
+                  label={t('table.labelSort')}
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value || '')}
+                  sx={{ minWidth: 180 }}
+                  displayEmpty
+                >
+                  <MenuItem value=''>{t('table.default')}</MenuItem>
+                  <MenuItem value='name'>{t('table.name')}</MenuItem>
+                  <MenuItem value='creationTimestamp'>{t('table.creationTime')}</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl>
+                <InputLabel shrink>{t('table.labelOrder')}</InputLabel>
+                <Select
+                  size='small'
+                  label={t('table.labelOrder')}
+                  value={order || ''}
+                  onChange={(e) => setOrder(e.target.value)}
+                  sx={{ minWidth: 140 }}
+                  displayEmpty
+                >
+                  <MenuItem value=''>{t('table.default')}</MenuItem>
+                  <MenuItem value='asc'>{t('table.orderAsc')}</MenuItem>
+                  <MenuItem value='desc'>{t('table.orderDesc')}</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField size='small' label={t('table.name')} value={name || ''} onChange={(e) => setName(e.target.value || '')} placeholder={t('table.textWildcardHelp')} />
+            </>
+          )}
         />
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
-          <TextField size="small" select label="Rows per page" value={pageSize}
-            onChange={(e) => { const v = Number(e.target.value) || 10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={50}>50</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Sort" value={sort || ''} onChange={(e) => setSort(e.target.value || undefined)} sx={{ minWidth: 180 }}>
-            <MenuItem value="">Default</MenuItem>
-            <MenuItem value="name">name</MenuItem>
-            <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Order" value={order || ''} onChange={(e) => setOrder((e.target.value as any) || undefined)} sx={{ minWidth: 140 }}>
-            <MenuItem value="">Default</MenuItem>
-            <MenuItem value="asc">asc</MenuItem>
-            <MenuItem value="desc">desc</MenuItem>
-          </TextField>
-          <TextField size="small" label="Name" value={name || ''} onChange={(e) => setName(e.target.value || undefined)} placeholder="supports * wildcards" />
-          {/* mock control removed in PR branch; automatic fetch on change, no apply button */}
-          <Box sx={{ flexGrow: 1 }} />
-          <Pagination
-            page={page}
-            onChange={(_, value) => { setPage(value); mutate(); }}
-            count={Math.max(1, Math.ceil(((data?.total ?? 0) as number) / (pageSize || 1)))}
-            size="small"
-            color="primary"
-          />
-        </Box>
       </Box>
-      <AddSecretDialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} onSubmit={handleOnSubmit} />
-
-      <SecretDetailDialog open={openDetailDialog} onClose={() => setOpenDetailDialog(false)} data={selectedSecret} />
+      <AddSecretDialog
+        open={openAddDialog}
+        onClose={() => setOpenAddDialog(false)}
+        onSubmit={handleOnSubmit}
+        onCreated={() => setOpenAddDialog(false)}
+      />
+      <SecretDetailDialog
+        open={openDetailDialog}
+        onClose={() => setOpenDetailDialog(false)}
+        data={selectedSecret}
+      />
       {ConfirmDialogComponent}
     </Box>
   );

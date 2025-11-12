@@ -48,7 +48,8 @@
     "generateCommand": "生成命令",
     "yaml": "YAML",
     "ok": "确定",
-    "detail": "详情"
+    "detail": "详情",
+    "addOneItem": "添加一项"
   },
   "table": {
     "name": "名称",
@@ -216,7 +217,12 @@
     "memory": "内存",
     "scope": "范围",
     "cluster": "集群",
-    "namespaced": "命名空间"
+    "namespaced": "命名空间",
+    "generalInformation": "基本信息",
+    "dockerInformation": "Docker信息",
+    "docker": "Docker",
+    "opaque": "Opaque",
+    "base64DataItems": "数据项（Base64）"
   },
   "status": {
     "all": "全部",
