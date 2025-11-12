@@ -17,7 +17,7 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
     <Dialog open={!!props?.open} onClose={props?.onClose} fullWidth maxWidth="md">
       <DialogTitle>{t('actions.yaml')}</DialogTitle>
       <DialogContent>
-        <Box sx={{ height: '400px', overflowY: 'auto' }}>
+        <Box sx={{ height: '400px', overflowY: 'auto', fontFamily: 'monospace' }}>
           <CodeBlock
             text={stringify(props?.content)}
             language="yaml"

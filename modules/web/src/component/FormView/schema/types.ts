@@ -43,6 +43,7 @@ export interface FieldSchema {
   rows?: number;
   inlineRemove?: boolean;
   props?: Record<string, any>;
+  watchFields?: string[];
 }
 
 export interface FormSchema {

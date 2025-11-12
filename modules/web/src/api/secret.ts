@@ -1,7 +1,7 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { Secret, SecretList } from '@/types/secret';
+import { ConciseSecretList, Secret, SecretList } from '@/types/secret';
 
 export function useListSecrets(params?: Record<string, string | number | undefined>) {
   let path = '/secret';
@@ -48,5 +48,5 @@ export function deleteSecret(namespace: string, name: string) {
 }
 
 export async function listSecrets(namespace: string) {
-  return request<SecretList>(`/secret/${namespace}`, { method: 'GET' });
+  return request<ConciseSecretList>(`/secret/${namespace}`, { method: 'GET' });
 }
