@@ -11,6 +11,7 @@ export default function InputField({ field, control }: any) {
     <Controller
       name={field.name}
       control={control}
+      defaultValue={field.defaultValue ?? ''}
       render={({ field: rhf, fieldState: { error } }) => (
         <TextField
           {...rhf}

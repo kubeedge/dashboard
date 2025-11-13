@@ -15,6 +15,7 @@ export type Rule =
   | { type: 'required'; message?: string }
   | { type: 'min'; value: number; message?: string }
   | { type: 'max'; value: number; message?: string }
+  | { type: 'in'; values: any[]; message?: string }
   | { type: 'regex'; value: RegExp; message?: string }
   | { type: 'custom'; fn: (val: any, form: any) => true | string };
 
@@ -28,6 +29,7 @@ export interface FieldSchema {
   helperText?: string;
   defaultValue?: any;
   rules?: Rule[];
+  ruleIf?: { field: string; value: string };
   options?:
   | { label: string; value: any }[]
   | (() => Promise<{ label: string; value: any }[]>)

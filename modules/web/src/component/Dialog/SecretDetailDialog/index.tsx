@@ -34,9 +34,10 @@ const SecretDetailDialog = ({ open, onClose, data }: SecretDetailDialogProps) =>
   const renderDockerInformation = (secretData?: Record<string, any>) => {
     const dockerConfigJSON = secretData?.['.dockerconfigjson'] ? atob(secretData?.['.dockerconfigjson']) : '{}';
     const dockerData = JSON.parse(dockerConfigJSON);
-    const server = Object.keys(dockerData)[0];
-    const username = dockerData?.[server]?.username;
-    const password = dockerData?.[server]?.password;
+    const auths = dockerData?.auths || {};
+    const server = Object.keys(auths)?.[0];
+    const username = auths?.[server]?.username;
+    const password = auths?.[server]?.password;
 
     return (
       <Box sx={{ marginBottom: '16px' }}>

@@ -1,17 +1,15 @@
 'use client';
 
-import { Button, Grid, IconButton, Stack, Typography } from '@mui/material';
+import { Box, Button, Grid, IconButton, Stack, Typography } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useFieldArray, Controller } from 'react-hook-form';
 import InputField from './InputField';
-import SelectField from './SelectField';
 import { useI18n } from '@/hook/useI18n';
 
 export default function ArrayField({ field, control }: any) {
+  const { t } = useI18n();
   const name = field.name;
   const { fields, append, remove } = useFieldArray({ control, name });
-  const subFields: any[] = field.itemsSchema ?? field.itemSchema ?? [];
-  const { t } = useI18n();
 
   return (
     <Stack spacing={1}>
@@ -28,7 +26,7 @@ export default function ArrayField({ field, control }: any) {
             key={row.id}
             container
             spacing={2}
-            alignItems="center"
+            alignItems="flex-start"
             wrap={inlineRemove ? 'nowrap' : 'wrap'}
           >
             {subFields.map((sub: any) => {
@@ -39,19 +37,13 @@ export default function ArrayField({ field, control }: any) {
 
               return (
                 <Grid item xs={xs} sm={sm} md={md} lg={lg} key={`${idx}-${sub.name}`}>
-                  <Controller
-                    name={`${name}.${idx}.${sub.name}`}
+                  <InputField
+                    field={{
+                      ...sub,
+                      name: `${name}.${idx}.${sub.name}`,
+                      fullWidth: true,
+                    }}
                     control={control}
-                    render={({ field: rhf }) => (
-                      <InputField
-                        field={{
-                          ...sub,
-                          name: `${name}.${idx}.${sub.name}`,
-                          fullWidth: true,
-                        }}
-                        control={control}
-                      />
-                    )}
                   />
                 </Grid>
               );
@@ -67,6 +59,7 @@ export default function ArrayField({ field, control }: any) {
                 <DeleteOutlineIcon />
               </IconButton>
             </Grid>
+
           </Grid>
         );
       })}
