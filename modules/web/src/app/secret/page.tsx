@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, TextField, MenuItem, Pagination, FormControl, Select, InputLabel } from '@mui/material';
+import { Box, TextField, MenuItem, FormControl, Select, InputLabel } from '@mui/material';
 import { createSecret, deleteSecret, getSecret, useListSecrets } from '@/api/secret';
 import { ConciseSecret, Secret } from '@/types/secret';
 import { useNamespace } from '@/hook/useNamespace';
@@ -52,13 +52,13 @@ export default function SecretPage() {
     },
     {
       name: t('table.creationTime'),
-      render: (account) => (
+      render: (secret) => (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
-            {formatDateTime(account?.creationTimestamp, currentLanguage)}
+            {formatDateTime(secret?.creationTimestamp, currentLanguage)}
           </Box>
           <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-            {formatRelativeTime(account?.creationTimestamp, currentLanguage)}
+            {formatRelativeTime(secret?.creationTimestamp, currentLanguage)}
           </Box>
         </Box>
       )

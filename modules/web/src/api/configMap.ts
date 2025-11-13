@@ -4,21 +4,13 @@ import { Status } from '@/types/common';
 import { ConfigMap } from '@/types/configMap';
 
 export function useListConfigMaps(params?: Record<string, string | number | undefined>) {
-  let path = '/configmap';
-  // Optional namespace path parameter for compatibility
-  const namespace = params?.namespace as string | undefined;
-  if (namespace) {
-    path = `/configmap/${namespace}`;
-  }
-  const search = new URLSearchParams();
-  Object.entries(params || {}).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && `${v}` !== '' && k !== 'namespace') {
-      search.set(k, String(v));
-    }
-  });
-  const qs = search.toString();
-  if (qs) path += `?${qs}`;
-  return useQuery<any>(`listConfigMaps:${path}`, path, { method: 'GET' });
+  const path = params?.namespace ? `/configmap/${params.namespace}` : '/configmap';
+
+  return useQuery<any>(
+    `listConfigMaps:${JSON.stringify(params)}`,
+    path,
+    { method: 'GET', params },
+  );
 }
 
 export function getConfigMap(namespace: string, name: string) {
