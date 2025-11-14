@@ -1,4 +1,4 @@
-import type { Condition, Resource, ResourceList } from './common';
+import type { Condition, DataList, Resource, ResourceList } from './common';
 
 interface CustomResourceDefinitionNames {
   kind: string;
@@ -151,11 +151,13 @@ export interface CustomResourceDefinition extends Resource<
   spec: CustomResourceDefinitionSpec;
 }
 
-export interface CustomResourceDefinitionList extends ResourceList<CustomResourceDefinition> {
-  total?: number;
-  page?: number;
-  pageSize?: number;
-  hasNext?: boolean;
-  sort?: string;
-  order?: string;
+export interface ConciseCustomResourceDefinition {
+  age?: string;
+  creationTimestamp?: string;
+  group?: string;
+  kind?: string;
+  name?: string;
+  scope?: string;
 }
+
+export interface ConciseCustomResourceDefinitionList extends DataList<ConciseCustomResourceDefinition> {}

@@ -1,16 +1,16 @@
 import type { ServiceAccount } from '@/types/serviceAccount';
 
-export function toServiceAccount(values: any): { ns: string; body: ServiceAccount | any } {
-  const ns = values?.namespace || '';
+export function toServiceAccount(values: any): ServiceAccount {
+  const namespace = values?.namespace || '';
   const body: ServiceAccount = {
     apiVersion: 'v1',
     kind: 'ServiceAccount',
     metadata: {
       name: values?.name,
-      namespace: ns,
+      namespace: namespace,
     },
-    secrets: values?.secret ? [{ name: values.secret }] : [],
+    secrets: values?.secrets?.map((s: string) => ({ name: s })) || [],
   };
 
-  return { ns, body };
+  return body;
 }

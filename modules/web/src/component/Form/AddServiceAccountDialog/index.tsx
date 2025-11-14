@@ -7,29 +7,39 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import FormView from '@/component/FormView';
+import { useI18n } from '@/hook/useI18n';
 import { addSaSchema } from './schema';
 import { toServiceAccount } from './mapper';
-import { createServiceAccount } from '@/api/serviceAccount';
+import { ServiceAccount } from '@/types/serviceAccount';
+import { useAlert } from '@/hook/useAlert';
 
-type Props = {
+type AddServiceAccountDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSubmit: (record: ServiceAccount) => void | Promise<void>;
+  onCreated?: () => void;
 };
 
-export default function AddServiceAccountDialog({ open, onClose, onSuccess }: Props) {
+export default function AddServiceAccountDialog({ open, onClose, onSubmit, onCreated }: AddServiceAccountDialogProps) {
   const formId = 'add-sa-form';
+  const { t } = useI18n();
+  const { error } = useAlert();
 
   const handleSubmit = async (values: any) => {
-    const { ns, body } = toServiceAccount(values);
-    await createServiceAccount(ns, body);
-    onSuccess?.();
-    onClose();
+    try {
+      const body = toServiceAccount(values);
+      if (onSubmit) {
+        await onSubmit(body);
+      }
+      onCreated?.();
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
+    }
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add ServiceAccounts</DialogTitle>
+      <DialogTitle>{`${t('actions.add')} ${t('common.serviceAccount')}`}</DialogTitle>
       <DialogContent dividers>
         <FormView
           formId={formId}
@@ -39,8 +49,8 @@ export default function AddServiceAccountDialog({ open, onClose, onSuccess }: Pr
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form={formId}>ADD</Button>
+        <Button onClick={onClose}>{t('actions.cancel')}</Button>
+        <Button type="submit" form={formId}>{t('actions.add')}</Button>
       </DialogActions>
     </Dialog>
   );

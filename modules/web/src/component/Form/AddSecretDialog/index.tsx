@@ -4,56 +4,55 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/
 import FormView from '@/component/FormView';
 import { secretSchema } from './schema';
 import { toSecret } from './mapper';
-import { createSecret } from '@/api/secret';
 import { useAlert } from '@/hook/useAlert';
 import { useNamespace } from '@/hook/useNamespace';
 import { Secret } from '@/types/secret';
+import { useI18n } from '@/hook/useI18n';
 
-type Props = {
+type AddSecretDialog = {
   open: boolean;
   onClose: () => void;
-  initial?: Record<string, any>;
-  onSubmit: (_: any, record: Secret) => void | Promise<void>;
+  onSubmit: (record: Secret) => void | Promise<void>;
   onCreated?: () => void;
 };
 
 export default function AddSecretDialog({
   open,
   onClose,
-  initial,
   onCreated,
   onSubmit,
-}: Props) {
-  const { success, error } = useAlert();
-  const { namespace: currentNs } = (useNamespace?.() as any) || { namespace: '' };
+}: AddSecretDialog) {
+  const formId = 'add-secret-form';
+  const { t } = useI18n();
+  const { error } = useAlert();
+  const { namespace } = useNamespace()
 
   const handleSubmit = async (values: any) => {
     try {
-      const { body } = toSecret(values);
-      await onSubmit(undefined, body as Secret);
-      success?.('success');
+      if (onSubmit) {
+        const body = toSecret(values);
+        await onSubmit(body);
+      }
       onCreated?.();
-      onClose();
-    } catch (e: any) {
-      console.error(e);
-      error?.(e?.message || 'error');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
-  const initValues = { namespace: currentNs || '', ...(initial || {}) };
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>ADD Secret</DialogTitle>
+      <DialogTitle>{`${t('actions.add')} ${t('common.secret')}`}</DialogTitle>
       <DialogContent dividers>
         <FormView
+          formId={formId}
           schema={secretSchema}
-          initialValues={initValues}
+          initialValues={{ namespace }}
           onSubmit={handleSubmit}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t('actions.cancel')}</Button>
+        <Button type="submit" form={formId}>{t('actions.add')}</Button>
       </DialogActions>
     </Dialog>
   );

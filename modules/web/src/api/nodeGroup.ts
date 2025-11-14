@@ -1,19 +1,14 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { NodeGroup, NodeGroupList } from '@/types/nodeGroup';
+import { NodeGroup, ConciseNodeGroupList } from '@/types/nodeGroup';
 
 export function useListNodeGroups(params?: Record<string, string | number | undefined>) {
-  let path = '/nodegroup';
-  if (params) {
-    const search = new URLSearchParams();
-    Object.entries(params).forEach(([k, v]) => {
-      if (v !== undefined && v !== null && `${v}` !== '') search.set(k, String(v));
-    });
-    const qs = search.toString();
-    if (qs) path += `?${qs}`;
-  }
-  return useQuery<any>(`listNodeGroups:${path}`, path, { method: 'GET' });
+  return useQuery<ConciseNodeGroupList>(
+    'listNodeGroups',
+    '/nodegroup',
+    { method: 'GET', params },
+  );
 }
 
 export function getNodeGroup(name: string) {

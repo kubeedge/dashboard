@@ -2,71 +2,66 @@ import type { FormSchema } from '@/component/FormView';
 import { listNamespaces } from '@/api/namespace';
 
 export const addRoleSchema: FormSchema = {
-  submitText: 'SUBMIT',
   fields: [
     {
-      // Namespace *
       name: 'namespace',
-      label: 'Namespace *',
+      label: 'table.namespace',
       type: 'select',
       fullWidth: true,
       grid: { xs: 12, md: 12 },
-      rules: [{ type: 'required', message: 'Miss namespace' }],
+      rules: [{ type: 'required' }],
       options: async () => {
         const res = await listNamespaces();
-        const items = (res?.data?.items ?? []) as any[];
+        const items = (res?.data?.items ?? [])
         return items.map(n => ({
-          label: n?.metadata?.name,
-          value: n?.metadata?.name,
+          label: n?.metadata?.name || '',
+          value: n?.metadata?.name || '',
         }));
       },
     },
     {
-      // Name *
       name: 'name',
-      label: 'Name *',
+      label: 'table.name',
       type: 'text',
       fullWidth: true,
       grid: { xs: 12, md: 12 },
-      rules: [{ type: 'required', message: 'Miss name' }],
+      rules: [{ type: 'required' }],
     },
     {
-      // Rules
       name: 'rules',
-      label: 'Rules',
+      label: 'table.rules',
       type: 'array',
-      addText: 'ADD RULE',
-      removeText: 'REMOVE',
+      addText: 'table.addRule',
       itemSchema: [
         {
           name: 'verbs',
-          label: 'Verbs *',
+          label: 'table.verbs',
           type: 'text',
-          rules: [{ type: 'required', message: 'Please input verbs' }],
+          rules: [{ type: 'required' }],
           fullWidth: true,
           grid: { xs: 12, sm: 12, md: 12 },
         },
         {
           name: 'apiGroups',
-          label: 'ApiGroups *',
+          label: 'table.apiGroups',
           type: 'text',
-          rules: [{ type: 'required', message: 'Please input apiGroups' }],
+          rules: [{ type: 'required' }],
           fullWidth: true,
           grid: { xs: 12, sm: 12, md: 12 },
         },
         {
           name: 'resources',
-          label: 'Resources *',
+          label: 'table.resources',
           type: 'text',
-          rules: [{ type: 'required', message: 'Please input resources' }],
+          rules: [{ type: 'required' }],
           fullWidth: true,
           grid: { xs: 12, sm: 12, md: 12 },
         },
         {
           name: 'resourceNames',
-          label: 'ResourceNames *',
+          label: 'table.resourceNames',
           type: 'text',
-          rules: [{ type: 'required', message: 'Please input resourceNames' }],
+          rules: [{ type: 'required' }],
           fullWidth: true,
           grid: { xs: 12, sm: 12, md: 12 },
         },

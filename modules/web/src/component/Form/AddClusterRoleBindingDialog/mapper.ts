@@ -1,6 +1,6 @@
 import type { ClusterRoleBinding } from '@/types/clusterRoleBinding';
 
-export function toClusterRoleBinding(values: any) {
+export function toClusterRoleBinding(values: any): ClusterRoleBinding {
   const name = values?.name?.trim();
 
   const roleRef = {
@@ -24,5 +24,5 @@ export function toClusterRoleBinding(values: any) {
     subjects,
   };
 
-  return { body };
+  return body;
 }

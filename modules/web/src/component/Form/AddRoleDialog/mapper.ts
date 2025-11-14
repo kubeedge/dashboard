@@ -1,3 +1,5 @@
+import { Role } from "@/types/role";
+
 function toArray(v: any): string[] {
   if (Array.isArray(v)) return v;
   if (typeof v === 'string') {
@@ -6,15 +8,13 @@ function toArray(v: any): string[] {
   return [];
 }
 
-export function toRole(values: any) {
-  const ns = values?.namespace || '';
-
+export function toRole(values: any): Role {
   const body = {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'Role',
     metadata: {
       name: values?.name,
-      namespace: ns,
+      namespace: values?.namespace,
     },
     rules: (values?.rules ?? []).map((r: any) => ({
       verbs: toArray(r?.verbs),
@@ -24,5 +24,5 @@ export function toRole(values: any) {
     })),
   };
 
-  return { ns, body };
+  return body;
 }

@@ -7,29 +7,34 @@ import {
   DialogActions,
   Button,
 } from '@mui/material';
+import { useI18n } from './useI18n';
 
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
   content: string;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
 }
 
-const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ open, title, content, onConfirm, onCancel }) => (
-  <Dialog open={open} onClose={onCancel}>
-    <DialogTitle>{title}</DialogTitle>
-    <DialogContent>{content}</DialogContent>
-    <DialogActions>
-      <Button onClick={onCancel} color="primary">
-        Cancel
-      </Button>
-      <Button onClick={onConfirm} color="primary" autoFocus>
-        Ok
-      </Button>
-    </DialogActions>
-  </Dialog>
-);
+const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ open, title, content, onConfirm, onCancel }) => {
+  const { t } = useI18n();
+
+  return (
+    <Dialog open={open} onClose={onCancel}>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>{content}</DialogContent>
+      <DialogActions>
+        <Button onClick={onCancel} color="primary">
+          {t('actions.cancel')}
+        </Button>
+        <Button onClick={onConfirm} color="primary" autoFocus>
+          {t('actions.ok')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+};
 
 const useConfirmDialog = () => {
   const [open, setOpen] = useState(false);

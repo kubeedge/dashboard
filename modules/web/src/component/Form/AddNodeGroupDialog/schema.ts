@@ -1,32 +1,36 @@
 import type { FormSchema } from '@/component/FormView';
+import { listNodes } from '@/api/node';
 
 export const addNodeGroupSchema: FormSchema = {
   fields: [
     {
       name: 'name',
-      label: 'Name *',
+      label: 'table.name',
       type: 'text',
-      rules: [{ type: 'required', message: 'Miss name' }],
+      rules: [{ type: 'required' }],
       grid: { md: 12 },
     },
     {
       name: 'nodes',
-      label: 'Nodes',
+      label: 'table.node',
       type: 'select',
       grid: { md: 12 },
-      options: [
-        { label: 'node-1', value: 'node-1' },
-        { label: 'node-2', value: 'node-2' },
-      ],
+      options: async () => {
+        const nodeList = await listNodes();
+        return nodeList?.items?.map((node) => ({
+          label: node?.name || '',
+          value: node?.name || '',
+        }))
+      }
     },
     {
       name: 'matchLabels',
-      label: 'MatchLabels',
+      label: 'table.matchLabels',
       type: 'array',
-      addText: '+ ADD MATCHLABELS',
+      addText: 'table.labelAddMatchLabels',
       itemSchema: [
-        { name: 'key', label: 'Key *', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
-        { name: 'value', label: 'Value *', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
+        { name: 'key', label: 'table.key', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
+        { name: 'value', label: 'table.value', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
       ],
       grid: { md: 12 },
     },

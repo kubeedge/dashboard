@@ -1,5 +1,6 @@
-export function toNodeGroup(values: any /*): NodeGroup */) {
+import { NodeGroup } from "@/types/nodeGroup";
 
+export function toNodeGroup(values: any): NodeGroup {
   const labels: Record<string, string> = {};
   (values.matchLabels || []).forEach((row: any) => {
     if (row?.key) labels[row.key] = String(row.value ?? '');
@@ -9,8 +10,8 @@ export function toNodeGroup(values: any /*): NodeGroup */) {
     ? values.nodes
     : values.nodes ? [values.nodes] : [];
 
-  const body: any = {
-    apiVersion: 'devices.kubeedge.io/v1alpha2',
+  const body: NodeGroup = {
+    apiVersion: 'apps.kubeedge.io/v1alpha1',
     kind: 'NodeGroup',
     metadata: {
       name: values.name,
