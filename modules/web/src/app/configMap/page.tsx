@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Box, TextField } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createConfigMap, deleteConfigMap, getConfigMap, useListConfigMaps } from '@/api/configMap';
@@ -86,11 +86,6 @@ export default function ConfigMapPage() {
     },
   ];
 
-  const handleCloseDetailDialog = () => {
-    setDetailDialogOpen(false);
-    setSelectedConfigMap(null);
-  };
-
   const handlePaginationChange = (newPage: number, newPageSize: number) => {
     setPage(newPage);
     setPageSize(newPageSize);
@@ -172,7 +167,7 @@ export default function ConfigMapPage() {
       />
       <ConfigMapDetailDialog
         open={detailDialogOpen}
-        onClose={handleCloseDetailDialog}
+        onClose={() => setDetailDialogOpen(false)}
         data={selectedConfigMap}
       />
       {ConfirmDialogComponent}

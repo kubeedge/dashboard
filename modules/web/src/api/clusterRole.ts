@@ -1,25 +1,14 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { ClusterRole, ClusterRoleList } from '@/types/clusterRole';
+import { ClusterRole, ClusterRoleList, ConciseClusterRoleList } from '@/types/clusterRole';
 
 export function useListClusterRoles(params?: Record<string, string | number | undefined>) {
-  const searchParams = new URLSearchParams();
-  let url = '/clusterrole';
-
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        searchParams.append(key, String(value));
-      }
-    });
-  }
-
-  const finalUrl = searchParams.toString() ? `${url}?${searchParams.toString()}` : url;
-
-  return useQuery<ClusterRoleList>('listClusterRoles', finalUrl, {
-    method: 'GET',
-  });
+  return useQuery<ConciseClusterRoleList>(
+    'listClusterRoles',
+    '/clusterrole',
+    { method: 'GET', params },
+  );
 }
 
 export function getClusterRole(name: string) {
