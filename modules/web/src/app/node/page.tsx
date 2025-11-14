@@ -39,7 +39,9 @@ export default function NodePage() {
   const { data, mutate, isLoading } = useListNodes(params);
 
   const columns: ColumnDefinition<ConciseNode>[] = [{
+    key: 'name',
     name: `${t('table.name')}/${t('table.id')}`,
+    sortable: true,
     render: (node) => (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ color: 'rgb(47, 84, 235)', fontWeight: 500 }}>
@@ -68,7 +70,9 @@ export default function NodePage() {
       </Box>
     )
   }, {
+    key: 'creationTimestamp',
     name: t('table.creationTime'),
+    sortable: true,
     render: (node) => (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
@@ -92,6 +96,11 @@ export default function NodePage() {
     setPageSize(newPageSize);
   };
 
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
+
   const handleDetailClick = async (_: any, node: ConciseNode) => {
     try {
       const resp = await getNode(node?.name || '');
@@ -100,11 +109,6 @@ export default function NodePage() {
     } catch (err: any) {
       error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
-  };
-
-  const handleDetailDialogClose = () => {
-    setDetailDialogOpen(false);
-    setSelectedNode(undefined);
   };
 
   const handleDelete = (_: any, row: ConciseNode) => {
@@ -144,38 +148,13 @@ export default function NodePage() {
           }}
           onPaginationChange={handlePaginationChange}
           loading={isLoading}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
           filter={(
             <>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelSort')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelSort')}
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value || '')}
-                  sx={{ minWidth: 180 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='name'>{t('table.name')}</MenuItem>
-                  <MenuItem value='creationTimestamp'>{t('table.creationTime')}</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelOrder')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelOrder')}
-                  value={order || ''}
-                  onChange={(e) => setOrder(e.target.value || '')}
-                  sx={{ minWidth: 140 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='asc'>{t('table.orderAsc')}</MenuItem>
-                  <MenuItem value='desc'>{t('table.orderDesc')}</MenuItem>
-                </Select>
-              </FormControl>
               <FormControl>
                 <InputLabel shrink>{t('table.status')}</InputLabel>
                 <Select
@@ -202,7 +181,7 @@ export default function NodePage() {
       />
       <NodeDetailDialog
         open={detailDialogOpen}
-        onClose={handleDetailDialogClose}
+        onClose={() => setDetailDialogOpen(false)}
         data={selectedNode}
       />
       {ConfirmDialogComponent}

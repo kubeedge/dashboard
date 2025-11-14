@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createConfigMap, deleteConfigMap, getConfigMap, useListConfigMaps } from '@/api/configMap';
 import { ConciseConfigMap, ConfigMap } from '@/types/configMap';
@@ -17,8 +17,8 @@ export default function ConfigMapPage() {
   const { namespace } = useNamespace();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
-  const [sort, setSort] = useState<string>('creationTimestamp');
-  const [order, setOrder] = useState<'asc' | 'desc' | string>('desc');
+  const [sort, setSort] = useState<string>('');
+  const [order, setOrder] = useState<'asc' | 'desc' | string>('');
   const [name, setName] = useState<string>('');
   const params = useMemo(() => ({
     namespace,
@@ -43,7 +43,9 @@ export default function ConfigMapPage() {
       render: (configMap) => configMap?.namespace,
     },
     {
+      key: 'name',
       name: t('table.name'),
+      sortable : true,
       render: (configMap) => configMap?.name,
     },
     {
@@ -65,7 +67,9 @@ export default function ConfigMapPage() {
       )
     },
     {
+      key: 'creationTimestamp',
       name: t('table.creationTime'),
+      sortable : true,
       render: (configMap) => (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
@@ -96,6 +100,11 @@ export default function ConfigMapPage() {
     setPage(newPage);
     setPageSize(newPageSize);
   };
+
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
 
   const handleDetailClick = async (_: any, row: ConciseConfigMap) => {
     try {
@@ -148,38 +157,13 @@ export default function ConfigMapPage() {
             total: data?.total || 0,
           }}
           onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
           filter={(
             <>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelSort')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelSort')}
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value || '')}
-                  sx={{ minWidth: 180 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='name'>{t('table.name')}</MenuItem>
-                  <MenuItem value='creationTimestamp'>{t('table.creationTime')}</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelOrder')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelOrder')}
-                  value={order || ''}
-                  onChange={(e) => setOrder(e.target.value)}
-                  sx={{ minWidth: 140 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='asc'>{t('table.orderAsc')}</MenuItem>
-                  <MenuItem value='desc'>{t('table.orderDesc')}</MenuItem>
-                </Select>
-              </FormControl>
               <TextField size='small' label={t('table.name')} value={name || ''} onChange={(e) => setName(e.target.value || '')} placeholder={t('table.textWildcardHelp')} />
             </>
           )}

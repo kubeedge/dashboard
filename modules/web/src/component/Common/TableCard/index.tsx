@@ -9,23 +9,16 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
-  TablePagination,
   CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useI18n } from '@/hook/useI18n';
+import { ColumnDefinition, SortState, Direction, TableCardHeader } from './header';
 import { TableCardPagination, type Pagination } from './pagination';
 
-export interface ColumnDefinition<T> {
-  name?: string;
-  key?: string;
-  render?: (row: T) => React.ReactNode | string | undefined;
-  renderOperation?: boolean;
-}
+export type { ColumnDefinition } from './header';
 
 interface TableCardProps<T> {
   addButtonLabel?: string;
@@ -55,7 +48,9 @@ interface TableCardProps<T> {
    * Pagination information. If provided, the component will use this for pagination instead of internal state.
    */
   pagination?: Pagination;
-
+  /**
+   * Options for rows per page selection in pagination, default is [10, 25, 50].
+   */
   rowsPerPageOptions?: number[];
   /**
    * Callback when pagination changes (page or page size).
@@ -69,6 +64,14 @@ interface TableCardProps<T> {
    * Loading state for the table data.
    */
   loading?: boolean;
+  /**
+   * Current sort state { field, direction }
+   */
+  sort?: SortState;
+  /**
+   * Callback when sort changes.
+   */
+  onSortChange?: (field: string, direction: Direction) => void;
 }
 
 export function TableCard<T>({
@@ -91,6 +94,8 @@ export function TableCard<T>({
   onPaginationChange,
   rowsPerPageOptions,
   loading,
+  sort,
+  onSortChange,
 }: TableCardProps<T>) {
   return (
     <Paper sx={{ boxShadow: 'none' }}>
@@ -143,7 +148,7 @@ export function TableCard<T>({
         </Box>
       )}
 
-      {/* Table */}
+      {/* Table Body */}
       <TableContainer
         sx={{
           backgroundColor: (theme) => theme.palette.background.paper,
@@ -151,19 +156,11 @@ export function TableCard<T>({
         }}
       >
         <Table>
-          <TableHead>
-            <TableRow>
-              {columns?.map((col, index) => (
-                <TableCell
-                  key={index}
-                  sx={{ textAlign: 'center', padding: '16px' }}
-                >
-                  {typeof col === 'string' ? col : col.name}
-                </TableCell>
-              ))}
-              <TableCell sx={{ textAlign: 'center', padding: '16px' }} />
-            </TableRow>
-          </TableHead>
+          <TableCardHeader
+            columns={columns}
+            sort={sort}
+            onSortChange={onSortChange}
+          />
           <TableBody>
             {loading ? (
               <TableRow>

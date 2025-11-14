@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, TextField, MenuItem, FormControl, Select, InputLabel } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { createSecret, deleteSecret, getSecret, useListSecrets } from '@/api/secret';
 import { ConciseSecret, Secret } from '@/types/secret';
 import { useNamespace } from '@/hook/useNamespace';
@@ -21,7 +21,7 @@ export default function SecretPage() {
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
   const [selectedSecret, setSelectedSecret] = useState<Secret | null>(null);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error, success } = useAlert();
+  const { error } = useAlert();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const [sort, setSort] = useState<string>('creationTimestamp');
@@ -43,7 +43,9 @@ export default function SecretPage() {
       render: (secret) => secret?.namespace,
     },
     {
+      key: 'name',
       name: t('table.name'),
+      sortable : true,
       render: (secret) => secret?.name,
     },
     {
@@ -51,6 +53,8 @@ export default function SecretPage() {
       render: (secret) => secret?.type,
     },
     {
+      key: 'creationTimestamp',
+      sortable : true,
       name: t('table.creationTime'),
       render: (secret) => (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
@@ -77,6 +81,11 @@ export default function SecretPage() {
     setPage(newPage);
     setPageSize(newPageSize);
   };
+
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
 
   const handleDetailClick = async (_: any, row: ConciseSecret) => {
     try {
@@ -129,38 +138,13 @@ export default function SecretPage() {
             total: data?.total || 0,
           }}
           onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
           filter={(
             <>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelSort')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelSort')}
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value || '')}
-                  sx={{ minWidth: 180 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='name'>{t('table.name')}</MenuItem>
-                  <MenuItem value='creationTimestamp'>{t('table.creationTime')}</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelOrder')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelOrder')}
-                  value={order || ''}
-                  onChange={(e) => setOrder(e.target.value)}
-                  sx={{ minWidth: 140 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='asc'>{t('table.orderAsc')}</MenuItem>
-                  <MenuItem value='desc'>{t('table.orderDesc')}</MenuItem>
-                </Select>
-              </FormControl>
               <TextField size='small' label={t('table.name')} value={name || ''} onChange={(e) => setName(e.target.value || '')} placeholder={t('table.textWildcardHelp')} />
             </>
           )}

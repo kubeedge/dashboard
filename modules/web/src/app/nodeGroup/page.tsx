@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { TextField } from '@mui/material';
 import { Box } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { deleteNodeGroup, getNodeGroup, useListNodeGroups, createNodeGroup } from '@/api/nodeGroup';
@@ -20,8 +18,8 @@ export default function NodeGroupPage() {
   const currentLanguage = getCurrentLanguage();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
-  const [sort, setSort] = useState<string>('creationTimestamp');
-  const [order, setOrder] = useState<'asc' | 'desc' | string>('desc');
+  const [sort, setSort] = useState<string>('');
+  const [order, setOrder] = useState<'asc' | 'desc' | string>('');
   const [name, setName] = useState<string>('');
   const [selectedYaml, setSelectedYaml] = React.useState<NodeGroup | null>(null);
   const [openYamlDialog, setOpenYamlDialog] = React.useState(false);
@@ -38,11 +36,15 @@ export default function NodeGroupPage() {
 
   const columns: ColumnDefinition<ConciseNodeGroup>[] = [
     {
+      key: 'name',
       name: t('table.name'),
+      sortable : true,
       render: (row) => row?.name || '-',
     },
     {
+      key: 'creationTimestamp',
       name: t('table.creationTime'),
+      sortable : true,
       render: (node) => (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
@@ -64,6 +66,11 @@ export default function NodeGroupPage() {
     setPage(newPage);
     setPageSize(newPageSize);
   };
+
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
 
   const handleAddNodeGroup = async (record: NodeGroup) => {
     await createNodeGroup(record);
@@ -116,38 +123,13 @@ export default function NodeGroupPage() {
             total: data?.total || 0,
           }}
           onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
           filter={(
             <>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelSort')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelSort')}
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value || '')}
-                  sx={{ minWidth: 180 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='name'>{t('table.name')}</MenuItem>
-                  <MenuItem value='creationTimestamp'>{t('table.creationTime')}</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelOrder')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelOrder')}
-                  value={order || ''}
-                  onChange={(e) => setOrder(e.target.value || '')}
-                  sx={{ minWidth: 140 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='asc'>{t('table.orderAsc')}</MenuItem>
-                  <MenuItem value='desc'>{t('table.orderDesc')}</MenuItem>
-                </Select>
-              </FormControl>
               <TextField
                 size="small"
                 label={t('table.name')}

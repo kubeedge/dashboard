@@ -13,14 +13,14 @@ import { Pod } from '@/types/pod';
 import { ConciseNode } from '@/types/node';
 import { getPodStatus } from "@/helper/status";
 import { useListNodes } from "@/api/node";
-import { Deployment } from "@/types/deployment";
+import { ConciseDeployment } from "@/types/deployment";
 import { useListDeployments } from "@/api/deployment";
 import { useI18n } from "@/hook/useI18n";
 
 const CardRow = (props: {
   k8sVersion?: string;
   nodes?: ConciseNode[];
-  apps?: Deployment[];
+  apps?: ConciseDeployment[];
 }) => {
   const { t } = useI18n();
   let readyNodes = 0;
@@ -32,8 +32,8 @@ const CardRow = (props: {
     node.status === 'Ready' ? readyNodes++ : notReadyNodes++;
   });
   props?.apps?.forEach(app => {
-    availableApps += app.status?.availableReplicas || 0;
-    unavailableApps += (app.status?.replicas || 0) - (app.status?.availableReplicas || 0);
+    availableApps += app?.availableReplicas || 0;
+    unavailableApps += (app?.replicas || 0) - (app?.availableReplicas || 0);
   });
 
   const extractKubeEdgeVersion = (nodes?: ConciseNode[]) => {

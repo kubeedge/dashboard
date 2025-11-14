@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Box, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { getCustomResourceDefinition, useListCustomResourceDefinitions } from '@/api/customResourceDefinition';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
@@ -15,8 +15,8 @@ export default function CrdPage() {
   const currentLanguage = getCurrentLanguage();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sort, setSort] = useState('name');
-  const [order, setOrder] = useState('asc');
+  const [sort, setSort] = useState('');
+  const [order, setOrder] = useState('');
   const [name, setName] = useState('');
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(undefined);
@@ -30,8 +30,10 @@ export default function CrdPage() {
   }), [page, pageSize, sort, order, name]);
   const { data, mutate, isLoading } = useListCustomResourceDefinitions(params);
 
-  const columns: ColumnDefinition<ConciseCustomResourceDefinition | any>[] = [{
+  const columns: ColumnDefinition<ConciseCustomResourceDefinition>[] = [{
+    key: 'name',
     name: t('table.name'),
+    sortable: true,
     render: (row) => row?.name,
   }, {
     name: t('table.group'),
@@ -43,7 +45,9 @@ export default function CrdPage() {
     name: t('table.scope'),
     render: (row) => row?.scope === 'Namespaced' ? t('table.namespaced') : t('table.cluster'),
   }, {
+    key: 'creationTimestamp',
     name: t('table.creationTime'),
+    sortable: true,
     render: (row) => (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
@@ -67,6 +71,11 @@ export default function CrdPage() {
     setPage(newPage);
     setPageSize(newPageSize);
   };
+
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
 
   const handleYamlClick = async (_: any, row: ConciseCustomResourceDefinition) => {
     try {
@@ -96,38 +105,13 @@ export default function CrdPage() {
             total: data?.total || 0,
           }}
           onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
           filter={(
             <>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelSort')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelSort')}
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value || '')}
-                  sx={{ minWidth: 180 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='name'>{t('table.name')}</MenuItem>
-                  <MenuItem value='creationTimestamp'>{t('table.creationTime')}</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelOrder')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelOrder')}
-                  value={order || ''}
-                  onChange={(e) => setOrder(e.target.value || '')}
-                  sx={{ minWidth: 140 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='asc'>{t('table.orderAsc')}</MenuItem>
-                  <MenuItem value='desc'>{t('table.orderDesc')}</MenuItem>
-                </Select>
-              </FormControl>
               <TextField
                 size="small"
                 label={t('table.name')}

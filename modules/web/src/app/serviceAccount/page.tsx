@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, TextField, MenuItem, FormControl, Select, InputLabel } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createServiceAccount, deleteServiceAccount, getServiceAccount, useListServiceAccounts } from '@/api/serviceAccount';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
@@ -17,8 +17,8 @@ export default function ServiceAccountPage() {
   const { namespace } = useNamespace();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sort, setSort] = useState('name');
-  const [order, setOrder] = useState('asc');
+  const [sort, setSort] = useState('');
+  const [order, setOrder] = useState('');
   const [name, setName] = useState('');
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
   const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
@@ -45,7 +45,9 @@ export default function ServiceAccountPage() {
       render: (account) => account?.namespace,
     },
     {
+      key: 'name',
       name: t('table.name'),
+      sortable : true,
       render: (account) => account?.name,
     },
     {
@@ -55,7 +57,9 @@ export default function ServiceAccountPage() {
       },
     },
     {
+      key: 'creationTimestamp',
       name: t('table.creationTime'),
+      sortable : true,
       render: (account) => (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
@@ -77,14 +81,15 @@ export default function ServiceAccountPage() {
     mutate();
   }, [params, mutate]);
 
-  const handleAddClick = () => {
-    setAddDialogOpen(true);
-  };
-
   const handlePaginationChange = (newPage: number, newPageSize: number) => {
     setPage(newPage);
     setPageSize(newPageSize);
   };
+
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
 
   const handleYamlClick = async (_: any, row: ConciseServiceAccount) => {
     try {
@@ -112,10 +117,6 @@ export default function ServiceAccountPage() {
     })
   };
 
-  const handleAddDialogClose = () => {
-    setAddDialogOpen(false);
-  };
-
   const handleAddServiceAccount = async (record: ServiceAccount) => {
     await createServiceAccount(record?.metadata?.namespace || namespace || 'default', record);
     mutate();
@@ -129,7 +130,7 @@ export default function ServiceAccountPage() {
           addButtonLabel={t('actions.add') + ' ' + t('common.serviceAccount')}
           columns={columns}
           data={data?.items}
-          onAddClick={handleAddClick}
+          onAddClick={() => setAddDialogOpen(true)}
           onQueryClick={() => mutate()}
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
@@ -142,38 +143,13 @@ export default function ServiceAccountPage() {
             total: data?.total || 0,
           }}
           onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
           filter={(
             <>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelSort')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelSort')}
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value || '')}
-                  sx={{ minWidth: 180 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='name'>{t('table.name')}</MenuItem>
-                  <MenuItem value='creationTimestamp'>{t('table.creationTime')}</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl>
-                <InputLabel shrink>{t('table.labelOrder')}</InputLabel>
-                <Select
-                  size='small'
-                  label={t('table.labelOrder')}
-                  value={order || ''}
-                  onChange={(e) => setOrder(e.target.value || '')}
-                  sx={{ minWidth: 140 }}
-                  displayEmpty
-                >
-                  <MenuItem value=''>{t('table.default')}</MenuItem>
-                  <MenuItem value='asc'>{t('table.orderAsc')}</MenuItem>
-                  <MenuItem value='desc'>{t('table.orderDesc')}</MenuItem>
-                </Select>
-              </FormControl>
               <TextField size='small' label={t('table.name')} value={name || ''} onChange={(e) => setName(e.target.value || '')} placeholder={t('table.textWildcardHelp')} />
             </>
           )}
@@ -186,7 +162,7 @@ export default function ServiceAccountPage() {
       />
       <AddServiceAccountDialog
         open={addDialogOpen}
-        onClose={handleAddDialogClose}
+        onClose={() => setAddDialogOpen(false)}
         onCreated={() => setAddDialogOpen(false)}
         onSubmit={handleAddServiceAccount}
       />
