@@ -3,28 +3,12 @@
 import { Grid, Box, Stack, Button } from '@mui/material';
 import { useFormState } from './adapters/useFormState';
 import type { FormSchema, FieldSchema } from './schema/types';
-import InputField from './fields/InputField';
-import SelectField from './fields/SelectField';
-import SwitchField from './fields/SwitchField';
-import ArrayField from './fields/ArrayField';
-import RadioField from './fields/RadioField';
+import { getFieldComponent } from './fields/registry';
 import { useI18n } from '@/hook/useI18n';
-
-const registry: Record<string, (p: any) => JSX.Element> = {
-  text: (p) => <InputField {...p} />,
-  password: (p) => <InputField {...p} />,
-  textarea: (p) => <InputField {...p} />,
-  number: (p) => <InputField {...p} />,
-  select: (p) => <SelectField {...p} />,
-  'multi-select': (p) => <SelectField {...p} />,
-  switch: (p) => <SwitchField {...p} />,
-  array: (p) => <ArrayField {...p} />,
-  radio: (p) => <RadioField {...p} />,
-};
 
 function renderField(field: FieldSchema, control: any, values: any) {
   if (field.visibleWhen && !field.visibleWhen(values)) return null;
-  const Comp = registry[field.type];
+  const Comp = getFieldComponent(field.type);
 
   if (typeof Comp !== 'function') {
     console.error('Bad field component:', field.type, Comp);

@@ -221,7 +221,11 @@
     "dockerInformation": "Docker Information",
     "docker": "Docker",
     "opaque": "Opaque",
-    "base64DataItems": "Data items (Base64)"
+    "base64DataItems": "Data items (Base64)",
+    "role": "Role",
+    "clusterRole": "Cluster Role",
+    "user": "User",
+    "serviceAccount": "Service Account"
   },
   "status": {
     "all": "All",

@@ -1,46 +1,32 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import { Box, TextField } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createRole, deleteRole, getRole, useListRoles } from '@/api/role';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import AddRoleDialog from '@/component/Form/AddRoleDialog';
-import { Role } from '@/types/role';
+import { ConciseRole, Role } from '@/types/role';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 
 export default function RolePage() {
   const { namespace } = useNamespace();
-  const { t } = useI18n();
-
-  const columns: ColumnDefinition<Role | any>[] = [
-    {
-      name: t('table.namespace'),
-      render: (role) => role?.metadata?.namespace || role?.namespace,
-    },
-    {
-      name: t('table.name'),
-      render: (role) => role?.metadata?.name || role?.name,
-    },
-    {
-      name: t('table.creationTime'),
-      render: (role) => role?.metadata?.creationTimestamp || role?.creationTimestamp,
-    },
-    {
-      name: t('table.operation'),
-      renderOperation: true,
-    },
-  ];
-
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
+  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
+  const [addRoleDialogOpen, setAddRoleDialogOpen] = React.useState(false);
+  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
+  const { error } = useAlert();
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [sort, setSort] = useState('name');
-  const [order, setOrder] = useState('asc');
+  const [pageSize, setPageSize] = useState(25);
+  const [sort, setSort] = useState('');
+  const [order, setOrder] = useState('');
   const [name, setName] = useState('');
-
   const params = useMemo(() => ({
     namespace,
     page,
@@ -49,47 +35,71 @@ export default function RolePage() {
     order,
     ...(name && { 'name': `*${name}*` }),
   }), [namespace, page, pageSize, sort, order, name]);
+  const { data, mutate, isLoading } = useListRoles(params);
 
-  const { data, mutate } = useListRoles(params);
-  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
-  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
-  const [addRoleDialogOpen, setAddRoleDialogOpen] = React.useState(false);
-  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error, success } = useAlert();
+  const columns: ColumnDefinition<ConciseRole>[] = [
+    {
+      name: t('table.namespace'),
+      render: (role) => role?.namespace,
+    },
+    {
+      key: 'name',
+      name: t('table.name'),
+      sortable: true,
+      render: (role) => role?.name,
+    },
+    {
+      key: 'creationTimestamp',
+      name: t('table.creationTime'),
+      sortable: true,
+      render: (secret) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+            {formatDateTime(secret?.creationTimestamp, currentLanguage)}
+          </Box>
+          <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+            {formatRelativeTime(secret?.creationTimestamp, currentLanguage)}
+          </Box>
+        </Box>
+      )
+    },
+    {
+      name: t('table.operation'),
+      renderOperation: true,
+    },
+  ];
 
   useEffect(() => {
     mutate();
   }, [params, mutate]);
 
-  const handleAddClick = () => {
-    setAddRoleDialogOpen(true);
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
   };
 
-  const handleQueryClick = () => {
-    mutate();
-  };
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
 
-  const handleYamlClick = async (_: any, row: Role) => {
+  const handleYamlClick = async (_: any, row: ConciseRole) => {
     try {
-      const resp = await getRole(row?.metadata?.namespace || '', row?.metadata?.name || '');
+      const resp = await getRole(row?.namespace || '', row?.name || '');
       setCurrentYamlContent(resp.data);
       setYamlDialogOpen(true);
     } catch (err: any) {
-      error(err?.response?.data?.message || err?.message || 'Failed to get Role');
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
-  const handleYamlDialogClose = () => {
-    setYamlDialogOpen(false);
-  };
-
-  const handleDeleteClick = (_: any, row: Role) => {
+  const handleDeleteClick = (_: any, row: ConciseRole) => {
     showConfirmDialog({
       title: t('actions.delete') + ' ' + t('common.role'),
-      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
+      content: t('messages.deleteConfirm') + ` ${row?.name}?`,
       onConfirm: async () => {
         try {
-          await deleteRole(row?.metadata?.namespace || '', row?.metadata?.name || '');
+          await deleteRole(row?.namespace || '', row?.name || '');
           mutate();
         } catch (err: any) {
           error(err?.response?.data?.message || err?.message || t('messages.error'));
@@ -99,14 +109,10 @@ export default function RolePage() {
     })
   };
 
-  const handleOnSubmit = async (_: any, record: Role) => {
+  const handleOnSubmit = async (record: Role) => {
     await createRole(record?.metadata?.namespace || namespace || 'default', record);
     mutate();
   }
-
-  const handleAddRoleDialogClose = () => {
-    setAddRoleDialogOpen(false);
-  };
 
   return (
     <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
@@ -116,85 +122,41 @@ export default function RolePage() {
           addButtonLabel={t('actions.add') + ' ' + t('common.role')}
           columns={columns}
           data={data?.items}
-          onAddClick={handleAddClick}
-          onQueryClick={handleQueryClick}
+          onAddClick={() => setAddRoleDialogOpen(true)}
+          onQueryClick={() => mutate()}
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
-          detailButtonLabel="YAML"
+          detailButtonLabel={t('actions.yaml')}
           deleteButtonLabel={t('actions.delete')}
-          noPagination={true}
+          loading={isLoading}
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
+          filter={(
+            <>
+              <TextField size='small' label={t('table.name')} value={name || ''} onChange={(e) => setName(e.target.value || '')} placeholder={t('table.textWildcardHelp')} />
+            </>
+          )}
         />
-
-        {/* New pagination controls */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, gap: 2 }}>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <TextField
-              select
-              label="Rows per page"
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              size="small"
-              sx={{ minWidth: 120 }}
-            >
-              <MenuItem value={5}>5</MenuItem>
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={20}>20</MenuItem>
-              <MenuItem value={50}>50</MenuItem>
-            </TextField>
-
-            <TextField
-              select
-              label="Sort"
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              size="small"
-              sx={{ minWidth: 120 }}
-            >
-              <MenuItem value="name">Name</MenuItem>
-              <MenuItem value="namespace">Namespace</MenuItem>
-              <MenuItem value="creationTimestamp">Creation Time</MenuItem>
-            </TextField>
-
-            <TextField
-              select
-              label="Order"
-              value={order}
-              onChange={(e) => setOrder(e.target.value)}
-              size="small"
-              sx={{ minWidth: 100 }}
-            >
-              <MenuItem value="asc">Ascending</MenuItem>
-              <MenuItem value="desc">Descending</MenuItem>
-            </TextField>
-
-            <TextField
-              label="Name filter"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              size="small"
-              placeholder="Search by name..."
-              sx={{ minWidth: 150 }}
-            />
-          </Box>
-
-          <Pagination
-            count={data?.total ? Math.ceil(data.total / pageSize) : 1}
-            page={page}
-            onChange={(_, newPage) => setPage(newPage)}
-            color="primary"
-            showFirstButton
-            showLastButton
-          />
-        </Box>
       </Box>
       <YAMLViewerDialog
         open={yamlDialogOpen}
-        onClose={handleYamlDialogClose}
+        onClose={() => setYamlDialogOpen(false)}
         content={currentYamlContent}
       />
       <AddRoleDialog
         open={addRoleDialogOpen}
-        onClose={handleAddRoleDialogClose}
+        onClose={() => setAddRoleDialogOpen(false)}
+        onSubmit={handleOnSubmit}
+        onCreated={() => setAddRoleDialogOpen(false)}
       />
       {ConfirmDialogComponent}
     </Box>

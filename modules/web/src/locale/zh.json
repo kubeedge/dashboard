@@ -222,7 +222,11 @@
     "dockerInformation": "Docker信息",
     "docker": "Docker",
     "opaque": "Opaque",
-    "base64DataItems": "数据项（Base64）"
+    "base64DataItems": "数据项（Base64）",
+    "role": "角色",
+    "clusterRole": "集群角色",
+    "user": "用户",
+    "serviceAccount": "服务账户"
   },
   "status": {
     "all": "全部",

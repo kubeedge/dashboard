@@ -8,19 +8,19 @@ import { useI18n } from '@/hook/useI18n';
 export default function SelectField({ field, control }: any) {
   const [opts, setOpts] = useState<any[]>(Array.isArray(field.options) ? field.options : []);
   const { t } = useI18n();
+  const watchedValues = useWatch({ control });
 
-  if (field.watchFields && Array.isArray(field.watchFields) && field.watchFields.length > 0) {
-    const watchedValues = useWatch({ control });
-    useEffect(() => {
-      if (typeof field.options === 'function') {
-        field.options(null, watchedValues).then(setOpts).catch(() => setOpts([]));
-      }
-    }, [watchedValues, field]);
-  } else {
-    useEffect(() => {
-      if (typeof field.options === 'function') field.options().then(setOpts).catch(() => setOpts([]));
-    }, [field]);
-  }
+  useEffect(() => {
+    if (typeof field.options === 'function') {
+      field.options().then(setOpts).catch(() => setOpts([]));
+    }
+  }, [field]);
+
+  useEffect(() => {
+    if (typeof field.options === 'function') {
+      field.options(null, watchedValues).then(setOpts).catch(() => setOpts([]));
+    }
+  }, [watchedValues, field]);
 
   return (
     <Controller
@@ -34,7 +34,7 @@ export default function SelectField({ field, control }: any) {
             multiple={field.type === 'multi-select'}
             {...rhf}
           >
-            {opts.map(o => <MenuItem key={o.value} value={o.value} disabled={o.disabled}>{o.label}</MenuItem>)}
+            {opts.map(o => <MenuItem key={o.value} value={o.value} disabled={o.disabled}>{t(o.label)}</MenuItem>)}
           </Select>
           <FormHelperText>{error?.message && `${t(field.label)} ${t(error?.message || field.helperText)}`}</FormHelperText>
         </FormControl>

@@ -1,29 +1,19 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { RoleBinding, RoleBindingList } from '@/types/roleBinding';
+import { ConciseRoleBindingList, RoleBinding } from '@/types/roleBinding';
 
 export function useListRoleBindings(params?: Record<string, string | number | undefined>) {
-  const searchParams = new URLSearchParams();
-  let url = '/rolebinding';
+  const url = params?.namespace ? `/rolebinding/${params.namespace}` : '/rolebinding';
 
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'namespace') {
-        searchParams.append(key, String(value));
-      }
-    });
-
-    if (params.namespace) {
-      url = `/rolebinding/${params.namespace}`;
+  return useQuery<ConciseRoleBindingList>(
+    `listRoleBindings:${JSON.stringify(params)}`,
+    url,
+    {
+      method: 'GET',
+      params
     }
-  }
-
-  const finalUrl = searchParams.toString() ? `${url}?${searchParams.toString()}` : url;
-
-  return useQuery<RoleBindingList>('listRoleBindings', finalUrl, {
-    method: 'GET',
-  });
+  );
 }
 
 export function getRoleBinding(namespace: string, name: string) {

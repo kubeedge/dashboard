@@ -5,6 +5,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { useFieldArray, Controller } from 'react-hook-form';
 import InputField from './InputField';
 import { useI18n } from '@/hook/useI18n';
+import { getFieldComponent } from './registry';
 
 export default function ArrayField({ field, control }: any) {
   const { t } = useI18n();
@@ -35,9 +36,16 @@ export default function ArrayField({ field, control }: any) {
               const md = sub.grid?.md ?? xs;
               const lg = sub.grid?.lg ?? md;
 
+              const Comp = getFieldComponent(sub.type);
+
+              if (typeof Comp !== 'function') {
+                console.error('Bad field component:', field.type, Comp);
+                return null;
+              }
+
               return (
                 <Grid item xs={xs} sm={sm} md={md} lg={lg} key={`${idx}-${sub.name}`}>
-                  <InputField
+                  <Comp
                     field={{
                       ...sub,
                       name: `${name}.${idx}.${sub.name}`,

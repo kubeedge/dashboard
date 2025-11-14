@@ -6,30 +6,40 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-
 import FormView from '@/component/FormView';
+import { Role } from '@/types/role';
+import { useAlert } from '@/hook/useAlert';
+import { useI18n } from '@/hook/useI18n';
 import { addRoleSchema } from './schema';
 import { toRole } from './mapper';
 
-type Props = {
+type AddRoleDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSubmit: (record: Role) => void | Promise<void>;
+  onCreated?: () => void;
 };
 
-export default function AddRoleDialog({ open, onClose, onSuccess }: Props) {
+export default function AddRoleDialog({ open, onClose, onSubmit, onCreated }: AddRoleDialogProps) {
   const formId = 'add-role-form';
+  const { t } = useI18n();
+  const { error } = useAlert();
 
   const handleSubmit = async (values: any) => {
-    const { ns, body } = toRole(values);
-
-    onSuccess?.();
-    onClose();
+    try {
+      if (onSubmit) {
+        const body = toRole(values);
+        await onSubmit(body);
+      }
+      onCreated?.();
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
+    }
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add Role</DialogTitle>
+      <DialogTitle>{`${t('actions.add')} ${t('common.role')}`}</DialogTitle>
       <DialogContent dividers>
         <FormView
           formId={formId}
@@ -40,8 +50,8 @@ export default function AddRoleDialog({ open, onClose, onSuccess }: Props) {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form={formId}>SUBMIT</Button>
+        <Button onClick={onClose}>{t('actions.cancel')}</Button>
+        <Button type="submit" form={formId}>{t('actions.add')}</Button>
       </DialogActions>
     </Dialog>
   );

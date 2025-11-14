@@ -8,20 +8,38 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import FormView from '@/component/FormView';
 import { addRoleBindingSchema } from './schema';
+import { useI18n } from '@/hook/useI18n';
+import { useAlert } from '@/hook/useAlert';
+import { toRoleBinding } from './mapper';
+import { RoleBinding } from '@/types/roleBinding';
 
-type Props = { open: boolean; onClose: () => void; onSuccess?: () => void };
+type AddRoleBindingProps = {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (record: RoleBinding) => void | Promise<void>;
+  onCreated?: () => void;
+};
 
-export default function AddRoleBindingDialog({ open, onClose, onSuccess }: Props) {
-  const formId = 'add-rolebinding-form';
+export default function AddRoleBindingDialog({ open, onClose, onSubmit, onCreated }: AddRoleBindingProps) {
+  const formId = 'add-role-binding-form';
+  const { t } = useI18n();
+  const { error } = useAlert();
 
   const handleSubmit = async (values: any) => {
-    onSuccess?.();
-    onClose();
+    try {
+      if (onSubmit) {
+        const body = toRoleBinding(values);
+        await onSubmit(body);
+      }
+      onCreated?.();
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
+    }
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add RoleBinding</DialogTitle>
+      <DialogTitle>{`${t('actions.add')} ${t('common.roleBinding')}`}</DialogTitle>
       <DialogContent dividers>
         <FormView
           formId={formId}
@@ -32,8 +50,8 @@ export default function AddRoleBindingDialog({ open, onClose, onSuccess }: Props
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form={formId}>SUBMIT</Button>
+        <Button onClick={onClose}>{t('actions.cancel')}</Button>
+        <Button type="submit" form={formId}>{t('actions.submit')}</Button>
       </DialogActions>
     </Dialog>
   );
