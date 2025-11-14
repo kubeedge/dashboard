@@ -18,6 +18,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useI18n } from '@/hook/useI18n';
+import { TableCardPagination, type Pagination } from './pagination';
 
 export interface ColumnDefinition<T> {
   name?: string;
@@ -53,11 +54,9 @@ interface TableCardProps<T> {
   /**
    * Pagination information. If provided, the component will use this for pagination instead of internal state.
    */
-  pagination?: {
-    current: number;
-    pageSize: number;
-    total: number;
-  };
+  pagination?: Pagination;
+
+  rowsPerPageOptions?: number[];
   /**
    * Callback when pagination changes (page or page size).
    */
@@ -90,47 +89,9 @@ export function TableCard<T>({
   pagination,
   filter,
   onPaginationChange,
+  rowsPerPageOptions,
   loading,
 }: TableCardProps<T>) {
-  const [internalPage, setInternalPage] = React.useState(0);
-  const [internalRowsPerPage, setInternalRowsPerPage] = React.useState(10);
-  const { t } = useI18n();
-
-  const handleChangePage = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent> | null,
-    newPage: number
-  ) => {
-    if (onPaginationChange && pagination) {
-      onPaginationChange(newPage + 1, pagination.pageSize);
-    } else {
-      setInternalPage(newPage);
-    }
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const newPageSize = parseInt(event.target.value, 10);
-    if (onPaginationChange && pagination) {
-      onPaginationChange(1, newPageSize);
-    } else {
-      setInternalRowsPerPage(newPageSize);
-      setInternalPage(0);
-    }
-  };
-
-  const currentPage = pagination ? pagination.current - 1 : internalPage;
-  const currentPageSize = pagination ? pagination.pageSize : internalRowsPerPage;
-  const total = pagination ? pagination.total : data?.length || 0;
-
-  let paginatedData = data;
-  if (!noPagination && !pagination) {
-    paginatedData = data?.slice(
-      currentPage * currentPageSize,
-      currentPage * currentPageSize + currentPageSize
-    );
-  }
-
   return (
     <Paper sx={{ boxShadow: 'none' }}>
       {/* Header */}
@@ -212,7 +173,7 @@ export function TableCard<T>({
                   </Box>
                 </TableCell>
               </TableRow>
-            ) : paginatedData?.map((row, rowIndex) => (
+            ) : data?.map((row, rowIndex) => (
               <TableRow key={rowIndex}>
                 {columns?.map((col, colIndex) => {
                   if (col.renderOperation) {
@@ -253,20 +214,12 @@ export function TableCard<T>({
         </Table>
       </TableContainer>
 
-      {/* page */}
-      {!noPagination && (
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 50]}
-          component="div"
-          count={total}
-          rowsPerPage={currentPageSize}
-          page={currentPage}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage={t('table.rowsPerPage')}
-          labelDisplayedRows={(info) => {
-            return `${info.from}-${info.to} ${t('table.of')} ${info.count}`;
-          }}
+      {/* Pagination */}
+      {!noPagination && pagination && (
+        <TableCardPagination
+          pagination={pagination}
+          onPaginationChange={onPaginationChange || (() => { })}
+          rowsPerPageOptions={rowsPerPageOptions}
         />
       )}
     </Paper>
