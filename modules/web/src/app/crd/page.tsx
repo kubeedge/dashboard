@@ -14,7 +14,7 @@ export default function CrdPage() {
   const { t, getCurrentLanguage } = useI18n();
   const currentLanguage = getCurrentLanguage();
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(25);
   const [sort, setSort] = useState('');
   const [order, setOrder] = useState('');
   const [name, setName] = useState('');
@@ -62,10 +62,6 @@ export default function CrdPage() {
     name: t('table.operation'),
     renderOperation: true,
   }];
-
-  useEffect(() => {
-    mutate();
-  }, [params, mutate]);
 
   const handlePaginationChange = (newPage: number, newPageSize: number) => {
     setPage(newPage);

@@ -5,7 +5,7 @@ import { NodeGroup, ConciseNodeGroupList } from '@/types/nodeGroup';
 
 export function useListNodeGroups(params?: Record<string, string | number | undefined>) {
   return useQuery<ConciseNodeGroupList>(
-    `listNodeGroups:${JSON.stringify(params)}`,
+    'listNodeGroups',
     '/nodegroup',
     { method: 'GET', params },
   );

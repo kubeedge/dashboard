@@ -4,12 +4,9 @@ import { CustomResourceDefinition, ConciseCustomResourceDefinitionList } from '@
 
 export function useListCustomResourceDefinitions(params?: Record<string, string | number | undefined>) {
   return useQuery<ConciseCustomResourceDefinitionList>(
-    `listCustomResourceDefinitions:${JSON.stringify(params)}`,
+    `listCustomResourceDefinitions`,
     '/crd',
-    {
-      method: 'GET',
-      params,
-    },
+    { method: 'GET', params, },
   );
 }
 

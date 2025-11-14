@@ -3,16 +3,13 @@ import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import { ConciseRoleBindingList, RoleBinding } from '@/types/roleBinding';
 
-export function useListRoleBindings(params?: Record<string, string | number | undefined>) {
-  const url = params?.namespace ? `/rolebinding/${params.namespace}` : '/rolebinding';
+export function useListRoleBindings(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const url = namespace ? `/rolebinding/${namespace}` : '/rolebinding';
 
   return useQuery<ConciseRoleBindingList>(
-    `listRoleBindings:${JSON.stringify(params)}`,
+    `listRoleBindings`,
     url,
-    {
-      method: 'GET',
-      params
-    }
+    { method: 'GET', params }
   );
 }
 

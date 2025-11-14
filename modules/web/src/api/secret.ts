@@ -3,11 +3,11 @@ import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import { ConciseSecretList, Secret } from '@/types/secret';
 
-export function useListSecrets(params?: Record<string, string | number | undefined>) {
-  const path = params?.namespace ? `/secret/${params.namespace}` : '/secret';
+export function useListSecrets(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const path = namespace ? `/secret/${namespace}` : '/secret';
 
   return useQuery<ConciseSecretList>(
-    `listSecrets:${JSON.stringify(params)}`,
+    'listSecrets',
     path,
     { method: 'GET', params },
   );

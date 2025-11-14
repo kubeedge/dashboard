@@ -5,7 +5,7 @@ import type { ConciseNodeList, Node } from '@/types/node';
 
 export function useListNodes(params?: Record<string, string | number | undefined>) {
   return useQuery<ConciseNodeList>(
-    `listNodes:${JSON.stringify(params)}`,
+    'listNodes',
     '/node',
     { method: 'GET', params },
   );

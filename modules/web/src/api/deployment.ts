@@ -1,16 +1,13 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { ConciseDeployment, ConciseDeploymentList, Deployment } from '@/types/deployment';
+import { ConciseDeploymentList, Deployment } from '@/types/deployment';
 
-export function useListDeployments(params?: Record<string, string | number | undefined>) {
-  let path = '/deployment';
-  // Optional namespace path parameter for compatibility
-  if (params?.namespace) {
-    path = `/deployment/${params.namespace}`;
-  }
+export function useListDeployments(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const path = namespace ? `/deployment/${namespace}` : '/deployment';
+
   return useQuery<ConciseDeploymentList>(
-    `listDeployments:${JSON.stringify(params)}`,
+    'listDeployments',
     path,
     { method: 'GET', params },
   );

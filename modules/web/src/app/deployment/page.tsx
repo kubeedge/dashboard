@@ -24,14 +24,13 @@ export default function DeploymentPage() {
   const [order, setOrder] = useState<'asc' | 'desc' | string>('');
   const [name, setName] = useState<string>('');
   const params = useMemo(() => ({
-    namespace,
     page,
     pageSize,
     sort,
     order,
     filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [namespace, page, pageSize, sort, order, name]);
-  const { data, mutate, isLoading } = useListDeployments(params);
+  const { data, mutate, isLoading } = useListDeployments(namespace, params);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const [detailOpen, setDetailOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -76,11 +75,6 @@ export default function DeploymentPage() {
       renderOperation: true,
     },
   ];
-
-  useEffect(() => {
-    mutate();
-    podMutate()
-  }, [namespace, mutate, podMutate]);
 
   const handlePaginationChange = (newPage: number, newPageSize: number) => {
     setPage(newPage);

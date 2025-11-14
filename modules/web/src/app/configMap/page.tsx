@@ -21,14 +21,13 @@ export default function ConfigMapPage() {
   const [order, setOrder] = useState<'asc' | 'desc' | string>('');
   const [name, setName] = useState<string>('');
   const params = useMemo(() => ({
-    namespace,
     page,
     pageSize,
     sort,
     order,
     filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [namespace, page, pageSize, sort, order, name]);
-  const { data, mutate, isLoading } = useListConfigMaps(params);
+  const { data, mutate, isLoading } = useListConfigMaps(namespace, params);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -86,10 +85,6 @@ export default function ConfigMapPage() {
       renderOperation: true,
     },
   ];
-
-  useEffect(() => {
-    mutate();
-  }, [namespace, mutate, params]);
 
   const handleCloseDetailDialog = () => {
     setDetailDialogOpen(false);

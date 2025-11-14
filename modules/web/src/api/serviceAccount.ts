@@ -3,16 +3,13 @@ import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import { ConciseServiceAccountList, ServiceAccount } from '@/types/serviceAccount';
 
-export function useListServiceAccounts(params?: Record<string, string | number | undefined>) {
-  let url = params?.namespace ? `/serviceaccount/${params.namespace}` : '/serviceaccount';
+export function useListServiceAccounts(namespace?: string, params?: Record<string, string | number | undefined>) {
+  let url = namespace ? `/serviceaccount/${namespace}` : '/serviceaccount';
 
   return useQuery<ConciseServiceAccountList>(
-    `listServiceAccounts:${JSON.stringify(params)}`,
+    'listServiceAccounts',
     url,
-    {
-      method: 'GET',
-      params
-    },
+    { method: 'GET', params, },
   );
 }
 

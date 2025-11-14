@@ -28,14 +28,13 @@ export default function SecretPage() {
   const [order, setOrder] = useState<'asc' | 'desc' | string>('desc');
   const [name, setName] = useState<string>('');
   const params = useMemo(() => ({
-    namespace,
     page,
     pageSize,
     sort,
     order,
     filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [namespace, page, pageSize, sort, order, name]);
-  const { data, mutate, isLoading } = useListSecrets(params);
+  const { data, mutate, isLoading } = useListSecrets(namespace, params);
 
   const columns: ColumnDefinition<ConciseSecret>[] = [
     {
@@ -72,10 +71,6 @@ export default function SecretPage() {
       renderOperation: true,
     },
   ];
-
-  useEffect(() => {
-    mutate();
-  }, [namespace, params, mutate]);
 
   const handlePaginationChange = (newPage: number, newPageSize: number) => {
     setPage(newPage);

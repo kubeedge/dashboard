@@ -1,13 +1,13 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { ConfigMap } from '@/types/configMap';
+import { ConciseConfigMapList, ConfigMap } from '@/types/configMap';
 
-export function useListConfigMaps(params?: Record<string, string | number | undefined>) {
-  const path = params?.namespace ? `/configmap/${params.namespace}` : '/configmap';
+export function useListConfigMaps(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const path = namespace ? `/configmap/${namespace}` : '/configmap';
 
-  return useQuery<any>(
-    `listConfigMaps:${JSON.stringify(params)}`,
+  return useQuery<ConciseConfigMapList>(
+    `listConfigMaps`,
     path,
     { method: 'GET', params },
   );

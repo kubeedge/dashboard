@@ -3,16 +3,13 @@ import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
 import { Role, ConciseRoleList } from '@/types/role';
 
-export function useListRoles(params?: Record<string, string | number | undefined>) {
-  const url = params?.namespace ? `/role/${params.namespace}` : '/role';
+export function useListRoles(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const url = namespace ? `/role/${namespace}` : '/role';
 
   return useQuery<ConciseRoleList>(
-    `listRoles:${JSON.stringify(params)}`,
+    `listRoles`,
     url,
-    {
-      method: 'GET',
-      params
-    }
+    { method: 'GET', params }
   );
 }
 

@@ -28,14 +28,13 @@ export default function RoleBindingPage() {
   const [order, setOrder] = useState('');
   const [name, setName] = useState('');
   const params = useMemo(() => ({
-    namespace,
     page,
     pageSize,
     sort,
     order,
     ...(name && { 'name': `*${name}*` }),
   }), [namespace, page, pageSize, sort, order, name]);
-  const { data, mutate, isLoading } = useListRoleBindings(params);
+  const { data, mutate, isLoading } = useListRoleBindings(namespace, params);
 
   const columns: ColumnDefinition<ConciseRoleBinding>[] = [
     {
@@ -72,10 +71,6 @@ export default function RoleBindingPage() {
       renderOperation: true,
     },
   ];
-
-  useEffect(() => {
-    mutate();
-  }, [params, mutate]);
 
   const handlePaginationChange = (newPage: number, newPageSize: number) => {
     setPage(newPage);

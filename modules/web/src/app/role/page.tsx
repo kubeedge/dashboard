@@ -28,14 +28,13 @@ export default function RolePage() {
   const [order, setOrder] = useState('');
   const [name, setName] = useState('');
   const params = useMemo(() => ({
-    namespace,
     page,
     pageSize,
     sort,
     order,
     ...(name && { 'name': `*${name}*` }),
   }), [namespace, page, pageSize, sort, order, name]);
-  const { data, mutate, isLoading } = useListRoles(params);
+  const { data, mutate, isLoading } = useListRoles(namespace, params);
 
   const columns: ColumnDefinition<ConciseRole>[] = [
     {
@@ -68,10 +67,6 @@ export default function RolePage() {
       renderOperation: true,
     },
   ];
-
-  useEffect(() => {
-    mutate();
-  }, [params, mutate]);
 
   const handlePaginationChange = (newPage: number, newPageSize: number) => {
     setPage(newPage);

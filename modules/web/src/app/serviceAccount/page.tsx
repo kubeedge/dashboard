@@ -16,7 +16,7 @@ import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 export default function ServiceAccountPage() {
   const { namespace } = useNamespace();
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(25);
   const [sort, setSort] = useState('');
   const [order, setOrder] = useState('');
   const [name, setName] = useState('');
@@ -28,7 +28,6 @@ export default function ServiceAccountPage() {
   const { t, getCurrentLanguage } = useI18n();
   const currentLanguage = getCurrentLanguage();
   const params = useMemo(() => ({
-    namespace,
     page,
     pageSize,
     sort,
@@ -37,7 +36,7 @@ export default function ServiceAccountPage() {
       name ? `name:${name}` : undefined,
     ].filter(Boolean).join(','),
   }), [namespace, page, pageSize, sort, order, name]);
-  const { data, mutate, isLoading } = useListServiceAccounts(params);
+  const { data, mutate, isLoading } = useListServiceAccounts(namespace, params);
 
   const columns: ColumnDefinition<ConciseServiceAccount>[] = [
     {
@@ -76,10 +75,6 @@ export default function ServiceAccountPage() {
       renderOperation: true,
     },
   ];
-
-  useEffect(() => {
-    mutate();
-  }, [params, mutate]);
 
   const handlePaginationChange = (newPage: number, newPageSize: number) => {
     setPage(newPage);
