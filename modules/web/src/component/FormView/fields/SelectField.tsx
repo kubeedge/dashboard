@@ -12,13 +12,23 @@ export default function SelectField({ field, control }: any) {
 
   useEffect(() => {
     if (typeof field.options === 'function') {
-      field.options().then(setOpts).catch(() => setOpts([]));
+      const res = field.options();
+      if (res instanceof Promise) {
+        res.then(setOpts).catch(() => setOpts([]));
+      } else {
+        setOpts(res);
+      }
     }
   }, [field]);
 
   useEffect(() => {
     if (typeof field.options === 'function') {
-      field.options(null, watchedValues).then(setOpts).catch(() => setOpts([]));
+      const res = field.options();
+      if (res instanceof Promise) {
+        res.then(setOpts).catch(() => setOpts([]));
+      } else {
+        setOpts(res);
+      }
     }
   }, [watchedValues, field]);
 

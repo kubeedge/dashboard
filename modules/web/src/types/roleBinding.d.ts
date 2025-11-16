@@ -31,6 +31,7 @@ export interface RoleBindingList extends ResourceList<RoleBinding> {
 export interface ConciseRoleBinding {
   age?: string;
   creationTimestamp?: string;
+  labels?: Record<string, string>;
   name?: string;
   namespace?: string;
   role?: string;

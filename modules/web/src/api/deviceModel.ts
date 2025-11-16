@@ -1,24 +1,16 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { DeviceModel, DeviceModelList } from '@/types/deviceModel';
+import { ConciseDeviceModelList, DeviceModel } from '@/types/deviceModel';
 
-export function useListDeviceModels(params?: Record<string, string | number | undefined>) {
-  let path = '/devicemodel';
-  // Optional namespace path parameter for compatibility
-  const namespace = params?.namespace as string | undefined;
-  if (namespace) {
-    path = `/devicemodel/${namespace}`;
-  }
-  const search = new URLSearchParams();
-  Object.entries(params || {}).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && `${v}` !== '' && k !== 'namespace') {
-      search.set(k, String(v));
-    }
-  });
-  const qs = search.toString();
-  if (qs) path += `?${qs}`;
-  return useQuery<any>(`listDeviceModels:${path}`, path, { method: 'GET' });
+export function useListDeviceModels(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const path = namespace ? `/devicemodel/${namespace}` : '/devicemodel';
+
+  return useQuery<ConciseDeviceModelList>(
+    `listDeviceModels`,
+    path,
+    { method: 'GET', params },
+  );
 }
 
 export function getDeviceModel(namespace: string, name: string) {
@@ -47,8 +39,8 @@ export function deleteDeviceModel(namespace: string, name: string) {
   });
 }
 
-export async function listDeviceModels(namespace?: string): Promise<DeviceModelList> {
+export async function listDeviceModels(namespace?: string): Promise<ConciseDeviceModelList> {
   const url = namespace ? `/devicemodel/${namespace}` : 'devicemodel';
-  const res = await request<DeviceModelList>(url, { method: 'GET' });
+  const res = await request<ConciseDeviceModelList>(url, { method: 'GET' });
   return res.data;
 }

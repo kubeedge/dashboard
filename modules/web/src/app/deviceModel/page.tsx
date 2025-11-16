@@ -6,7 +6,7 @@ import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createDeviceModel, deleteDeviceModel, getDeviceModel, useListDeviceModels } from '@/api/deviceModel';
 import AddDeviceModelDialog from '@/component/Form/AddDeviceModelDialog';
 import DeviceModelDetailDialog from '@/component/Dialog/DeviceModelDetailDialog';
-import { DeviceModel } from '@/types/deviceModel';
+import { ConciseDeviceModel, DeviceModel } from '@/types/deviceModel';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
@@ -48,7 +48,7 @@ export default function DeviceModelPage() {
     order,
     filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [namespace, page, pageSize, sort, order, name]);
-  const { data, mutate } = useListDeviceModels(params);
+  const { data, mutate } = useListDeviceModels(namespace, params);
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -68,9 +68,9 @@ export default function DeviceModelPage() {
     mutate();
   };
 
-  const handleDetailClick = async (_: any, row: DeviceModel) => {
+  const handleDetailClick = async (_: any, row: ConciseDeviceModel) => {
     try {
-      const resp = await getDeviceModel(row?.metadata?.namespace || '', row?.metadata?.name || '');
+      const resp = await getDeviceModel(row?.namespace || '', row?.name || '');
       setSelectedDeviceModel(resp?.data);
       setDetailDialogOpen(true);
     } catch (err: any) {
@@ -78,13 +78,13 @@ export default function DeviceModelPage() {
     }
   };
 
-  const handleDeleteClick = (_: any, row: DeviceModel) => {
+  const handleDeleteClick = (_: any, row: ConciseDeviceModel) => {
     showConfirmDialog({
       title: t('actions.delete') + ' ' + t('common.deviceModel'),
-      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
+      content: t('messages.deleteConfirm') + ` ${row?.name}?`,
       onConfirm: async () => {
         try {
-          await deleteDeviceModel(row?.metadata?.namespace || '', row?.metadata?.name || '');
+          await deleteDeviceModel(row?.namespace || '', row?.name || '');
           mutate();
         } catch (err: any) {
           error(err?.response?.data?.message || err?.message || t('messages.error'));

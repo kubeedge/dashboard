@@ -142,15 +142,10 @@ const DashboardCir = (props: {
 
 export default function Home() {
   const { namespace } = useNamespace();
-  const { data, mutate } = useListPods(namespace);
+  const { data } = useListPods(namespace);
   const versionDate = useGetK8sVersion()?.data;
   const nodeData = useListNodes()?.data;
-  const { data: appData, mutate: appMutate } = useListDeployments({ namespace });
-
-  useEffect(() => {
-    mutate();
-    appMutate();
-  }, [namespace, mutate, appMutate]);
+  const appData = useListDeployments(namespace)?.data;
 
   return (
     <div className={styles.main}>

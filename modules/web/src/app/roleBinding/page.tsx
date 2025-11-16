@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, TextField, MenuItem, Pagination } from '@mui/material';
-import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
+import React, { useMemo, useState } from 'react';
+import { Box, TextField } from '@mui/material';
+import { ColumnDefinition, Direction, TableCard } from '@/component/Common/TableCard';
 import { createRoleBinding, deleteRoleBinding, getRoleBinding, useListRoleBindings } from '@/api/roleBinding';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import AddRoleBindingDialog from '@/component/Form/AddRoleBindingDialog';
@@ -25,15 +25,15 @@ export default function RoleBindingPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
   const [sort, setSort] = useState('');
-  const [order, setOrder] = useState('');
+  const [order, setOrder] = useState<Direction | ''>('');
   const [name, setName] = useState('');
   const params = useMemo(() => ({
     page,
     pageSize,
     sort,
     order,
-    ...(name && { 'name': `*${name}*` }),
-  }), [namespace, page, pageSize, sort, order, name]);
+    ...(name && { name }),
+  }), [page, pageSize, sort, order, name]);
   const { data, mutate, isLoading } = useListRoleBindings(namespace, params);
 
   const columns: ColumnDefinition<ConciseRoleBinding>[] = [
@@ -50,6 +50,24 @@ export default function RoleBindingPage() {
     {
       name: t('table.roleRef'),
       render: (roleBinding) => roleBinding?.role,
+    },
+    {
+      name: t('table.labels'),
+      render: (roleBinding) => (
+        <Box>
+          {roleBinding?.labels && Object.entries(roleBinding.labels).map(([key, value]) => (
+            <Box
+              key={key}
+              sx={{
+                display: 'block', bgcolor: 'grey.200', color: 'text.primary', px: 1,
+                py: 0.5, borderRadius: 1, mr: 0.5, mb: 0.5, fontSize: '0.75rem'
+              }}
+            >
+              {key}: {value}
+            </Box>
+          ))}
+        </Box>
+      )
     },
     {
       key: 'creationTimestamp',
@@ -77,7 +95,7 @@ export default function RoleBindingPage() {
     setPageSize(newPageSize);
   };
 
-  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+  const handleSortChange = (field: string, direction: Direction) => {
     setSort(field);
     setOrder(direction);
   }
@@ -135,12 +153,18 @@ export default function RoleBindingPage() {
           onPaginationChange={handlePaginationChange}
           sort={{
             field: sort,
-            direction: order as 'asc' | 'desc',
+            direction: order as Direction,
           }}
           onSortChange={handleSortChange}
           filter={(
             <>
-              <TextField size='small' label={t('table.name')} value={name || ''} onChange={(e) => setName(e.target.value || '')} placeholder={t('table.textWildcardHelp')} />
+              <TextField
+                size='small'
+                label={t('table.name')}
+                value={name || ''}
+                onChange={(e) => setName(e.target.value || '')}
+                placeholder={t('table.textWildcardHelp')}
+              />
             </>
           )}
         />

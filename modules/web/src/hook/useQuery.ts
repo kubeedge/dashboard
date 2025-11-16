@@ -5,7 +5,7 @@ import { request } from '@/helper/request';
 interface UseQueryOptions<T> extends AxiosRequestConfig<T> {}
 
 const buildKey = (uri: string, params?: any) => {
-  if (!params) return null;
+  if (!params) return uri;
   const query = Object.entries(params)
     .filter(([, v]) => v !== undefined && v !== null && v !== '')
     .sort()
@@ -17,6 +17,7 @@ const buildKey = (uri: string, params?: any) => {
 
 export function useQuery<T>(key: string, url: string, opt?: UseQueryOptions<T>) {
   const newKey = buildKey(url, opt?.params);
+  console.log('useQuery Key:', newKey);
 
   const { data, error, isLoading, mutate } = useSWR<T>(
     [newKey],

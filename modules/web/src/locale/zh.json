@@ -226,7 +226,8 @@
     "role": "角色",
     "clusterRole": "集群角色",
     "user": "用户",
-    "serviceAccount": "服务账户"
+    "serviceAccount": "服务账户",
+    "reportedValue": "上报值"
   },
   "status": {
     "all": "全部",

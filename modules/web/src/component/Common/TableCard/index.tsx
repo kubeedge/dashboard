@@ -18,7 +18,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { ColumnDefinition, SortState, Direction, TableCardHeader } from './header';
 import { TableCardPagination, type Pagination } from './pagination';
 
-export type { ColumnDefinition } from './header';
+export type { ColumnDefinition, Direction } from './header';
 
 interface TableCardProps<T> {
   addButtonLabel?: string;
