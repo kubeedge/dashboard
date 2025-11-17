@@ -4,44 +4,53 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/
 import FormView from '@/component/FormView';
 import { deviceModelSchema } from './schema';
 import { toDeviceModel } from './mapper';
-import { createDeviceModel } from '@/api/deviceModel';
 import { useAlert } from '@/hook/useAlert';
 import { useNamespace } from '@/hook/useNamespace';
+import { DeviceModel } from '@/types/deviceModel';
+import { useI18n } from '@/hook/useI18n';
+import { useListNamespaces } from '@/api/namespace';
 
-type Props = {
+type AddDeviceModelDialogProps = {
   open: boolean;
   onClose: () => void;
-  initial?: Record<string, any>;
+  onSubmit: (record: DeviceModel) => void | Promise<void>;
   onCreated?: () => void;
 };
 
-export default function AddDeviceModelDialog({ open, onClose, initial, onCreated }: Props) {
-  const { success, error } = useAlert();
-  const { namespace: currentNs } = useNamespace?.() || { namespace: '' };
+export default function AddDeviceModelDialog({ open, onClose, onCreated, onSubmit }: AddDeviceModelDialogProps) {
+  const formId = 'add-device-model-form';
+  const { t } = useI18n();
+  const { error } = useAlert();
+  const { namespace } = useNamespace();
+  const { data } = useListNamespaces();
 
   const handleSubmit = async (values: any) => {
     try {
-      const { ns, body } = toDeviceModel(values);
-      await createDeviceModel(ns, body);
-      success('success');
+      if (onSubmit) {
+        const body = toDeviceModel(values);
+        await onSubmit(body);
+      }
       onCreated?.();
-      onClose();
-    } catch (e: any) {
-      console.error(e);
-      error(e?.message || 'error');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
-  const initValues = { namespace: currentNs || '', ...initial };
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add devicemodels</DialogTitle>
+      <DialogTitle>{`${t('actions.add')} ${t('common.deviceModel')}`}</DialogTitle>
       <DialogContent dividers>
-        <FormView schema={deviceModelSchema} initialValues={initValues} onSubmit={handleSubmit} />
+        <FormView
+          formId={formId}
+          schema={deviceModelSchema(data)}
+          initialValues={{ namespace }}
+          onSubmit={handleSubmit}
+          hideActions
+        />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t('actions.cancel')}</Button>
+        <Button type="submit" form={formId}>{t('actions.add')}</Button>
       </DialogActions>
     </Dialog>
   );

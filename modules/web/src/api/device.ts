@@ -1,12 +1,12 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { Device, DeviceList } from '@/types/device';
+import { ConciseDeviceList, Device } from '@/types/device';
 
 export function useListDevices(namespace?: string, params?: Record<string, string | number | undefined>) {
   const path = namespace ? `/device/${namespace}` : '/device';
 
-  return useQuery<any>(`listDevices`, path, { method: 'GET', params });
+  return useQuery<ConciseDeviceList>(`listDevices`, path, { method: 'GET', params });
 }
 
 export function getDevice(namespace: string, name: string) {

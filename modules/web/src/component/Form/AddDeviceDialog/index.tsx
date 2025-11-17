@@ -23,7 +23,7 @@ export default function AddDeviceDialog({ open, onClose, onSubmit, onCreated }: 
   const { t } = useI18n();
   const { error } = useAlert();
   const { namespace } = useNamespace();
-  const { data: deviceModels} = useListDeviceModels(namespace);
+  const { data: deviceModels } = useListDeviceModels(namespace);
   const { data: nodes } = useListNodes();
 
   const handleSubmit = async (values: any) => {

@@ -38,7 +38,9 @@ export default function DevicePage() {
 
   const columns: ColumnDefinition<ConciseDevice>[] = [
     {
+      key: 'name',
       name: t('table.name'),
+      sortable: true,
       render: (device) => device?.name,
     },
     {
@@ -58,7 +60,9 @@ export default function DevicePage() {
       render: (device) => device?.status ?? 'Unknown',
     },
     {
+      key: 'creationTimestamp',
       name: t('table.creationTime'),
+      sortable: true,
       render: (device) => (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
