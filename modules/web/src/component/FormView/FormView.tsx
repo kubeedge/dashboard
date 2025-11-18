@@ -42,8 +42,10 @@ export default function FormView({
 }) {
   const { t } = useI18n();
   const form = useFormState(schema, initialValues);
-  const { handleSubmit, control, watch, reset } = form;
+  const { handleSubmit, control, watch, reset, formState } = form;
   const values = watch();
+
+  console.log('errors: ', formState.errors);
 
   return (
     <form id={formId} onSubmit={handleSubmit(onSubmit)}>

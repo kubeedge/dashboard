@@ -39,7 +39,7 @@ export default function NodeGroupPage() {
       key: 'name',
       name: t('table.name'),
       sortable : true,
-      render: (row) => row?.name || '-',
+      render: (node) => node?.name || '-',
     },
     {
       key: 'creationTimestamp',

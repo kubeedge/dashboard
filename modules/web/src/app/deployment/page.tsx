@@ -35,7 +35,7 @@ export default function DeploymentPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [currentDeployment, setCurrentDeployment] = useState<Deployment | null>(null);
-  const { data: podData, mutate: podMutate } = useListPods(namespace);
+  const { data: podData } = useListPods(namespace);
   const { error } = useAlert();
 
   const columns: ColumnDefinition<ConciseDeployment>[] = [

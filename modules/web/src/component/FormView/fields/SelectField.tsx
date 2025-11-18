@@ -23,7 +23,7 @@ export default function SelectField({ field, control }: any) {
 
   useEffect(() => {
     if (typeof field.options === 'function') {
-      const res = field.options();
+      const res = field.options(null, watchedValues);
       if (res instanceof Promise) {
         res.then(setOpts).catch(() => setOpts([]));
       } else {

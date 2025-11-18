@@ -39,13 +39,13 @@ export default function ClusterRolesPage() {
       key: 'name',
       name: t('table.name'),
       sortable: true,
-      render: (clusterRole) => clusterRole?.name || clusterRole?.name,
+      render: (role) => role?.name || role?.name,
     },
     {
       name: t('table.labels'),
-      render: (configMap) => (
+      render: (role) => (
         <Box>
-          {configMap?.labels && Object.entries(configMap.labels).map(([key, value]) => (
+          {role?.labels && Object.entries(role.labels).map(([key, value]) => (
             <Box
               key={key}
               sx={{
@@ -63,13 +63,13 @@ export default function ClusterRolesPage() {
       key: 'creationTimestamp',
       name: t('table.creationTime'),
       sortable: true,
-      render: (clusterRole) => (
+      render: (role) => (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
-            {formatDateTime(clusterRole?.creationTimestamp, currentLanguage)}
+            {formatDateTime(role?.creationTimestamp, currentLanguage)}
           </Box>
           <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-            {formatRelativeTime(clusterRole?.creationTimestamp, currentLanguage)}
+            {formatRelativeTime(role?.creationTimestamp, currentLanguage)}
           </Box>
         </Box>
       )

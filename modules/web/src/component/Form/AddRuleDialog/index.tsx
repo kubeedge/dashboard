@@ -6,36 +6,51 @@ import FormView from '@/component/FormView';
 import { addRuleSchema } from './schema';
 import { toRule } from './mapper';
 import type { Rule } from '@/types/rule';
-import { createRule } from '@/api/rule';
+import { useListNamespaces } from '@/api/namespace';
+import { useNamespace } from '@/hook/useNamespace';
+import { useI18n } from '@/hook/useI18n';
+import { useAlert } from '@/hook/useAlert';
 
-type Props = {
+type AddRuleDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (e: any, record: Rule) => Promise<void> | void;
+  onSubmit: (record: Rule) => Promise<void> | void;
+  onCreated?: () => void;
 };
 
-export default function AddRuleDialog({ open, onClose, onSubmit }: Props) {
+export default function AddRuleDialog({ open, onClose, onSubmit, onCreated }: AddRuleDialogProps) {
+  const formId = 'add-rule-form';
+  const { t } = useI18n();
+  const { namespace } = useNamespace();
+  const { data: namespaces } = useListNamespaces();
+  const { error } = useAlert();
+
   const handleSubmit = async (values: any) => {
-    const { ns, body } = toRule(values);
-
-    await createRule(ns, body);
-
-    onClose?.();
+    try {
+      if (onSubmit) {
+        const body = toRule(values);
+        await onSubmit(body);
+      }
+      onCreated?.();
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
+    }
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add Rule</DialogTitle>
+      <DialogTitle>{`${t('actions.add')} ${t('common.rule')}`}</DialogTitle>
       <DialogContent dividers>
         <FormView
-          schema={addRuleSchema}
-          initialValues={{}}
+          formId={formId}
+          schema={addRuleSchema(namespaces)}
+          initialValues={{ namespace }}
           onSubmit={handleSubmit}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form="addrule-form">SUBMIT</Button>
+        <Button onClick={onClose}>{t('actions.cancel')}</Button>
+        <Button type="submit" form={formId}>{t('actions.add')}</Button>
       </DialogActions>
     </Dialog>
   );

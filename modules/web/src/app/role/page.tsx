@@ -69,13 +69,13 @@ export default function RolePage() {
       key: 'creationTimestamp',
       name: t('table.creationTime'),
       sortable: true,
-      render: (secret) => (
+      render: (role) => (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
-            {formatDateTime(secret?.creationTimestamp, currentLanguage)}
+            {formatDateTime(role?.creationTimestamp, currentLanguage)}
           </Box>
           <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-            {formatRelativeTime(secret?.creationTimestamp, currentLanguage)}
+            {formatRelativeTime(role?.creationTimestamp, currentLanguage)}
           </Box>
         </Box>
       )
