@@ -12,7 +12,7 @@ export function ruleToZod(field: FieldSchema) {
       s = z.coerce.number();
       break;
     case 'select': case 'radio':
-      s = z.union([z.string(), z.number()]);
+      s = z.string().or(z.literal('')).transform(v => v ?? '');
       break;
     case 'multi-select':
       s = z.array(z.union([z.string(), z.number()]));

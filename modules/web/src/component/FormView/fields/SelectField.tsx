@@ -38,15 +38,26 @@ export default function SelectField({ field, control }: any) {
       control={control}
       render={({ field: rhf, fieldState: { error } }) => (
         <FormControl fullWidth error={!!error}>
-          <InputLabel>{t(field.label)}</InputLabel>
+          <InputLabel>{/.+\..+/.test(field.label) ? t(field.label) : field.label}</InputLabel>
           <Select
-            label={t(field.label)}
+            label={/.+\..+/.test(field.label) ? t(field.label) : field.label}
             multiple={field.type === 'multi-select'}
             {...rhf}
           >
-            {opts.map(o => <MenuItem key={o.value} value={o.value} disabled={o.disabled}>{t(o.label)}</MenuItem>)}
+            {opts.map(o => <MenuItem
+              key={o.value}
+              value={o.value}
+              disabled={o.disabled}
+            >
+              {/.+\..+/.test(o.label) ? t(o.label) : o.label}
+            </MenuItem>
+            )}
           </Select>
-          <FormHelperText>{error?.message && `${t(field.label)} ${t(error?.message || field.helperText)}`}</FormHelperText>
+          <FormHelperText>
+            {error?.message && /.+\..+/.test(error.message)
+              ? `${t(field.label)} ${t(error?.message || field.helperText)}`
+              : error?.message || field.helperText}
+          </FormHelperText>
         </FormControl>
       )}
     />

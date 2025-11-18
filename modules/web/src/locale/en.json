@@ -226,7 +226,8 @@
     "clusterRole": "Cluster Role",
     "user": "User",
     "serviceAccount": "Service Account",
-    "reportedValue": "Reported Value"
+    "reportedValue": "Reported Value",
+    "servicePort": "Service Port"
   },
   "status": {
     "all": "All",
