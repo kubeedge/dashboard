@@ -1,8 +1,8 @@
 import type { FormSchema } from '@/component/FormView';
-import { listNamespaces } from '@/api/namespace';
-import { listSecrets } from '@/api/secret';
+import { ConciseSecretList } from '@/types/secret';
+import { NamespaceList } from '@/types/namespace';
 
-export const addSaSchema: FormSchema = {
+export const addSaSchema = (namespaces?: NamespaceList, secrets?: ConciseSecretList): FormSchema => ({
   fields: [
     {
       name: 'namespace',
@@ -11,10 +11,8 @@ export const addSaSchema: FormSchema = {
       fullWidth: true,
       grid: { xs: 12, sm: 12, md: 12 },
       rules: [{ type: 'required' }],
-      options: async () => {
-        const res = await listNamespaces();
-        const items = res?.data?.items || [];
-        return items.map(n => ({
+      options: () => {
+        return (namespaces?.items || []).map(n => ({
           label: n?.metadata?.name || '',
           value: n?.metadata?.name || '',
         }));
@@ -35,17 +33,12 @@ export const addSaSchema: FormSchema = {
       fullWidth: true,
       grid: { xs: 12, sm: 12, md: 12 },
       rules: [{ type: 'required' }],
-      options: async (_form: any, values: any) => {
-        const ns = values?.namespace;
-        if (!ns) return [];
-        const res = await listSecrets(ns);
-        const items = res?.data?.items || [];
-        return items.map(s => ({
-          label: s?.name,
-          value: s?.name,
+      options: () => {
+        return (secrets?.items || []).map(s => ({
+          label: s?.name || '',
+          value: s?.name || '',
         }));
       },
-      watchFields: ['namespace'],
     },
   ],
-};
+});

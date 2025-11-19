@@ -5,6 +5,7 @@ import { useFormState } from './adapters/useFormState';
 import type { FormSchema, FieldSchema } from './schema/types';
 import { getFieldComponent } from './fields/registry';
 import { useI18n } from '@/hook/useI18n';
+import { useEffect } from 'react';
 
 function renderField(field: FieldSchema, control: any, values: any) {
   if (field.visibleWhen && !field.visibleWhen(values)) return null;
@@ -32,6 +33,7 @@ export default function FormView({
   submitting,
   formId,
   hideActions,
+  onChange,
 }: {
   schema: FormSchema;
   onSubmit: (values: any) => Promise<void> | void;
@@ -39,13 +41,18 @@ export default function FormView({
   submitting?: boolean;
   formId?: string;
   hideActions?: boolean;
+  onChange?: (values: any) => void;
 }) {
   const { t } = useI18n();
   const form = useFormState(schema, initialValues);
-  const { handleSubmit, control, watch, reset, formState } = form;
+  const { handleSubmit, control, watch, reset } = form;
   const values = watch();
 
-  console.log('errors: ', formState.errors);
+  useEffect(() => {
+    if (onChange) {
+      onChange(values);
+    }
+  }, [values, onChange]);
 
   return (
     <form id={formId} onSubmit={handleSubmit(onSubmit)}>

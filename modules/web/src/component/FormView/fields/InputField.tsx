@@ -15,7 +15,9 @@ export default function InputField({ field, control }: any) {
       render={({ field: rhf, fieldState: { error } }) => (
         <TextField
           {...rhf}
-          type={field.type === 'password' ? 'password' : 'text'}
+          type={field.type === 'textarea' ? 'text' : field}
+          multiline={field.type === 'textarea'}
+          rows={field.rows || 1}
           label={t(field.label)}
           placeholder={t(field.placeholder)}
           fullWidth={field.fullWidth ?? true}

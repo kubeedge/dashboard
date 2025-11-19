@@ -1,8 +1,9 @@
 import { listRuleEndpoints } from '@/api/ruleEndpoint';
 import type { FormSchema } from '@/component/FormView';
 import { NamespaceList } from '@/types/namespace';
+import { ConciseRuleEndpointList } from '@/types/ruleEndpoint';
 
-export const addRuleSchema = (namespaces?: NamespaceList): FormSchema => ({
+export const addRuleSchema = (namespaces?: NamespaceList, ruleEndpoints?: ConciseRuleEndpointList): FormSchema => ({
   fields: [
     {
       name: 'namespace',
@@ -29,16 +30,12 @@ export const addRuleSchema = (namespaces?: NamespaceList): FormSchema => ({
       label: 'table.source',
       type: 'select',
       grid: { md: 12 },
-      options: async (_form: any, values: any) => {
-        const namespace = values?.namespace;
-        if (!namespace) return [];
-        const { data: ruleEndpoints } = await listRuleEndpoints(namespace);
+      options: () => {
         return (ruleEndpoints?.items || []).map((e) => ({
           label: e?.name,
           value: e?.name,
         }));
       },
-      watchFields: ['namespace'],
     },
     {
       name: 'sourceResource',
@@ -51,16 +48,12 @@ export const addRuleSchema = (namespaces?: NamespaceList): FormSchema => ({
       label: 'table.target',
       type: 'select',
       grid: { md: 12 },
-      options: async (_form: any, values: any) => {
-        const namespace = values?.namespace;
-        if (!namespace) return [];
-        const { data: ruleEndpoints } = await listRuleEndpoints(namespace);
+      options: () => {
         return (ruleEndpoints?.items || []).map((e) => ({
           label: e?.name,
           value: e?.name,
         }));
       },
-      watchFields: ['namespace'],
     },
     {
       name: 'targetResource',

@@ -1,78 +1,73 @@
 import type { FormSchema } from '@/component/FormView';
-import { listNamespaces } from '@/api/namespace';
-import { useListNodeGroups } from '@/api/nodeGroup';
+import { NamespaceList } from '@/types/namespace';
+import { ConciseNodeGroupList } from '@/types/nodeGroup';
 
-export const addEdgeAppSchema: FormSchema = {
-  submitText: 'SUBMIT',
-  resetText: 'CANCEL',
+export const addEdgeAppSchema = (namespaces?: NamespaceList, nodeGroups?: ConciseNodeGroupList): FormSchema => {
+  return ({
   fields: [
     {
       name: 'namespace',
-      label: 'Namespace *',
+      label: 'table.namespace',
       type: 'select',
-      rules: [{ type: 'required', message: 'Miss namespace' }],
+      rules: [{ type: 'required' }],
       grid: { md: 12 },
-      options: async () => {
-        const res = await listNamespaces();
-        const items = (res as any)?.items ?? (res as any)?.data?.items ?? [];
-        return items.map((n: any) => ({
-          label: n?.metadata?.name,
-          value: n?.metadata?.name,
+      options: () => {
+        return (namespaces?.items || []).map((n: any) => ({
+          label: n?.metadata?.name || '',
+          value: n?.metadata?.name || '',
         }));
       },
     },
     {
       name: 'name',
-      label: 'Name *',
+      label: 'table.name',
       type: 'text',
-      rules: [{ type: 'required', message: 'Miss name' }],
+      rules: [{ type: 'required' }],
       grid: { md: 12 },
     },
     {
-      // workloadTemplate
       name: 'workloadTemplate',
       label: '',
       type: 'array',
-      addText: '+ ADD WORKLOADTEMPLATE',
-      removeText: '- REMOVE WORKLOADTEMPLATE',
+      addText: 'table.addWorkloadTemplate',
       itemSchema: [{
         name: 'manifests',
-        label: 'manifests yaml',
+        label: 'table.manifestsYaml',
         type: 'textarea',
         rows: 10,
-        rules: [{ type: 'required', message: 'Missing workloadTemplate manifests yaml' }],
+        rules: [{ type: 'required' }],
         grid: { md: 12 },
       }],
+      inlineRemove: true,
       grid: { md: 12 },
     },
     {
-      // targetNodeGroups
       name: 'targetNodeGroups',
       label: '',
       type: 'array',
-      addText: '+ ADD TARGETNODEGROUP',
-      removeText: '- REMOVE TARGETNODEGROUP',
+      addText: 'table.addTargetNodeGroup',
+      inlineRemove: true,
       itemSchema: [{
         name: 'name',
-        label: 'Name',
+        label: 'table.name',
         type: 'select',
         grid: { md: 12 },
-        options: async () => {
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const { data } = useListNodeGroups();
-          const items = (data as any)?.items ?? [];
-          return items.map((i: any) => ({ label: i?.metadata?.name, value: i?.metadata?.name }));
+        options: () => {
+          return (nodeGroups?.items || []).map((i) => ({
+            label: i?.name || '',
+            value: i?.name || '',
+          }));
         },
       },
       {
         name: 'overriders',
-        label: 'overriders yaml',
+        label: 'table.overridersYaml',
         type: 'textarea',
         rows: 10,
-        rules: [{ type: 'required', message: 'Missing targetNodeGroup overriders yaml' }],
+        rules: [{ type: 'required' }],
         grid: { md: 12 },
       }],
       grid: { md: 12 },
     },
   ],
-};
+})};

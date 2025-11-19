@@ -2,35 +2,23 @@
 
 import { Controller, useWatch } from 'react-hook-form';
 import { FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useI18n } from '@/hook/useI18n';
 
 export default function SelectField({ field, control }: any) {
   const [opts, setOpts] = useState<any[]>(Array.isArray(field.options) ? field.options : []);
   const { t } = useI18n();
-  const watchedValues = useWatch({ control });
 
   useEffect(() => {
     if (typeof field.options === 'function') {
-      const res = field.options();
-      if (res instanceof Promise) {
-        res.then(setOpts).catch(() => setOpts([]));
+      const result = field.options();
+      if (result instanceof Promise) {
+        result.then((data: any[]) => setOpts(data));
       } else {
-        setOpts(res);
+        setOpts(result);
       }
     }
   }, [field]);
-
-  useEffect(() => {
-    if (typeof field.options === 'function') {
-      const res = field.options(null, watchedValues);
-      if (res instanceof Promise) {
-        res.then(setOpts).catch(() => setOpts([]));
-      } else {
-        setOpts(res);
-      }
-    }
-  }, [watchedValues, field]);
 
   return (
     <Controller

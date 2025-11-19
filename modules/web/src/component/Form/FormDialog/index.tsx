@@ -15,6 +15,7 @@ type FormDialogProps<T> = {
   onSubmit?: (record: T) => void | Promise<void>;
   onCreated?: () => void;
   transform?: (values: any) => T;
+  onChange?: (values: any) => void;
 };
 
 export default function FormDialog<T>({
@@ -26,7 +27,8 @@ export default function FormDialog<T>({
   onClose,
   onCreated,
   onSubmit,
-  transform
+  transform,
+  onChange,
 }: FormDialogProps<T>) {
   const { t } = useI18n();
   const { error } = useAlert();
@@ -52,6 +54,7 @@ export default function FormDialog<T>({
           schema={formSchema}
           initialValues={{ ...defaultValues }}
           onSubmit={handleSubmit}
+          onChange={onChange}
           hideActions
         />
       </DialogContent>
