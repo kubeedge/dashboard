@@ -73,7 +73,7 @@
     "targetResource": "Target Resource",
     "ruleEndpointType": "Rule Endpoint Type",
     "selectors": "Selectors",
-    "addSelectors": "ADD SELECTORS",
+    "addSelector": "ADD SELECTOR",
     "publishNotReadyAddresses": "PublishNotReadyAddresses",
     "rules": "Rules",
     "addRule": "ADD RULE",
@@ -227,7 +227,17 @@
     "user": "User",
     "serviceAccount": "Service Account",
     "reportedValue": "Reported Value",
-    "servicePort": "Service Port"
+    "servicePort": "Service Port",
+    "clusterIP": "Cluster IP",
+    "externalIP": "External IP",
+    "port": "Port",
+    "ports": "Ports",
+    "annotations": "Annotations",
+    "addPort": "ADD PORT",
+    "targetPort": "Target Port",
+    "nodePort": "Node Port",
+    "sessionAffinity": "Session Affinity",
+    "timeoutSeconds": "Timeout Seconds"
   },
   "status": {
     "all": "All",

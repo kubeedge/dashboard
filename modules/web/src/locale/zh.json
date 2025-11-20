@@ -73,7 +73,7 @@
     "targetResource": "目标资源",
     "ruleEndpointType": "规则端点类型",
     "selectors": "选择器",
-    "addSelectors": "添加选择器",
+    "addSelector": "添加选择器",
     "publishNotReadyAddresses": "发布未就绪地址",
     "rules": "规则",
     "addRule": "添加规则",
@@ -228,7 +228,17 @@
     "user": "用户",
     "serviceAccount": "服务账户",
     "reportedValue": "上报值",
-    "servicePort": "服务端口"
+    "servicePort": "服务端口",
+    "clusterIP": "集群IP",
+    "externalIP": "外部IP",
+    "port": "端口",
+    "ports": "端口",
+    "annotations": "注释",
+    "addPort": "添加端口",
+    "targetPort": "目标端口",
+    "nodePort": "节点端口",
+    "sessionAffinity": "会话亲和性",
+    "timeoutSeconds": "超时时间（秒）"
   },
   "status": {
     "all": "全部",

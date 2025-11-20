@@ -33,7 +33,7 @@ export default function SecretPage() {
     sort,
     order,
     filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
-  }), [namespace, page, pageSize, sort, order, name]);
+  }), [page, pageSize, sort, order, name]);
   const { data, mutate, isLoading } = useListSecrets(namespace, params);
 
   const columns: ColumnDefinition<ConciseSecret>[] = [
