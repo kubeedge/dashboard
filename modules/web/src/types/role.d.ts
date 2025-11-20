@@ -1,4 +1,4 @@
-import { ObjectMeta, ResourceList, TypeMeta } from "./common";
+import { DataList, ObjectMeta, ResourceList, TypeMeta } from "./common";
 
 export interface PolicyRule {
   apiGroups?: string[];
@@ -21,3 +21,13 @@ export interface RoleList extends ResourceList<Role> {
   sort?: string;
   order?: string;
 }
+
+export interface ConciseRole {
+  age?: string;
+  creationTimestamp?: string;
+  labels?: Record<string, string>;
+  name?: string;
+  namespace?: string;
+}
+
+export interface ConciseRoleList extends DataList<ConciseRole> {}

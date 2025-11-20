@@ -1,24 +1,12 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { Device, DeviceList } from '@/types/device';
+import { ConciseDeviceList, Device } from '@/types/device';
 
-export function useListDevices(params?: Record<string, string | number | undefined>) {
-  let path = '/device';
-  // Optional namespace path parameter for compatibility
-  const namespace = params?.namespace as string | undefined;
-  if (namespace) {
-    path = `/device/${namespace}`;
-  }
-  const search = new URLSearchParams();
-  Object.entries(params || {}).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && `${v}` !== '' && k !== 'namespace') {
-      search.set(k, String(v));
-    }
-  });
-  const qs = search.toString();
-  if (qs) path += `?${qs}`;
-  return useQuery<any>(`listDevices:${path}`, path, { method: 'GET' });
+export function useListDevices(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const path = namespace ? `/device/${namespace}` : '/device';
+
+  return useQuery<ConciseDeviceList>(`listDevices`, path, { method: 'GET', params });
 }
 
 export function getDevice(namespace: string, name: string) {

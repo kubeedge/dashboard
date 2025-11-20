@@ -5,88 +5,83 @@ export const addRoleBindingSchema: FormSchema = {
   submitText: 'SUBMIT',
   fields: [
     {
-      // Namespace
       name: 'namespace',
-      label: 'Namespace',
+      label: 'table.namespace',
       type: 'select',
       fullWidth: true,
       grid: { md: 12 },
-      rules: [{ type: 'required', message: 'Miss namespace' }],
+      rules: [{ type: 'required' }],
       options: async () => {
         const res = await listNamespaces();
-        const items = (res?.data?.items ?? []) as any[];
+        const items = res?.data?.items ?? [];
         return items.map(n => ({
-          label: n?.metadata?.name,
-          value: n?.metadata?.name,
+          label: n?.metadata?.name || '',
+          value: n?.metadata?.name || '',
         }));
       },
     },
     {
-      // Name
       name: 'name',
-      label: 'Name *',
+      label: 'table.name',
       type: 'text',
       fullWidth: true,
       grid: { md: 12 },
-      rules: [{ type: 'required', message: 'Miss name' }],
+      rules: [{ type: 'required' }],
     },
     {
-      // RoleRef
       name: 'roleRefKind',
-      label: 'Kind *',
-      type: 'text',
+      label: 'table.kind',
+      type: 'select',
       options: [
-        { label: 'Role', value: 'Role' },
-        { label: 'ClusterRole', value: 'ClusterRole' },
+        { label: 'table.role', value: 'Role' },
+        { label: 'table.clusterRole', value: 'ClusterRole' },
       ],
-      rules: [{ type: 'required', message: 'Miss kind' }],
+      rules: [{ type: 'required' }],
       grid: { md: 4 },
     },
     {
       name: 'roleRefName',
-      label: 'Name *',
+      label: 'table.name',
       type: 'text',
-      rules: [{ type: 'required', message: 'Miss name' }],
+      rules: [{ type: 'required' }],
       grid: { md: 4 },
     },
     {
       name: 'roleRefApiGroup',
-      label: 'ApiGroup',
+      label: 'table.apiGroup',
       type: 'text',
       grid: { md: 4 },
       defaultValue: ' ',
     },
     {
-      // Subjects
       name: 'subjects',
-      label: 'Subjects',
+      label: 'table.subjects',
       type: 'array',
-      addText: '+ ADD SUBJECT',
-      removeText: 'REMOVE',
+      addText: 'table.addSubject',
       inlineRemove: true,
       itemSchema: [
         {
           name: 'kind',
-          label: 'Kind *',
+          label: 'table.kind',
           type: 'select',
           options: [
-            { label: 'User', value: 'User' },
-            { label: 'Group', value: 'Group' },
-            { label: 'ServiceAccount', value: 'ServiceAccount' },
+            { label: 'table.user', value: 'User' },
+            { label: 'table.group', value: 'Group' },
+            { label: 'table.serviceAccount', value: 'ServiceAccount' },
           ],
-          rules: [{ type: 'required', message: 'Miss kind' }],
+          rules: [{ type: 'required' }],
           grid: { md: 4 },
         },
         {
           name: 'name',
-          label: 'Name *',
+          label: 'table.name',
           type: 'text',
-          rules: [{ type: 'required', message: 'Miss name' }],
+          rules: [{ type: 'required' }],
           grid: { md: 4 },
         },
         {
           name: 'apiGroup',
-          label: 'ApiGroup',
+          label: 'table.apiGroup',
           type: 'text',
           grid: { md: 4 },
         },

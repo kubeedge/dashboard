@@ -14,3 +14,4 @@ export { default as AddDeviceDialog } from './AddDeviceDialog';
 export { default as AddConfigMapDialog } from './AddConfigMapDialog';
 export { default as AddClusterRoleDialog } from './AddClusterRoleDialog';
 export { default as AddClusterRoleBindingDialog } from './AddClusterRoleBindingDialog';
+export { default as FormDialog } from './FormDialog';

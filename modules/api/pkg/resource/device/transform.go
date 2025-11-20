@@ -30,7 +30,9 @@ type DeviceListItem struct {
 	Name              string            `json:"name"`
 	Namespace         string            `json:"namespace"`
 	DeviceModelRef    string            `json:"deviceModelRef"`
+	NodeName          string            `json:"nodeName"`
 	NodeSelector      string            `json:"nodeSelector"`
+	Protocol          string            `json:"protocol"`
 	Status            string            `json:"status"`
 	CreationTimestamp time.Time         `json:"creationTimestamp"`
 	Labels            map[string]string `json:"labels,omitempty"`
@@ -55,7 +57,9 @@ func DeviceToListItem(d devicev1beta1.Device) DeviceListItem {
 		Name:              d.ObjectMeta.Name,
 		Namespace:         d.ObjectMeta.Namespace,
 		DeviceModelRef:    deviceModelRef,
+		NodeName:          d.Spec.NodeName,
 		NodeSelector:      nodeSelector,
+		Protocol:          d.Spec.Protocol.ProtocolName,
 		Status:            status,
 		CreationTimestamp: d.ObjectMeta.CreationTimestamp.Time,
 		Labels:            d.ObjectMeta.Labels,

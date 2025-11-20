@@ -17,10 +17,12 @@ limitations under the License.
 package args
 
 import (
+	"flag"
 	"net"
 	"strconv"
 
 	"github.com/spf13/pflag"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -38,6 +40,14 @@ var (
 )
 
 func init() {
+	// Init klog
+	fs := flag.NewFlagSet("", flag.PanicOnError)
+	klog.InitFlags(fs)
+
+	// Default log level to 1
+	_ = fs.Set("v", "1")
+
+	pflag.CommandLine.AddGoFlagSet(fs)
 	pflag.Parse()
 }
 

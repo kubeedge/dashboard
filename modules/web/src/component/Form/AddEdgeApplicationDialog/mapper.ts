@@ -1,33 +1,5 @@
+import { EdgeApplication } from '@/types/edgeApplication';
 import yaml from 'js-yaml';
-
-export function toEdgeApplication(values: any) {
-  const ns = values.namespace;
-
-  const workloadTemplate = (values.workloadTemplate ?? []).map((w: any) => {
-    const obj = safeLoadYaml(w?.manifests);
-    return { manifests: obj };
-  });
-
-  const targetNodeGroups = (values.targetNodeGroups ?? []).map((t: any) => {
-    const obj = safeLoadYaml(t?.overriders);
-    return { name: t?.name, overriders: obj };
-  });
-
-  const body: any = {
-    apiVersion: 'apps.kubeedge.io/v1alpha1',
-    kind: 'EdgeApplication',
-    metadata: {
-      name: values.name,
-      namespace: ns,
-    },
-    spec: {
-      ...(workloadTemplate.length ? { workloadTemplate } : {}),
-      ...(targetNodeGroups.length ? { targetNodeGroups } : {}),
-    },
-  };
-
-  return { ns, body };
-}
 
 function safeLoadYaml(text: string) {
   if (!text || typeof text !== 'string') return {};
@@ -37,4 +9,28 @@ function safeLoadYaml(text: string) {
   } catch (e) {
     return {};
   }
+}
+
+export function toEdgeApplication(values: any): EdgeApplication {
+  const body: any = {
+    apiVersion: 'apps.kubeedge.io/v1alpha1',
+    kind: 'EdgeApplication',
+    metadata: {
+      namespace: values.namespace,
+      name: values.name,
+    },
+    spec: {
+      workloadScope: {
+        targetNodeGroups: values.targetNodeGroups?.map((nodeGroup: any) => ({
+          name: nodeGroup.name,
+          overrides: safeLoadYaml(nodeGroup.overriders),
+        })),
+      },
+      workloadTemplate: {
+        manifests: values.workloadTemplate?.map((template: any) => safeLoadYaml(template.manifests)),
+      },
+    }
+  }
+
+  return body;
 }

@@ -19,7 +19,7 @@ export default function NamespaceSelector() {
       displayEmpty
       sx={{ color: 'white', mr: 2 }}
     >
-      <MenuItem key={'all-namespace'} value={''}>All Namespaces</MenuItem>
+      <MenuItem key={'all-namespace'} value={''}>{t('common.allNamespaces')}</MenuItem>
       {namespaces?.items.map((ns) => (
         <MenuItem key={ns.metadata?.name} value={ns.metadata?.name}>
           {ns.metadata?.name}

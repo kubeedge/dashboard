@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Dialog, Box, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle } from '@mui/material';
 import SSEOutputArea from '@/component/Common/SSEOutputArea';
+import { useI18n } from '@/hook/useI18n';
 
 const style = {
   position: 'absolute' as const,
@@ -22,6 +23,7 @@ interface KeinkDialogProps {
 const KeinkDialog = ({ open, onClose }: KeinkDialogProps) => {
   const [sseData, setSseData] = useState<string[]>([]);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (open) {
@@ -46,7 +48,7 @@ const KeinkDialog = ({ open, onClose }: KeinkDialogProps) => {
 
   return (
     <Dialog open={!!open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Install KubeEdge by Keink</DialogTitle>
+      <DialogTitle>{t("login.installByKeink")}</DialogTitle>
       <DialogContent>
         <SSEOutputArea messages={sseData} />
       </DialogContent>

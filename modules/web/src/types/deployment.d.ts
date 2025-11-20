@@ -1,4 +1,4 @@
-import type { Condition, LabelSelector, Resource, ResourceList } from "./common";
+import type { Condition, DataList, LabelSelector, Resource, ResourceList } from "./common";
 import { PodTemplateSpec } from "./podTemplate";
 
 interface RollingUpdateDeployment {
@@ -40,3 +40,13 @@ interface DeploymentStatus {
 export interface Deployment extends Resource<DeploymentSpec, DeploymentStatus> {}
 
 export interface DeploymentList extends ResourceList<Deployment> {}
+
+export interface ConciseDeployment {
+  name: string;
+  namespace: string;
+  replicas: number;
+  availableReplicas: number;
+  creationTimestamp: string;
+}
+
+export interface ConciseDeploymentList extends DataList<ConciseDeployment> {}

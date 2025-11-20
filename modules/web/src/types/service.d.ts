@@ -1,4 +1,4 @@
-import { Condition, Resource, ResourceList } from "./common";
+import { Condition, DataList, Resource, ResourceList } from "./common";
 
 interface ServicePort {
   port: number;
@@ -67,11 +67,18 @@ interface ServiceStatus {
 
 export interface Service extends Resource<ServiceSpec, ServiceStatus> {}
 
-export interface ServiceList extends ResourceList<Service> {
-  total?: number;
-  page?: number;
-  pageSize?: number;
-  hasNext?: boolean;
-  sort?: string;
-  order?: string;
+export interface ServiceList extends ResourceList<Service> {}
+
+export interface ConciseService {
+  age?: string;
+  clusterIP?: string;
+  creationTimestamp?: string;
+  externalIP?: string;
+  labels?: Record<string, string>;
+  name?: string;
+  namespace?: string;
+  ports?: string[];
+  type?: string;
 }
+
+export interface ConciseServiceList extends DataList<ConciseService> {}

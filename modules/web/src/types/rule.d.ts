@@ -1,4 +1,4 @@
-import type { ObjectMeta, ResourceList, TypeMeta } from "./common";
+import type { DataList, ObjectMeta, ResourceList, TypeMeta } from "./common";
 
 interface RuleSpec {
   source: string;
@@ -19,11 +19,17 @@ export interface Rule extends TypeMeta {
   status?: RuleStatus;
 }
 
-export interface RuleList extends ResourceList<Rule> {
-  total?: number;
-  page?: number;
-  pageSize?: number;
-  hasNext?: boolean;
-  sort?: string;
-  order?: string;
+export interface RuleList extends ResourceList<Rule> {}
+
+export interface ConciseRule {
+  creationTimestamp: string;
+  labels?: Record<string, string>;
+  name: string;
+  namespace: string;
+  source: string;
+  sourceResource: Record<string, string>;
+  target: string;
+  targetResource: Record<string, string>;
 }
+
+export interface ConciseRuleList extends DataList<ConciseRule> {}

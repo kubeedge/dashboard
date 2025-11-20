@@ -1,26 +1,16 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { Rule, RuleList } from '@/types/rule';
+import { Rule, ConciseRuleList } from '@/types/rule';
 
-export function useListRules(params?: Record<string, string | number | undefined>) {
-  const searchParams = new URLSearchParams();
+export function useListRules(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const path = namespace ? `/rule/${namespace}` : '/rule';
 
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== '' && key !== 'namespace') {
-        searchParams.append(key, value.toString());
-      }
-    });
-  }
-
-  const namespace = params?.namespace as string;
-  const baseUrl = namespace ? `/rule/${namespace}` : '/rule';
-  const url = searchParams.toString() ? `${baseUrl}?${searchParams.toString()}` : baseUrl;
-
-  return useQuery<RuleList>('listRules', url, {
-    method: 'GET',
-  });
+  return useQuery<ConciseRuleList>(
+    'listRules',
+    path,
+    { method: 'GET', params },
+  );
 }
 
 export function getRule(namespace: string, name: string) {

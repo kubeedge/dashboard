@@ -1,26 +1,16 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { RuleEndpoint, RuleEndpointList } from '@/types/ruleEndpoint';
+import { RuleEndpoint, ConciseRuleEndpointList } from '@/types/ruleEndpoint';
 
-export function useListRuleEndpoints(params?: Record<string, string | number | undefined>) {
-  const searchParams = new URLSearchParams();
+export function useListRuleEndpoints(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const path = namespace ? `/ruleendpoint/${namespace}` : '/ruleendpoint';
 
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== '' && key !== 'namespace') {
-        searchParams.append(key, value.toString());
-      }
-    });
-  }
-
-  const namespace = params?.namespace as string;
-  const baseUrl = namespace ? `/ruleendpoint/${namespace}` : '/ruleendpoint';
-  const url = searchParams.toString() ? `${baseUrl}?${searchParams.toString()}` : baseUrl;
-
-  return useQuery<RuleEndpointList>('listRuleEndpoints', url, {
-    method: 'GET',
-  });
+  return useQuery<ConciseRuleEndpointList>(
+    'listRuleEndpoints',
+    path,
+    { method: 'GET', params, },
+  );
 }
 
 export function getRuleEndpoint(namespace: string, name: string) {
@@ -50,7 +40,6 @@ export function deleteRuleEndpoint(namespace: string, name: string) {
 }
 
 export async function listRuleEndpoints(namespace?: string) {
-
-  const url = namespace ? `/ruleEndpoint/${namespace}` : '/ruleEndpoint';
-  return request<RuleEndpointList>(url, { method: 'GET' });
+  const url = namespace ? `/ruleendpoint/${namespace}` : '/ruleendpoint';
+  return request<ConciseRuleEndpointList>(url, { method: 'GET' });
 }

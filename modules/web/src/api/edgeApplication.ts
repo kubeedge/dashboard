@@ -1,21 +1,16 @@
 import { useQuery } from '@/hook/useQuery';
 import { request } from '@/helper/request';
 import { Status } from '@/types/common';
-import { EdgeApplication } from '@/types/edgeApplication';
+import { ConciseEdgeApplicationList, EdgeApplication } from '@/types/edgeApplication';
 
-export function useListEdgeApplications(params?: Record<string, string | number | undefined>) {
-  let path = '/edgeapplication';
-  const namespace = params?.namespace as string | undefined;
-  if (namespace) {
-    path = `/edgeapplication/${namespace}`;
-  }
-  const search = new URLSearchParams();
-  Object.entries(params || {}).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && `${v}` !== '' && k !== 'namespace') search.set(k, String(v));
-  });
-  const qs = search.toString();
-  if (qs) path += `?${qs}`;
-  return useQuery<any>(`listEdgeApplications:${path}`, path, { method: 'GET' });
+export function useListEdgeApplications(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const path = namespace ? `/edgeapplication/${namespace}` : '/edgeapplication';
+
+  return useQuery<ConciseEdgeApplicationList>(
+    `listEdgeApplications`,
+    path,
+    { method: 'GET', params },
+  );
 }
 
 export function getEdgeApplication(namespace: string, name: string) {

@@ -15,6 +15,7 @@ export type Rule =
   | { type: 'required'; message?: string }
   | { type: 'min'; value: number; message?: string }
   | { type: 'max'; value: number; message?: string }
+  | { type: 'in'; values: any[]; message?: string }
   | { type: 'regex'; value: RegExp; message?: string }
   | { type: 'custom'; fn: (val: any, form: any) => true | string };
 
@@ -28,26 +29,21 @@ export interface FieldSchema {
   helperText?: string;
   defaultValue?: any;
   rules?: Rule[];
+  ruleIf?: { field: string; value: string };
   options?:
   | { label: string; value: any }[]
   | (() => Promise<{ label: string; value: any }[]>)
-  | ((form: any, values: Record<string, any>) =>
-    Promise<{ label: string; value: any }[]>);
+  | (() => { label: string; value: any }[]);
   fullWidth?: boolean;
   grid?: { xs?: number; sm?: number; md?: number; lg?: number };
   visibleWhen?: (form: any) => boolean;
   disabledWhen?: (form: any) => boolean;
   itemSchema?: ArrayItemField[];
-
   addText?: string;
   removeText?: string;
-
   rows?: number;
-
   inlineRemove?: boolean;
-
   props?: Record<string, any>;
-
 }
 
 export interface FormSchema {

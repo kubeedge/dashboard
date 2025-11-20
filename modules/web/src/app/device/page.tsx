@@ -1,43 +1,78 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import { Box, TextField } from '@mui/material';
 import { createDevice, deleteDevice, getDevice, useListDevices } from '@/api/device';
-import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
-import { Device } from '@/types/device';
+import { ColumnDefinition, Direction, TableCard } from '@/component/Common/TableCard';
+import { ConciseDevice, Device } from '@/types/device';
 import { useNamespace } from '@/hook/useNamespace';
 import DeviceDetailDialog from '@/component/Dialog/DeviceDetailDialog';
 import AddDeviceDialog from '@/component/Form/AddDeviceDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 
 export default function DevicePage() {
-  const { t } = useI18n();
-  const columns: ColumnDefinition<Device | any>[] = [
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+  const [isAddDeviceDialogOpen, setIsAddDeviceDialogOpen] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
+  const { error } = useAlert();
+  const { namespace } = useNamespace();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sort, setSort] = useState<string>('');
+  const [order, setOrder] = useState<Direction>();
+  const [name, setName] = useState<string | undefined>(undefined);
+  const params = useMemo(() => ({
+    page,
+    pageSize,
+    sort,
+    order,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
+  }), [page, pageSize, sort, order, name]);
+  const { data, mutate, isLoading } = useListDevices(namespace, params);
+
+  const columns: ColumnDefinition<ConciseDevice>[] = [
     {
+      key: 'name',
       name: t('table.name'),
-      render: (device) => (device as any)?.metadata?.name ?? (device as any)?.name,
+      sortable: true,
+      render: (device) => device?.name,
     },
     {
       name: t('table.protocol'),
-      render: (device) => device?.spec?.protocol?.protocolName,
+      render: (device) => device?.protocol,
     },
     {
-      name: 'DeviceModelRef',
-      render: (device) => (device as any)?.spec?.deviceModelRef?.name ?? (device as any)?.deviceModelRef,
+      name: t('table.deviceModel'),
+      render: (device) => device?.deviceModelRef,
     },
     {
       name: t('table.nodeName'),
-      render: (device) => (device as any)?.spec?.nodeName ?? (device as any)?.nodeSelector,
+      render: (device) => device.nodeName,
     },
     {
-      name: 'Status',
-      render: (device) => (device as any)?.status ?? 'Unknown',
+      name: t('table.status'),
+      render: (device) => device?.status ?? 'Unknown',
     },
     {
+      key: 'creationTimestamp',
       name: t('table.creationTime'),
-      render: (device) => (device as any)?.metadata?.creationTimestamp ?? (device as any)?.creationTimestamp,
+      sortable: true,
+      render: (device) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+            {formatDateTime(device?.creationTimestamp, currentLanguage)}
+          </Box>
+          <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+            {formatRelativeTime(device?.creationTimestamp, currentLanguage)}
+          </Box>
+        </Box>
+      )
     },
     {
       name: t('table.operation'),
@@ -45,43 +80,19 @@ export default function DevicePage() {
     },
   ];
 
-  const { namespace } = useNamespace();
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
-  const [sort, setSort] = useState<string | undefined>('creationTimestamp');
-  const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
-  const [name, setName] = useState<string | undefined>(undefined);
-  const params = useMemo(() => ({
-    namespace,
-    page,
-    pageSize,
-    sort,
-    order,
-    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
-  }), [namespace, page, pageSize, sort, order, name]);
-  const { data, mutate } = useListDevices(params);
-
-  const [isAddDeviceDialogOpen, setIsAddDeviceDialogOpen] = useState(false);
-  const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error, success } = useAlert();
-
-  useEffect(() => {
-    mutate();
-  }, [namespace, mutate]);
-
-  const handleAddClick = () => {
-    setIsAddDeviceDialogOpen(true);
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
   };
 
-  const handleRefreshClick = () => {
-    mutate();
-  };
+  const handleSortChange = (field: string, direction: Direction) => {
+    setSort(field);
+    setOrder(direction);
+  }
 
-  const handleDetailClick = async (_: any, row: Device) => {
+  const handleDetailClick = async (_: any, row: ConciseDevice) => {
     try {
-      const resp = await getDevice(row?.metadata?.namespace || '', row?.metadata?.name || '');
+      const resp = await getDevice(row?.namespace || '', row?.name || '');
       setSelectedDevice(resp?.data);
       setIsDetailDialogOpen(true);
     } catch (err: any) {
@@ -89,29 +100,19 @@ export default function DevicePage() {
     }
   };
 
-  const handleDeleteClick = (_: any, row: Device) => {
+  const handleDeleteClick = (_: any, row: ConciseDevice) => {
     showConfirmDialog({
-      title: t('actions.delete') + ' ' + t('common.device'),
-      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
+      title: `${t('actions.delete')} ${t('common.device')}`,
+      content: `${t('messages.deleteConfirm')} ${row?.name}?`,
       onConfirm: async () => {
         try {
-          await deleteDevice(row?.metadata?.namespace || '', row?.metadata?.name || '');
+          await deleteDevice(row?.namespace || '', row?.name || '');
           mutate();
         } catch (err: any) {
           error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
-      onCancel: () => { },
     });
-  };
-
-  const handleCloseDetailDialog = () => {
-    setIsDetailDialogOpen(false);
-    setSelectedDevice(null);
-  };
-
-  const handleCloseAddDeviceDialog = () => {
-    setIsAddDeviceDialogOpen(false);
   };
 
   const handleSubmit = async (device: Device) => {
@@ -127,53 +128,47 @@ export default function DevicePage() {
           addButtonLabel={t('actions.add') + ' ' + t('common.device')}
           columns={columns}
           data={data?.items}
-          onAddClick={handleAddClick}
-          onRefreshClick={handleRefreshClick}
+          onAddClick={() => setIsAddDeviceDialogOpen(true)}
+          onRefreshClick={() => mutate()}
           onDetailClick={handleDetailClick}
           onDeleteClick={handleDeleteClick}
-          detailButtonLabel="Details"
+          detailButtonLabel={t('actions.detail')}
           deleteButtonLabel={t('actions.delete')}
-          noPagination={true}
+          loading={isLoading}
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as Direction,
+          }}
+          onSortChange={handleSortChange}
+          filter={(
+            <>
+              <TextField
+                size='small'
+                label={t('table.name')}
+                value={name || ''}
+                onChange={(e) => setName(e.target.value || '')}
+                placeholder={t('table.textWildcardHelp')}
+              />
+            </>
+          )}
         />
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
-          <TextField size="small" select label="Rows per page" value={pageSize}
-            onChange={(e) => { const v = Number(e.target.value) || 10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={50}>50</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Sort" value={sort || ''} onChange={(e) => setSort(e.target.value || undefined)} sx={{ minWidth: 180 }}>
-            <MenuItem value="">Default</MenuItem>
-            <MenuItem value="name">name</MenuItem>
-            <MenuItem value="deviceModelRef">deviceModelRef</MenuItem>
-            <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Order" value={order || ''} onChange={(e) => setOrder((e.target.value as any) || undefined)} sx={{ minWidth: 140 }}>
-            <MenuItem value="">Default</MenuItem>
-            <MenuItem value="asc">asc</MenuItem>
-            <MenuItem value="desc">desc</MenuItem>
-          </TextField>
-          <TextField size="small" label="Name" value={name || ''} onChange={(e) => setName(e.target.value || undefined)} placeholder="supports * wildcards" />
-          <Box sx={{ flexGrow: 1 }} />
-          <Pagination
-            page={page}
-            onChange={(_, value) => { setPage(value); mutate(); }}
-            count={Math.max(1, Math.ceil(((data?.total ?? 0) as number) / (pageSize || 1)))}
-            size="small"
-            color="primary"
-          />
-        </Box>
       </Box>
       <DeviceDetailDialog
         open={isDetailDialogOpen}
-        onClose={handleCloseDetailDialog}
+        onClose={() => setIsDetailDialogOpen(false)}
         data={selectedDevice}
       />
       <AddDeviceDialog
         open={isAddDeviceDialogOpen}
-        onClose={handleCloseAddDeviceDialog}
-
+        onClose={() => setIsAddDeviceDialogOpen(false)}
+        onSubmit={handleSubmit}
+        onCreated={() => setIsAddDeviceDialogOpen(false)}
       />
       {ConfirmDialogComponent}
     </Box>

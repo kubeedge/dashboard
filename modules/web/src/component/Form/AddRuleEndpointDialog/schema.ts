@@ -1,43 +1,46 @@
 import type { FormSchema } from '@/component/FormView';
-import { listNamespaces } from '@/api/namespace';
+import { NamespaceList } from '@/types/namespace';
 
-export const addRuleEndpointSchema: FormSchema = {
-
-  resetText: undefined,
+export const addRuleEndpointSchema = (namespaces?: NamespaceList): FormSchema => ({
   fields: [
     {
       name: 'namespace',
-      label: 'Namespace *',
+      label: 'table.namespace',
       type: 'select',
       grid: { md: 12 },
-      rules: [{ type: 'required', message: 'Miss namespace' }],
-      options: async () => {
-        const res = await listNamespaces();
-        const items = (res?.data?.items ?? []) as any[];
-        return items.map((n) => ({
-          label: n?.metadata?.name,
-          value: n?.metadata?.name,
+      rules: [{ type: 'required' }],
+      options: () => {
+        return (namespaces?.items || [])?.map((n) => ({
+          label: n?.metadata?.name || '',
+          value: n?.metadata?.name || '',
         }));
       },
     },
     {
       name: 'name',
-      label: 'Name *',
+      label: 'table.name',
       type: 'text',
       grid: { md: 12 },
-      rules: [{ type: 'required', message: 'Miss name' }],
+      rules: [{ type: 'required' }],
     },
     {
       name: 'type',
-      label: 'RuleEndpointType *',
+      label: 'table.ruleEndpointType',
       type: 'select',
       grid: { md: 12 },
-      rules: [{ type: 'required', message: 'Miss type' }],
+      rules: [{ type: 'required' }],
       options: [
         { label: 'rest', value: 'rest' },
         { label: 'eventbus', value: 'eventbus' },
         { label: 'servicebus', value: 'servicebus' },
       ],
     },
+    {
+      name: 'servicePort',
+      label: 'table.servicePort',
+      type: 'text',
+      grid: { md: 12 },
+      visibleWhen: (values) => values?.type === 'servicebus',
+    }
   ],
-};
+});

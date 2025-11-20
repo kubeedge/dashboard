@@ -1,88 +1,90 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, TextField, Button, MenuItem, Pagination } from '@mui/material';
-import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
+import React, { useMemo, useState } from 'react';
+import { Box, TextField } from '@mui/material';
+import { ColumnDefinition, Direction, TableCard } from '@/component/Common/TableCard';
 import { createEdgeApplication, deleteEdgeApplication, getEdgeApplication, useListEdgeApplications } from '@/api/edgeApplication';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import AddEdgeApplicationDialog from '@/component/Form/AddEdgeApplicationDialog';
-import { EdgeApplication } from '@/types/edgeApplication';
+import { ConciseEdgeApplication, EdgeApplication } from '@/types/edgeApplication';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 
 export default function EdgeApplicationPage() {
   const [name, setName] = useState('');
   const { namespace } = useNamespace();
-  const { t } = useI18n();
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
+  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
+  const [addDialogOpen, setAddDialogOpen] = React.useState(false);
+  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
+  const { error } = useAlert();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sort, setSort] = useState<string>('');
+  const [order, setOrder] = useState<Direction | ''>('');
+  const params = useMemo(() => ({
+    page,
+    pageSize,
+    sort,
+    order,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
+  }), [page, pageSize, sort, order, name]);
+  const { data, mutate, isLoading } = useListEdgeApplications(namespace, params);
 
-  const columns: ColumnDefinition<EdgeApplication>[] = [
+  const columns: ColumnDefinition<ConciseEdgeApplication>[] = [
     {
       name: t('table.namespace'),
-      render: (edgeApplication) => edgeApplication?.metadata?.namespace,
+      render: (edgeApplication) => edgeApplication?.namespace,
     },
     {
+      key: 'name',
       name: t('table.name'),
-      render: (edgeApplication) => edgeApplication?.metadata?.name,
+      sortable: true,
+      render: (edgeApplication) => edgeApplication?.name,
     },
     {
       name: t('table.nodeGroups'),
-      render: (edgeApplication) => edgeApplication?.spec?.workloadScope?.targetNodeGroups?.map(group => group.name).join(', '),
+      render: (edgeApplication) => edgeApplication?.nodeGroups || '-',
     },
     {
+      key: 'creationTimestamp',
       name: t('table.creationTime'),
-      render: (edgeApplication) => edgeApplication.metadata?.creationTimestamp,
+      sortable: true,
+      render: (edgeApplication) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+            {formatDateTime(edgeApplication?.creationTimestamp, currentLanguage)}
+          </Box>
+          <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+            {formatRelativeTime(edgeApplication?.creationTimestamp, currentLanguage)}
+          </Box>
+        </Box>
+      )
     },
     {
       name: t('table.operation'),
       renderOperation: true,
     },
   ];
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
-  const [sort, setSort] = useState<string | undefined>('creationTimestamp');
-  const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
-  const [mock, setMock] = useState<number | undefined>(undefined);
-  const params = useMemo(() => ({
-    namespace,
-    page,
-    pageSize,
-    sort,
-    order,
-    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
-    mock,
-  }), [namespace, page, pageSize, sort, order, name, mock]);
-  const { data, mutate } = useListEdgeApplications(params);
-  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
-  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
-  const [addDialogOpen, setAddDialogOpen] = React.useState(false);
-  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error, success } = useAlert();
 
-  useEffect(() => {
-    mutate();
-  }, [namespace, mutate]);
-
-  const handleNameChange = (event: any) => {
-    setName(event.target.value);
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
   };
 
-  const handleAddClick = () => {
-    setAddDialogOpen(true);
-  };
+  const handleSortChange = (field: string, direction: Direction) => {
+    setSort(field);
+    setOrder(direction);
+  }
 
-  const handleRefreshClick = () => {
-    mutate();
-  };
-
-  const handleViewOptionsClick = () => {
-    alert('View options button clicked');
-  };
-
-  const handleYamlClick = async (_: any, row: EdgeApplication) => {
+  const handleYamlClick = async (_: any, row: ConciseEdgeApplication) => {
     try {
-      const resp = await getEdgeApplication(row?.metadata?.namespace || '', row?.metadata?.name || '');
+      const resp = await getEdgeApplication(row?.namespace || '', row?.name || '');
       setCurrentYamlContent(resp.data);
       setYamlDialogOpen(true);
     } catch (err: any) {
@@ -90,32 +92,23 @@ export default function EdgeApplicationPage() {
     }
   };
 
-  const handleYamlDialogClose = () => {
-    setYamlDialogOpen(false);
-  };
-
-  const handleAddDialogClose = () => {
-    setAddDialogOpen(false);
-  };
-
-  const handleAddEdgeApplication = async (_: any, record: EdgeApplication) => {
+  const handleAddEdgeApplication = async (record: EdgeApplication) => {
     await createEdgeApplication(record?.metadata?.namespace || namespace || 'default', record);
     mutate();
   };
 
-  const handleDeleteClick = (_: any, row: EdgeApplication) => {
+  const handleDeleteClick = (_: any, row: ConciseEdgeApplication) => {
     showConfirmDialog({
-      title: t('actions.delete') + ' ' + t('common.edgeApplication'),
-      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
+      title: `${t('actions.delete')} ${t('common.edgeApplication')}`,
+      content: `${t('messages.deleteConfirm')} ${row?.name}?`,
       onConfirm: async () => {
         try {
-          await deleteEdgeApplication(row?.metadata?.namespace || '', row?.metadata?.name || '');
+          await deleteEdgeApplication(row?.namespace || '', row?.name || '');
           mutate();
         } catch (err: any) {
           error(err?.response?.message || err?.message || t('messages.error'));
         }
       },
-      onCancel: () => { },
     })
   };
 
@@ -127,53 +120,47 @@ export default function EdgeApplicationPage() {
           addButtonLabel={t('actions.add') + ' ' + t('common.edgeApplication')}
           columns={columns}
           data={data?.items}
-          onAddClick={handleAddClick}
-          onRefreshClick={handleRefreshClick}
-          onViewOptionsClick={handleViewOptionsClick}
+          onAddClick={() => setAddDialogOpen(true)}
+          onRefreshClick={() => mutate()}
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
-          detailButtonLabel="YAML"
+          detailButtonLabel={t('actions.detail')}
           deleteButtonLabel={t('actions.delete')}
-          noPagination={true}
+          loading={isLoading}
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as Direction,
+          }}
+          onSortChange={handleSortChange}
+          filter={(
+            <>
+              <TextField
+                size='small'
+                label={t('table.name')}
+                value={name || ''}
+                onChange={(e) => setName(e.target.value || '')}
+                placeholder={t('table.textWildcardHelp')}
+              />
+            </>
+          )}
         />
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
-          <TextField size="small" select label="Rows per page" value={pageSize}
-            onChange={(e) => { const v = Number(e.target.value) || 10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={50}>50</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Sort" value={sort || ''} onChange={(e) => setSort(e.target.value || undefined)} sx={{ minWidth: 180 }}>
-            <MenuItem value="">Default</MenuItem>
-            <MenuItem value="name">name</MenuItem>
-            <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Order" value={order || ''} onChange={(e) => setOrder((e.target.value as any) || undefined)} sx={{ minWidth: 140 }}>
-            <MenuItem value="">Default</MenuItem>
-            <MenuItem value="asc">asc</MenuItem>
-            <MenuItem value="desc">desc</MenuItem>
-          </TextField>
-          <TextField size="small" label="Name" value={name || ''} onChange={(e) => setName(e.target.value)} placeholder="supports * wildcards" />
-          {/* mock control removed in PR branch; automatic fetch on change, no apply button */}
-          <Box sx={{ flexGrow: 1 }} />
-          <Pagination
-            page={page}
-            onChange={(_, value) => { setPage(value); mutate(); }}
-            count={Math.max(1, Math.ceil(((data?.total ?? 0) as number) / (pageSize || 1)))}
-            size="small"
-            color="primary"
-          />
-        </Box>
       </Box>
       <YAMLViewerDialog
         open={yamlDialogOpen}
-        onClose={handleYamlDialogClose}
+        onClose={() => setYamlDialogOpen(false)}
         content={currentYamlContent}
       />
       <AddEdgeApplicationDialog
         open={addDialogOpen}
-        onClose={handleAddDialogClose}
+        onClose={() => setAddDialogOpen(false)}
+        onSubmit={handleAddEdgeApplication}
+        onCreated={() => setAddDialogOpen(false)}
       />
       {ConfirmDialogComponent}
     </Box>

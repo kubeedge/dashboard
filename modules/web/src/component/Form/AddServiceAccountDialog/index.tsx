@@ -1,47 +1,49 @@
 'use client';
 
-import React from 'react';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-import FormView from '@/component/FormView';
+import React, { useState } from 'react';
+import { useI18n } from '@/hook/useI18n';
 import { addSaSchema } from './schema';
 import { toServiceAccount } from './mapper';
-import { createServiceAccount } from '@/api/serviceAccount';
+import { ServiceAccount } from '@/types/serviceAccount';
+import FormDialog from '../FormDialog';
+import { useNamespace } from '@/hook/useNamespace';
+import { useListNamespaces } from '@/api/namespace';
+import { ConciseSecretList } from '@/types/secret';
+import { listSecrets, useListSecrets } from '@/api/secret';
 
-type Props = {
+type AddServiceAccountDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSubmit: (record: ServiceAccount) => void | Promise<void>;
+  onCreated?: () => void;
 };
 
-export default function AddServiceAccountDialog({ open, onClose, onSuccess }: Props) {
-  const formId = 'add-sa-form';
+export default function AddServiceAccountDialog({ open, onClose, onSubmit, onCreated }: AddServiceAccountDialogProps) {
+  const { t } = useI18n();
+  const { namespace } = useNamespace();
+  const [ currentNamespace, setCurrentNamespace ] = useState(namespace);
+  const { data: namespaces } = useListNamespaces();
+  const { data: secrets } = useListSecrets(currentNamespace);
 
-  const handleSubmit = async (values: any) => {
-    const { ns, body } = toServiceAccount(values);
-    await createServiceAccount(ns, body);
-    onSuccess?.();
-    onClose();
-  };
+  const handleValueChange = (values: any) => {
+    if (values?.namespace === currentNamespace) {
+      return;
+    }
+    setCurrentNamespace(values?.namespace);
+  }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add ServiceAccounts</DialogTitle>
-      <DialogContent dividers>
-        <FormView
-          formId={formId}
-          schema={addSaSchema}
-          initialValues={{}}
-          onSubmit={handleSubmit}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form={formId}>ADD</Button>
-      </DialogActions>
-    </Dialog>
-  );
+    <FormDialog
+      title={`${t('actions.add')} ${t('common.serviceAccount')}`}
+      formId='add-service-account-form'
+      formSchema={addSaSchema(namespaces, secrets)}
+      open={open}
+      defaultValues={{ namespace }}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      onCreated={onCreated}
+      transform={toServiceAccount}
+      onChange={handleValueChange}
+    />
+  )
 }

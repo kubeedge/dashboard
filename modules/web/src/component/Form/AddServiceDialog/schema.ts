@@ -1,131 +1,122 @@
 import type { FormSchema } from '@/component/FormView';
-import { listNamespaces } from '@/api/namespace';
+import { NamespaceList } from '@/types/namespace';
 
-export const addServiceSchema: FormSchema = {
-  submitText: 'ADD',
-  resetText: 'CANCEL',
+export const addServiceSchema = (namespaces?: NamespaceList): FormSchema => ({
   fields: [
     {
-      // Namespace
       name: 'namespace',
-      label: 'Namespace',
+      label: 'table.namespace',
       type: 'select',
-      rules: [{ type: 'required', message: 'Miss namespace' }],
-      options: async () => {
-        const res = await listNamespaces();
-        const items = res?.data?.items ?? [];
-        return items.map((n: any) => ({
-          label: n?.metadata?.name,
-          value: n?.metadata?.name,
+      rules: [{ type: 'required' }],
+      options: () => {
+        return (namespaces?.items || []).map((n: any) => ({
+          label: n?.metadata?.name || '',
+          value: n?.metadata?.name || '',
         }));
       },
     },
     {
-      // Name
       name: 'name',
-      label: 'Name *',
+      label: 'table.name',
       type: 'text',
-      rules: [{ type: 'required', message: 'Miss name' }],
+      rules: [{ type: 'required' }],
     },
     {
-      // Annotations
       name: 'annotations',
-      label: 'Annotations',
+      label: 'table.annotations',
       type: 'array',
-      addText: 'ADD ANNOTATIONS',
+      addText: 'table.addAnnotation',
       itemSchema: [
-        { name: 'key', label: 'Key *', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
-        { name: 'value', label: 'Value *', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
+        { name: 'key', label: 'table.key', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
+        { name: 'value', label: 'table.value', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
       ],
+      inlineRemove: true,
     },
     {
-      // Labels
       name: 'labels',
-      label: 'Labels',
+      label: 'table.labels',
       type: 'array',
-      addText: 'ADD LABELS',
+      addText: 'table.addLabel',
       itemSchema: [
-        { name: 'key', label: 'Key *', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
-        { name: 'value', label: 'Value *', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
+        { name: 'key', label: 'table.key', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
+        { name: 'value', label: 'table.value', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
       ],
+      inlineRemove: true,
     },
     {
-      // Selectors
       name: 'selectors',
-      label: 'Selectors',
+      label: 'table.selectors',
       type: 'array',
-      addText: 'ADD SELECTORS',
+      addText: 'table.addSelector',
       itemSchema: [
-        { name: 'key', label: 'Key *', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
-        { name: 'value', label: 'Value *', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
+        { name: 'key', label: 'table.key', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
+        { name: 'value', label: 'table.value', type: 'text', rules: [{ type: 'required' }], grid: { md: 6 } },
       ],
+      inlineRemove: true,
     },
     {
-      // PublishNotReadyAddresses
       name: 'publishNotReadyAddresses',
-      label: 'PublishNotReadyAddresses',
+      label: 'table.publishNotReadyAddresses',
       type: 'select',
       options: [
-        { label: 'None', value: '' },
-        { label: 'true', value: 'true' },
-        { label: 'false', value: 'false' },
+        { label: 'common.none', value: '' },
+        { label: 'common.true', value: 'true' },
+        { label: 'common.false', value: 'false' },
       ],
     },
     {
-      // Type Segmented
       name: 'serviceType',
-      label: 'Type',
+      label: 'table.type',
       type: 'select',
       defaultValue: 'ClusterIP',
       options: [
-        { label: 'CLUSTERIP', value: 'ClusterIP' },
-        { label: 'NODEPORT', value: 'NodePort' },
-        { label: 'HEADLESS', value: 'Headless' },
+        { label: 'ClusterIP', value: 'ClusterIP' },
+        { label: 'NodePort', value: 'NodePort' },
+        { label: 'Headless', value: 'Headless' },
       ],
     },
-
     {
       name: 'ports',
-      label: 'Ports',
+      label: 'table.ports',
       type: 'array',
-      addText: 'ADD PORTS',
+      addText: 'table.addPort',
       itemSchema: [
-        { name: 'name', label: 'Name', type: 'text', grid: { md: 3 } },
-        { name: 'port', label: 'Port *', type: 'number', rules: [{ type: 'required' }], grid: { md: 3 } },
-        { name: 'targetPort', label: 'TargetPort', type: 'text', grid: { md: 3 } },
+        { name: 'name', label: 'table.name', type: 'text', grid: { md: 4 } },
+        { name: 'port', label: 'table.port', type: 'text', rules: [{ type: 'required' }], grid: { md: 4 } },
+        { name: 'targetPort', label: 'table.targetPort', type: 'text', grid: { md: 4 } },
         {
           name: 'protocol',
-          label: 'Protocol',
+          label: 'table.protocol',
           type: 'select',
           options: [
             { label: 'TCP', value: 'TCP' },
             { label: 'UDP', value: 'UDP' },
             { label: 'SCTP', value: 'SCTP' },
           ],
-          grid: { md: 3 },
+          grid: { md: 4 },
         },
 
         {
           name: 'nodePort',
-          label: 'NodePort',
-          type: 'number',
+          label: 'table.nodePort',
+          type: 'text',
           visibleWhen: (form) => form.serviceType === 'NodePort',
-          grid: { md: 3 },
+          grid: { md: 4 },
         },
       ],
     },
     {
-      // ClusterIP / NodePort
       name: 'externalIPs',
-      label: 'External IPs',
+      label: 'table.externalIP',
       type: 'array',
-      addText: 'ADD',
+      addText: 'actions.add',
       visibleWhen: (values: any) => values?.serviceType === 'ClusterIP' || values?.serviceType === 'NodePort',
-      itemSchema: [{ name: 'ip', label: 'External IPs', type: 'text' }],
+      itemSchema: [{ name: 'ip', label: 'table.externalIP', type: 'text' }],
+      inlineRemove: true,
     },
     {
       name: 'sessionAffinity',
-      label: 'Session Affinity',
+      label: 'table.sessionAffinity',
       type: 'select',
       visibleWhen: (values: any) => values?.serviceType === 'ClusterIP' || values?.serviceType === 'NodePort',
       options: [
@@ -133,5 +124,11 @@ export const addServiceSchema: FormSchema = {
         { label: 'ClientIP', value: 'ClientIP' },
       ],
     },
+    {
+      name: 'timeoutSeconds',
+      label: 'table.timeoutSeconds',
+      type: 'text',
+      visibleWhen: (values: any) => values?.sessionAffinity === 'ClientIP',
+    }
   ],
-};
+});

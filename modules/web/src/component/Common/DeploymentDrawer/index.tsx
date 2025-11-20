@@ -15,8 +15,6 @@ import { useListNamespaces } from '@/api/namespace';
 import { Container, ContainerPort, EnvFromSource, EnvVar, VolumeMount } from '@/types/pod';
 import { Volume } from '@/types/volume';
 
-// Step titles will be dynamically obtained through useI18n
-
 interface DeploymentDrawerProps {
   open?: boolean;
   onClose?: () => void;
@@ -28,7 +26,6 @@ export default function DeploymentDrawer({ open, onClose, onSubmit }: Deployment
   const steps = [t('table.basicInfo'), t('table.containerInfo'), t('table.storageMount'), t('table.moreSetting')];
   const [namespace, setNamespace] = useState<any>('');
   const [activeStep, setActiveStep] = useState(0);
-  // const { setErrorMessage } = useAlert();
   const { error, success } = useAlert();
 
   const [data, setData] = useState<any>({});
