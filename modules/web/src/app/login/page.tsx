@@ -1,8 +1,11 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, TextField, Button, Link } from '@mui/material';
+import { Box, Typography, TextField, Button, Link, IconButton, InputAdornment } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { getVersion } from '@/api/version';
 import { useStorage } from '@/hook/useStorage';
@@ -16,6 +19,7 @@ import KeinkDialog from '@/component/Dialog/KeinkDialog';
 const LoginPage = () => {
   const [token, setToken] = useState('');
   const [tokenError, setTokenError] = useState('');
+  const [showToken, setShowToken] = useState(false);
   const [storedToken, setStoredToken] = useStorage('token');
   const [cookie, setCookie] = useCookie('dashboard_user');
   const { error } = useAlert();
@@ -56,6 +60,16 @@ const LoginPage = () => {
       error(e?.response?.data?.message || e?.message || 'Failed to login');
       setTokenError('Invalid token');
     }
+  };
+
+  const handlePaste = async () => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.readText === 'function') {
+        const text = await navigator.clipboard.readText();
+        setToken(text || '');
+        setTokenError('');
+      }
+    } catch (_) {}
   };
 
   const handleRunKeink = () => {
@@ -107,13 +121,25 @@ const LoginPage = () => {
       <TextField
         variant="outlined"
         placeholder="Please enter token"
+        type={showToken ? 'text' : 'password'}
         InputProps={{
           startAdornment: (
             <PersonIcon sx={{ marginRight: '8px', color: 'gray' }} />
           ),
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton aria-label="paste token" onClick={handlePaste} edge="end">
+                <ContentPasteIcon />
+              </IconButton>
+              <IconButton aria-label="toggle token visibility" onClick={() => setShowToken(!showToken)} edge="end">
+                {showToken ? <VisibilityOffIcon /> : <VisibilityIcon />}
+              </IconButton>
+            </InputAdornment>
+          ),
         }}
         value={token}
-        onChange={(e) => setToken(e.target.value)}
+        onChange={(e) => { setToken(e.target.value); if (tokenError) setTokenError(''); }}
+        onKeyDown={(e) => { if (e.key === 'Enter') handleLogin(); }}
         error={!!tokenError}
         helperText={tokenError}
         sx={{
