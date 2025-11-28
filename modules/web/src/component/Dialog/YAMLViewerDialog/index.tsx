@@ -1,3 +1,5 @@
+'use client';
+
 // src/component/YAMLViewerDialog.js
 
 import React from 'react';
@@ -12,13 +14,16 @@ interface YAMLViewerDialogProps {
 }
 
 const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
+  const [fullScreen, setFullScreen] = React.useState(false);
+  const yamlText = stringify(props?.content);
+
   return (
-    <Dialog open={!!props?.open} onClose={props?.onClose} fullWidth maxWidth="md">
+    <Dialog open={!!props?.open} onClose={props?.onClose} fullWidth maxWidth="md" fullScreen={fullScreen}>
       <DialogTitle>YAML</DialogTitle>
       <DialogContent>
-        <Box sx={{ height: '400px', overflowY: 'auto' }}>
+        <Box sx={{ height: fullScreen ? 'calc(100vh - 160px)' : '400px', overflowY: 'auto' }}>
           <CodeBlock
-            text={stringify(props?.content)}
+            text={yamlText}
             language="yaml"
             showLineNumbers
             theme={dracula}
@@ -28,6 +33,9 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
       <DialogActions>
         <Button onClick={props?.onClose} color="primary">
           Cancel
+        </Button>
+        <Button onClick={() => setFullScreen(!fullScreen)} variant="outlined">
+          {fullScreen ? 'Exit Full Screen' : 'Full Screen'}
         </Button>
       </DialogActions>
     </Dialog>
