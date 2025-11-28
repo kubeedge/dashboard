@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
+import { useAlert } from '@/hook/useAlert';
+import { copyToClipboard } from '@/helper/util';
 import { useTheme } from '@mui/material/styles';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import { Node } from '@/types/node';
@@ -15,6 +17,7 @@ interface NodeDetailDialogProps {
 export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps) {
   const [yamlDialogOpen, setYamlDialogOpen] = useState(false);
   const theme = useTheme();
+  const { success } = useAlert();
 
   const handleYamlOpen = () => {
     setYamlDialogOpen(true);
@@ -22,6 +25,20 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
 
   const handleYamlClose = () => {
     setYamlDialogOpen(false);
+  };
+
+  const handleCopyName = async () => {
+    if (data?.metadata?.name) {
+      await copyToClipboard(String(data.metadata.name));
+      success('Copied name');
+    }
+  };
+
+  const handleCopyUID = async () => {
+    if (data?.metadata?.uid) {
+      await copyToClipboard(String(data.metadata.uid));
+      success('Copied ID');
+    }
   };
 
   return (
@@ -100,6 +117,8 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={handleCopyName} variant="outlined">Copy Name</Button>
+          <Button onClick={handleCopyUID} variant="outlined">Copy ID</Button>
           <Button onClick={handleYamlOpen} variant="contained">
             YAML
           </Button>

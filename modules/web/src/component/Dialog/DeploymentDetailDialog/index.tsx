@@ -19,6 +19,8 @@ import {
 import { Deployment } from '@/types/deployment';
 import { Pod } from '@/types/pod';
 import YAMLViewerDialog from '../YAMLViewerDialog';
+import { useAlert } from '@/hook/useAlert';
+import { copyToClipboard } from '@/helper/util';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -52,6 +54,7 @@ interface DeploymentDetailDialogProps {
 function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailDialogProps) {
   const [tab, setTab] = React.useState(0);
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
+  const { success } = useAlert();
 
   const handleYamlOpen = () => {
     setYamlDialogOpen(true);
@@ -62,6 +65,20 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
   };
 
   const displayPods = pods?.filter((pod) => pod.metadata?.ownerReferences?.[0]?.name?.includes(data?.metadata?.name || '')) || [];
+
+  const handleCopyName = async () => {
+    if (data?.metadata?.name) {
+      await copyToClipboard(String(data.metadata.name));
+      success('Copied name');
+    }
+  };
+
+  const handleCopyUID = async () => {
+    if (data?.metadata?.uid) {
+      await copyToClipboard(String(data.metadata.uid));
+      success('Copied ID');
+    }
+  };
 
   return (
     <>
@@ -208,6 +225,8 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={handleCopyName} variant="outlined">Copy Name</Button>
+          <Button onClick={handleCopyUID} variant="outlined">Copy ID</Button>
           <Button onClick={handleYamlOpen} variant="contained">
             YAML
           </Button>
