@@ -111,7 +111,7 @@ export default function DeploymentPage() {
     });
   };
 
-  const handleSubmit = async (_: any, record: Deployment) => {
+  const handleSubmit = async (record: Deployment) => {
     await createDeployment(record?.metadata?.namespace || namespace || 'default', record);
     mutate();
   }

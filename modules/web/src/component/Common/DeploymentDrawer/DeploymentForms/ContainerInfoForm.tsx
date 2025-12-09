@@ -17,15 +17,15 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { ConfigMap } from '@/types/configMap';
-import { Secret } from '@/types/secret';
+import { ConciseConfigMap } from '@/types/configMap';
+import { ConciseSecret } from '@/types/secret';
 import { useI18n } from '@/hook/useI18n';
 
 interface ContainerInfoFormProps {
   data: any;
   onChange: (field: string, value: any) => void;
-  configMaps: ConfigMap[];
-  secrets: Secret[];
+  configMaps: ConciseConfigMap[];
+  secrets: ConciseSecret[];
   showValidation?: boolean; // Add this line
 }
 
@@ -40,11 +40,11 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets,
 
   useEffect(() => {
     if (refType === 'configMapKeyRef') {
-      const configMap = configMaps.find((configMap) => configMap.metadata?.name === keyRef);
-      setKeyFrom(Object.keys(configMap?.data || {}));
+      const configMap = configMaps.find((configMap) => configMap?.name === keyRef);
+      // setKeyFrom(Object.keys(configMap?.data || {}));
     } else if (refType === 'secretKeyRef') {
-      const secret = secrets.find((secret) => secret.metadata?.name === keyRef);
-      setKeyFrom(Object.keys(secret?.data || {}));
+      const secret = secrets.find((secret) => secret?.name === keyRef);
+      // setKeyFrom(Object.keys(secret?.data || {}));
     }
   }, [refType, keyRef, configMaps, secrets]);
 
@@ -325,8 +325,8 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets,
                                     setKeyRef(e.target.value);
                                   }}
                                 >
-                                  {(env.valueType === 'configMapKeyRef' ? configMaps : secrets).map((value: ConfigMap) => (
-                                    <MenuItem key={value?.metadata?.uid} value={value?.metadata?.name}>{value?.metadata?.name}</MenuItem>
+                                  {(env.valueType === 'configMapKeyRef' ? configMaps : secrets).map((value: ConciseConfigMap) => (
+                                    <MenuItem key={value?.name} value={value?.name}>{value?.name}</MenuItem>
                                   ))}
                                 </Select>
                               </FormControl>
@@ -392,8 +392,8 @@ export default function ContainerInfoForm({ data, onChange, configMaps, secrets,
                                     handleFormChange(index, 'configs', updatedConfigs);
                                   }}
                                 >
-                                  {(config?.configType === 'configMapRef' ? configMaps : secrets)?.map((value: ConfigMap | Secret) => (
-                                    <MenuItem key={value?.metadata?.uid} value={value?.metadata?.name}>{value?.metadata?.name}</MenuItem>
+                                  {(config?.configType === 'configMapRef' ? configMaps : secrets)?.map((value: ConciseConfigMap | ConciseSecret) => (
+                                    <MenuItem key={value?.name} value={value?.name}>{value?.name}</MenuItem>
                                   ))}
                                 </Select>
                               </FormControl>

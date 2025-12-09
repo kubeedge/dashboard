@@ -6,7 +6,7 @@ export function useListNamespaces() {
   return useQuery<NamespaceList>(
     'listNamespaces',
     '/namespace',
-    { method: 'GET', swrConfig: { refreshInterval: 10000 } });
+    { method: 'GET' });
 }
 
 export async function listNamespaces() {
