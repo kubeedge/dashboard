@@ -25,7 +25,7 @@ export default function ServicePage() {
     pageSize,
     sort,
     order,
-    name: name ? `*${name}*` : undefined,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [page, pageSize, sort, order, name]);
   const { data, mutate, isLoading } = useListServices(namespace, params);
   const { t, getCurrentLanguage } = useI18n();

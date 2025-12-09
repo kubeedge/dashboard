@@ -32,9 +32,7 @@ export default function ServiceAccountPage() {
     pageSize,
     sort,
     order,
-    filter: [
-      name ? `name:${name}` : undefined,
-    ].filter(Boolean).join(','),
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [namespace, page, pageSize, sort, order, name]);
   const { data, mutate, isLoading } = useListServiceAccounts(namespace, params);
 

@@ -30,7 +30,7 @@ export default function ClusterRolesPage() {
     pageSize,
     sort,
     order,
-    ...(name && { 'name': `*${name}*` }),
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [page, pageSize, sort, order, name]);
   const { data, mutate, isLoading } = useListClusterRoles(params);
 

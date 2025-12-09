@@ -28,9 +28,7 @@ export default function NodeGroupPage() {
   const { error } = useAlert();
   const params = useMemo(() => ({
     page, pageSize, sort, order,
-    filter: [
-      name ? `name:${name}` : undefined,
-    ].filter(Boolean).join(','),
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [page, pageSize, sort, order, name]);
   const { data, mutate, isLoading } = useListNodeGroups(params);
 

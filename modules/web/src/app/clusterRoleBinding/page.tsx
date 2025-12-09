@@ -32,7 +32,7 @@ export default function ClusterRoleBindingPage() {
     pageSize,
     sort,
     order,
-    ...(name && { name }),
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [page, pageSize, sort, order, name]);
   const { data, mutate, isLoading } = useListClusterRoleBindings(params);
 

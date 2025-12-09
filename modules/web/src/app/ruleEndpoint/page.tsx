@@ -33,7 +33,7 @@ export default function RuleEndpointPage() {
     pageSize,
     sort,
     order,
-    name: name ? `*${name}*` : undefined,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [namespace, page, pageSize, sort, order, name]);
   const { data, mutate, isLoading } = useListRuleEndpoints(namespace, params);
 
