@@ -1,42 +1,38 @@
 'use client';
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import FormView from '@/component/FormView/FormView';
 import { addDeviceSchema } from './schema';
 import { toDevice } from './mapper';
+import { Device } from '@/types/device';
+import { useI18n } from '@/hook/useI18n';
+import { useNamespace } from '@/hook/useNamespace';
+import { useListDeviceModels } from '@/api/deviceModel';
+import { useListNodes } from '@/api/node';
+import FormDialog from '../FormDialog';
 
-import { createDevice } from '@/api/device';
-
-type Props = {
+type AddDeviceDialogProps = {
   open: boolean;
   onClose: () => void;
+  onSubmit: (record: Device) => void | Promise<void>;
   onCreated?: () => void;
 };
 
-export default function AddDeviceDialog({ open, onClose, onCreated }: Props) {
-  const handleSubmit = async (values: any) => {
-
-    const { ns, body } = toDevice(values);
-    await createDevice(ns, body);
-    onCreated?.();
-    onClose();
-  };
+export default function AddDeviceDialog({ open, onClose, onSubmit, onCreated }: AddDeviceDialogProps) {
+  const { t } = useI18n();
+  const { namespace } = useNamespace();
+  const { data: deviceModels } = useListDeviceModels(namespace);
+  const { data: nodes } = useListNodes();
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add Devices</DialogTitle>
-      <DialogContent dividers>
-        <FormView
-          schema={{ ...addDeviceSchema, submitText: undefined, resetText: undefined }}
-          formId="device-form"
-          initialValues={{ attributes: [] }}
-          onSubmit={handleSubmit}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form="device-form">SUBMIT</Button>
-      </DialogActions>
-    </Dialog>
-  );
+    <FormDialog
+      title={`${t('actions.add')} ${t('common.device')}`}
+      formId='add-device-form'
+      formSchema={addDeviceSchema(deviceModels, nodes)}
+      defaultValues={{ namespace }}
+      open={open}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      onCreated={onCreated}
+      transform={(values: any) => toDevice(namespace, values)}
+    />
+  )
 }

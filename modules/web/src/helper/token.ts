@@ -8,9 +8,11 @@ export const getServiceAccountName = async (token: string) => {
   const payload = parts[1];
   const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
 
-  // Extract the 'sub' field
-  const sub = decodedPayload['kubernetes.io/serviceaccount/service-account.name'];
+  // Extract the 'sub' field and make the default username as 'admin' if not present
+  const sub = decodedPayload['kubernetes.io/serviceaccount/service-account.name']
+    || decodedPayload?.['kubernetes.io']?.['serviceaccount']?.['name']
+    || decodedPayload['sub']
+    || 'admin';
 
-  // Make the default username as 'admin'
-  return sub || 'admin';
+  return sub;
 };

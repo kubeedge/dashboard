@@ -1,4 +1,4 @@
-import type { LocalObjectReference, Resource, ResourceList } from "./common";
+import type { LocalObjectReference, Resource, ResourceList, DataList } from "./common";
 
 interface TwinProperty {
   value: string;
@@ -119,3 +119,17 @@ interface DeviceStatus {
 export interface Device extends Resource<DeviceSpec, DeviceStatus> {}
 
 export interface DeviceList extends ResourceList<Device> {}
+
+export interface ConciseDevice {
+  creationTimestamp: string;
+  deviceModelRef: string;
+  labels?: Record<string, string>;
+  name: string;
+  namespace: string;
+  nodeName: string;
+  nodeSelector: string;
+  protocol: string;
+  status: string;
+}
+
+export interface ConciseDeviceList extends DataList<ConciseDevice> {}

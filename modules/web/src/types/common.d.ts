@@ -133,3 +133,11 @@ export interface NodeSelectorRequirement {
   operator: string;
   values?: string[];
 }
+
+export interface DataList<T> {
+  items: T[];
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+}

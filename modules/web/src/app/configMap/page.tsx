@@ -1,120 +1,128 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { Box, TextField, Button, MenuItem, Pagination } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import { Box, TextField } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createConfigMap, deleteConfigMap, getConfigMap, useListConfigMaps } from '@/api/configMap';
-import { ConfigMap } from '@/types/configMap';
+import { ConciseConfigMap, ConfigMap } from '@/types/configMap';
 import { useNamespace } from '@/hook/useNamespace';
 import AddConfigMapDialog from '@/component/Form/AddConfigMapDialog';
 import ConfigMapDetailDialog from '@/component/Dialog/ConfigMapDetailDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 
-export default function ConfigmapPage() {
+export default function ConfigMapPage() {
   const { namespace } = useNamespace();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
-  const [sort, setSort] = useState<string | undefined>('creationTimestamp');
-  const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
-  const [name, setName] = useState<string | undefined>(undefined);
-  const [mock, setMock] = useState<number | undefined>(undefined);
+  const [sort, setSort] = useState<string>('');
+  const [order, setOrder] = useState<'asc' | 'desc' | string>('');
+  const [name, setName] = useState<string>('');
   const params = useMemo(() => ({
-    namespace,
     page,
     pageSize,
     sort,
     order,
     filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
-    mock,
-  }), [namespace, page, pageSize, sort, order, name, mock]);
-  const { data, mutate } = useListConfigMaps(params);
+  }), [namespace, page, pageSize, sort, order, name]);
+  const { data, mutate, isLoading } = useListConfigMaps(namespace, params);
   const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error, success } = useAlert();
-  const { t } = useI18n();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedConfigMap, setSelectedConfigMap] = useState<ConfigMap | null>(null);
+  const { error } = useAlert();
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
 
-  const columns: ColumnDefinition<ConfigMap | any>[] = [
+  const columns: ColumnDefinition<ConciseConfigMap>[] = [
     {
       name: t('table.namespace'),
-      render: (configMap) => (configMap as any)?.metadata?.namespace ?? (configMap as any)?.namespace,
+      render: (configMap) => configMap?.namespace,
     },
     {
+      key: 'name',
       name: t('table.name'),
-      render: (configMap) => (configMap as any)?.metadata?.name ?? (configMap as any)?.name,
+      sortable : true,
+      render: (configMap) => configMap?.name,
     },
     {
       name: t('table.labels'),
-      render: (configMap) => JSON.stringify((configMap as any)?.metadata?.labels ?? (configMap as any)?.labels),
+      render: (configMap) => (
+        <Box>
+          {configMap?.labels && Object.entries(configMap.labels).map(([key, value]) => (
+            <Box
+              key={key}
+              sx={{
+                display: 'block', bgcolor: 'grey.200', color: 'text.primary', px: 1,
+                py: 0.5, borderRadius: 1, mr: 0.5, mb: 0.5, fontSize: '0.75rem'
+              }}
+            >
+              {key}: {value}
+            </Box>
+          ))}
+        </Box>
+      )
     },
     {
+      key: 'creationTimestamp',
       name: t('table.creationTime'),
-      render: (configMap) => (configMap as any)?.metadata?.creationTimestamp ?? (configMap as any)?.creationTimestamp,
+      sortable : true,
+      render: (configMap) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+            {formatDateTime(configMap?.creationTimestamp, currentLanguage)}
+          </Box>
+          <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+            {formatRelativeTime(configMap?.creationTimestamp, currentLanguage)}
+          </Box>
+        </Box>
+      )
     },
     {
       name: t('table.operation'),
       renderOperation: true,
     },
   ];
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [selectedConfigMap, setSelectedConfigMap] = useState<ConfigMap | null>(null);
 
-  useEffect(() => {
-    mutate();
-  }, [namespace, mutate]);
-
-  const handleAddClick = () => {
-    setDialogOpen(true);
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-  };
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
 
-  const handleDetailClick = async (_: any, row: ConfigMap) => {
+  const handleDetailClick = async (_: any, row: ConciseConfigMap) => {
     try {
-      const resp = await getConfigMap(row?.metadata?.namespace || '', row?.metadata?.name || '');
+      const resp = await getConfigMap(row?.namespace || '', row?.name || '');
       setSelectedConfigMap(resp?.data);
       setDetailDialogOpen(true);
     } catch (err: any) {
-      error(err?.response?.data?.message || err?.message || 'Failed to get ConfigMap');
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
-  const handleCloseDetailDialog = () => {
-    setDetailDialogOpen(false);
-    setSelectedConfigMap(null);
-  };
-
-  const handleSubmit = async (_: any, record: ConfigMap) => {
-    try {
-      await createConfigMap(record?.metadata?.namespace || namespace || 'default', record);
-      success('ConfigMap created');
-      setDialogOpen(false);
-      mutate();
-    } catch (e: any) {
-      error(e?.response?.data?.message || e?.message || 'Failed to create ConfigMap');
-    }
-  };
-
-  const handleRefreshClick = () => {
+  const handleSubmit = async (record: ConfigMap) => {
+    await createConfigMap(record?.metadata?.namespace || namespace || 'default', record);
     mutate();
   };
 
-  const handleDelete = (_: any, row: ConfigMap) => {
+  const handleDelete = (_: any, row: ConciseConfigMap) => {
     showConfirmDialog({
       title: t('actions.delete') + ' ' + t('common.configMap'),
-      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
+      content: t('messages.deleteConfirm') + ` ${row?.name}?`,
       onConfirm: async () => {
         try {
-          await deleteConfigMap(row?.metadata?.namespace || '', row?.metadata?.name || '');
+          await deleteConfigMap(row?.namespace || '', row?.name || '');
           mutate();
         } catch (err: any) {
           error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
-      onCancel: () => { },
     })
   };
 
@@ -126,48 +134,42 @@ export default function ConfigmapPage() {
           addButtonLabel={t('actions.add') + ' ' + t('common.configMap')}
           columns={columns}
           data={data?.items}
-          onAddClick={handleAddClick}
-          onRefreshClick={handleRefreshClick}
+          onAddClick={() => setDialogOpen(true)}
+          onRefreshClick={() => mutate()}
           onDetailClick={handleDetailClick}
           onDeleteClick={handleDelete}
           detailButtonLabel={t('actions.view')}
           deleteButtonLabel={t('actions.delete')}
-          specialHandling={false}
-          noPagination={true}
+          loading={isLoading}
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
+          filter={(
+            <>
+              <TextField size='small' label={t('table.name')} value={name || ''} onChange={(e) => setName(e.target.value || '')} placeholder={t('table.textWildcardHelp')} />
+            </>
+          )}
         />
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
-          <TextField size="small" select label="Rows per page" value={pageSize}
-            onChange={(e) => { const v = Number(e.target.value) || 10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={50}>50</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Sort" value={sort || ''} onChange={(e) => setSort(e.target.value || undefined)} sx={{ minWidth: 180 }}>
-            <MenuItem value="">Default</MenuItem>
-            <MenuItem value="name">name</MenuItem>
-            <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Order" value={order || ''} onChange={(e) => setOrder((e.target.value as any) || undefined)} sx={{ minWidth: 140 }}>
-            <MenuItem value="">Default</MenuItem>
-            <MenuItem value="asc">asc</MenuItem>
-            <MenuItem value="desc">desc</MenuItem>
-          </TextField>
-          <TextField size="small" label="Name" value={name || ''} onChange={(e) => setName(e.target.value || undefined)} placeholder="supports * wildcards" />
-          {/* mock control removed in PR branch; automatic fetch on change, no apply button */}
-          <Box sx={{ flexGrow: 1 }} />
-          <Pagination
-            page={page}
-            onChange={(_, value) => { setPage(value); mutate(); }}
-            count={Math.max(1, Math.ceil(((data?.total ?? 0) as number) / (pageSize || 1)))}
-            size="small"
-            color="primary"
-          />
-        </Box>
       </Box>
-      <AddConfigMapDialog open={dialogOpen} onClose={handleCloseDialog} onSubmit={handleSubmit} />
-
-      <ConfigMapDetailDialog open={detailDialogOpen} onClose={handleCloseDetailDialog} data={selectedConfigMap} />
+      <AddConfigMapDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onSubmit={handleSubmit}
+        onCreated={() => setDialogOpen(false)}
+      />
+      <ConfigMapDetailDialog
+        open={detailDialogOpen}
+        onClose={() => setDetailDialogOpen(false)}
+        data={selectedConfigMap}
+      />
       {ConfirmDialogComponent}
     </Box>
   );

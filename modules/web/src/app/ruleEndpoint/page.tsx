@@ -2,53 +2,70 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, TextField, MenuItem, Pagination } from '@mui/material';
-import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
+import { ColumnDefinition, Direction, TableCard } from '@/component/Common/TableCard';
 import { createRuleEndpoint, deleteRuleEndpoint, getRuleEndpoint, useListRuleEndpoints } from '@/api/ruleEndpoint';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
-import { RuleEndpoint } from '@/types/ruleEndpoint';
+import { ConciseRuleEndpoint, RuleEndpoint } from '@/types/ruleEndpoint';
 import AddRuleEndpointDialog from '@/component/Form/AddRuleEndpointDialog';
 import { useNamespace } from '@/hook/useNamespace';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 
 export default function RuleEndpointPage() {
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
+  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
+  const [addDialogOpen, setAddDialogOpen] = React.useState(false);
+  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
+  const { error } = useAlert();
   const { namespace } = useNamespace();
-  // New pagination state
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [sort, setSort] = useState('name');
-  const [order, setOrder] = useState('asc');
+  const [sort, setSort] = useState<string>('');
+  const [order, setOrder] = useState<Direction | string>('');
   const [name, setName] = useState('');
-
   const params = useMemo(() => ({
     namespace,
     page,
     pageSize,
     sort,
     order,
-    name: name ? `*${name}*` : undefined,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
   }), [namespace, page, pageSize, sort, order, name]);
+  const { data, mutate, isLoading } = useListRuleEndpoints(namespace, params);
 
-  const { data, mutate } = useListRuleEndpoints(params);
-  const { t } = useI18n();
-
-  const columns: ColumnDefinition<RuleEndpoint | any>[] = [
+  const columns: ColumnDefinition<ConciseRuleEndpoint>[] = [
     {
       name: t('table.namespace'),
-      render: (ruleEndpoint) => ruleEndpoint?.metadata?.namespace || ruleEndpoint?.namespace,
+      render: (ruleEndpoint) => ruleEndpoint?.namespace,
     },
     {
+      key: 'name',
       name: t('table.name'),
-      render: (ruleEndpoint) => ruleEndpoint?.metadata?.name || ruleEndpoint?.name,
+      sortable: true,
+      render: (ruleEndpoint) => ruleEndpoint?.name,
     },
     {
-      name: 'RuleEndpoint Type',
-      render: (ruleEndpoint) => ruleEndpoint?.spec?.ruleEndpointType || ruleEndpoint?.ruleEndpointType,
+      name: t('table.ruleEndpointType'),
+      render: (ruleEndpoint) => ruleEndpoint?.ruleEndpointType,
     },
     {
+      key: 'creationTimestamp',
       name: t('table.creationTime'),
-      render: (ruleEndpoint) => ruleEndpoint?.metadata?.creationTimestamp || ruleEndpoint?.creationTimestamp,
+      sortable: true,
+      render: (ruleEndpoint) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+            {formatDateTime(ruleEndpoint?.creationTimestamp, currentLanguage)}
+          </Box>
+          <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+            {formatRelativeTime(ruleEndpoint?.creationTimestamp, currentLanguage)}
+          </Box>
+        </Box>
+      )
     },
     {
       name: t('table.operation'),
@@ -56,32 +73,24 @@ export default function RuleEndpointPage() {
     },
   ];
 
-  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
-  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
-  const [addDialogOpen, setAddDialogOpen] = React.useState(false);
-  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error, success } = useAlert();
-
-  useEffect(() => {
-    mutate();
-  }, [params, mutate]);
-
-  const handleAddClick = () => {
-    setAddDialogOpen(true);
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
   };
 
-  const handleAddDialogClose = () => {
-    setAddDialogOpen(false);
-  };
+  const handleSortChange = (field: string, direction: Direction) => {
+    setSort(field);
+    setOrder(direction);
+  }
 
-  const handleFormSubmit = async (_: any, record: RuleEndpoint) => {
+  const handleFormSubmit = async (record: RuleEndpoint) => {
     await createRuleEndpoint(record?.metadata?.namespace || namespace || 'default', record);
     mutate();
   };
 
-  const handleYamlClick = async (_: any, row: RuleEndpoint) => {
+  const handleYamlClick = async (_: any, row: ConciseRuleEndpoint) => {
     try {
-      const resp = await getRuleEndpoint(row?.metadata?.namespace || '', row?.metadata?.name || '');
+      const resp = await getRuleEndpoint(row?.namespace || '', row?.name || '');
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (err: any) {
@@ -89,17 +98,13 @@ export default function RuleEndpointPage() {
     }
   };
 
-  const handleYamlDialogClose = () => {
-    setYamlDialogOpen(false);
-  };
-
-  const handleDeleteClick = (_: any, row: RuleEndpoint) => {
+  const handleDeleteClick = (_: any, row: ConciseRuleEndpoint) => {
     showConfirmDialog({
-      title: t('actions.delete') + ' ' + t('common.ruleEndpoint'),
-      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
+      title: `${t('actions.delete')} ${t('common.ruleEndpoint')}`,
+      content: `${t('messages.deleteConfirm')} ${row?.name}?`,
       onConfirm: async () => {
         try {
-          await deleteRuleEndpoint(row?.metadata?.namespace || '', row?.metadata?.name || '');
+          await deleteRuleEndpoint(row?.namespace || '', row?.name || '');
           mutate();
         } catch (err: any) {
           error(err?.response?.data?.message || err?.message || t('messages.error'));
@@ -117,84 +122,49 @@ export default function RuleEndpointPage() {
           addButtonLabel={t('actions.add') + ' ' + t('common.ruleEndpoint')}
           columns={columns}
           data={data?.items}
-          onAddClick={handleAddClick}
+          onAddClick={() => setAddDialogOpen(true)}
           onRefreshClick={() => mutate()}
           onViewOptionsClick={() => alert('View options button clicked')}
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
-          detailButtonLabel="YAML"
+          detailButtonLabel={t('actions.yaml')}
           deleteButtonLabel={t('actions.delete')}
-          noPagination={true}
+          loading={isLoading}
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as Direction,
+          }}
+          onSortChange={handleSortChange}
+          filter={(
+            <>
+              <TextField
+                size='small'
+                label={t('table.name')}
+                value={name || ''}
+                onChange={(e) => setName(e.target.value || '')}
+                placeholder={t('table.textWildcardHelp')}
+              />
+            </>
+          )}
         />
-
-        {/* New pagination controls */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2, flexWrap: 'wrap' }}>
-          <TextField
-            select
-            size="small"
-            label="Rows per page"
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value));
-              setPage(1);
-            }}
-            sx={{ minWidth: 120 }}
-          >
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={50}>50</MenuItem>
-          </TextField>
-
-          <TextField
-            select
-            size="small"
-            label="Sort"
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            sx={{ minWidth: 120 }}
-          >
-            <MenuItem value="name">Name</MenuItem>
-            <MenuItem value="ruleEndpointType">RuleEndpoint Type</MenuItem>
-            <MenuItem value="creationTimestamp">Creation Time</MenuItem>
-          </TextField>
-
-          <TextField
-            select
-            size="small"
-            label="Order"
-            value={order}
-            onChange={(e) => setOrder(e.target.value)}
-            sx={{ minWidth: 100 }}
-          >
-            <MenuItem value="asc">Ascending</MenuItem>
-            <MenuItem value="desc">Descending</MenuItem>
-          </TextField>
-
-          <TextField
-            size="small"
-            label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Filter by name..."
-            sx={{ minWidth: 200 }}
-          />
-
-          <Pagination
-            count={data?.total ? Math.ceil(data.total / pageSize) : 1}
-            page={page}
-            onChange={(_, newPage) => setPage(newPage)}
-            color="primary"
-            sx={{ ml: 'auto' }}
-          />
-        </Box>
       </Box>
       <AddRuleEndpointDialog
         open={addDialogOpen}
-        onClose={handleAddDialogClose}
+        onClose={() => setAddDialogOpen(false)}
         onSubmit={handleFormSubmit}
+        onCreated={() => setAddDialogOpen(false)}
       />
-      <YAMLViewerDialog open={yamlDialogOpen} onClose={handleYamlDialogClose} content={currentYamlContent} />
+      <YAMLViewerDialog
+        open={yamlDialogOpen}
+        onClose={() => setYamlDialogOpen(false)}
+        content={currentYamlContent}
+      />
       {ConfirmDialogComponent}
     </Box>
   );

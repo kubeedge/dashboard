@@ -1,48 +1,32 @@
 'use client';
 
 import React from 'react';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-
-import FormView from '@/component/FormView';
+import { ClusterRoleBinding } from '@/types/clusterRoleBinding';
+import { useI18n } from '@/hook/useI18n';
 import { addClusterRoleBindingSchema } from './schema';
 import { toClusterRoleBinding } from './mapper';
-import { createClusterRoleBinding } from '@/api/clusterRoleBinding';
+import FormDialog from '../FormDialog';
 
-type Props = {
+type AddClusterRoleBindingDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSubmit: (record: ClusterRoleBinding) => void | Promise<void>;
+  onCreated?: () => void;
 };
 
-export default function AddClusterRoleBindingDialog({ open, onClose, onSuccess }: Props) {
-  const formId = 'add-crb-form';
-
-  const handleSubmit = async (values: any) => {
-    const { body } = toClusterRoleBinding(values);
-    await createClusterRoleBinding(body);
-    onSuccess?.();
-    onClose();
-  };
+export default function AddClusterRoleBindingDialog({ open, onClose, onSubmit, onCreated }: AddClusterRoleBindingDialogProps) {
+  const { t } = useI18n();
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add ClusterRoleBinding</DialogTitle>
-      <DialogContent dividers>
-        <FormView
-          formId={formId}
-          schema={addClusterRoleBindingSchema}
-          initialValues={{ subjects: [] }}
-          onSubmit={handleSubmit}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form={formId}>SUBMIT</Button>
-      </DialogActions>
-    </Dialog>
+    <FormDialog
+      title={`${t('actions.add')} ${t('common.clusterRoleBinding')}`}
+      formId='add-cluster-role-binding-form'
+      formSchema={addClusterRoleBindingSchema}
+      open={open}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      onCreated={onCreated}
+      transform={toClusterRoleBinding}
+    />
   );
 }

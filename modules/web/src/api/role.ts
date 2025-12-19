@@ -1,29 +1,16 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { Role, RoleList } from '@/types/role';
+import { Role, ConciseRoleList } from '@/types/role';
 
-export function useListRoles(params?: Record<string, string | number | undefined>) {
-  const searchParams = new URLSearchParams();
-  let url = '/role';
+export function useListRoles(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const url = namespace ? `/role/${namespace}` : '/role';
 
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'namespace') {
-        searchParams.append(key, String(value));
-      }
-    });
-
-    if (params.namespace) {
-      url = `/role/${params.namespace}`;
-    }
-  }
-
-  const finalUrl = searchParams.toString() ? `${url}?${searchParams.toString()}` : url;
-
-  return useQuery<RoleList>('listRoles', finalUrl, {
-    method: 'GET',
-  });
+  return useQuery<ConciseRoleList>(
+    `listRoles`,
+    url,
+    { method: 'GET', params }
+  );
 }
 
 export function getRole(namespace: string, name: string) {

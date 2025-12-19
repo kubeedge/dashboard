@@ -1,24 +1,16 @@
 import { request } from '@/helper/request';
 import { useQuery } from '@/hook/useQuery';
 import { Status } from '@/types/common';
-import { ConfigMap } from '@/types/configMap';
+import { ConciseConfigMapList, ConfigMap } from '@/types/configMap';
 
-export function useListConfigMaps(params?: Record<string, string | number | undefined>) {
-  let path = '/configmap';
-  // Optional namespace path parameter for compatibility
-  const namespace = params?.namespace as string | undefined;
-  if (namespace) {
-    path = `/configmap/${namespace}`;
-  }
-  const search = new URLSearchParams();
-  Object.entries(params || {}).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && `${v}` !== '' && k !== 'namespace') {
-      search.set(k, String(v));
-    }
-  });
-  const qs = search.toString();
-  if (qs) path += `?${qs}`;
-  return useQuery<any>(`listConfigMaps:${path}`, path, { method: 'GET' });
+export function useListConfigMaps(namespace?: string, params?: Record<string, string | number | undefined>) {
+  const path = namespace ? `/configmap/${namespace}` : '/configmap';
+
+  return useQuery<ConciseConfigMapList>(
+    `listConfigMaps`,
+    path,
+    { method: 'GET', params },
+  );
 }
 
 export function getConfigMap(namespace: string, name: string) {

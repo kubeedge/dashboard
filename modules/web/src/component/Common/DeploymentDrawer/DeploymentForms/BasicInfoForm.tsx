@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, TextField, Button, MenuItem, Typography } from '@mui/material';
-import { useListNamespaces } from '@/api/namespace';
 import { Namespace } from '@/types/namespace';
 import { useI18n } from '@/hook/useI18n';
 

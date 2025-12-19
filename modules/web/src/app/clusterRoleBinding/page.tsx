@@ -1,33 +1,84 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import React, { useState, useMemo } from 'react';
+import { Box, TextField } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { createClusterRoleBinding, deleteClusterRoleBinding, getClusterRoleBinding, useListClusterRoleBindings } from '@/api/clusterRoleBinding';
+import {
+  createClusterRoleBinding, deleteClusterRoleBinding, getClusterRoleBinding, useListClusterRoleBindings
+} from '@/api/clusterRoleBinding';
 import AddClusterRoleBindingDialog from '@/component/Form/AddClusterRoleBindingDialog';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
-import { ClusterRoleBinding } from '@/types/clusterRoleBinding';
+import { ClusterRoleBinding, ConciseClusterRoleBinding } from '@/types/clusterRoleBinding';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 
 export default function ClusterRoleBindingPage() {
-  const { t } = useI18n();
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
+  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
+  const [addDialogOpen, setAddDialogOpen] = React.useState(false);
+  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
+  const { error } = useAlert();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sort, setSort] = useState('');
+  const [order, setOrder] = useState('');
+  const [name, setName] = useState('');
+  const params = useMemo(() => ({
+    page,
+    pageSize,
+    sort,
+    order,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
+  }), [page, pageSize, sort, order, name]);
+  const { data, mutate, isLoading } = useListClusterRoleBindings(params);
 
-  const columns: ColumnDefinition<ClusterRoleBinding | any>[] = [
+  const columns: ColumnDefinition<ConciseClusterRoleBinding>[] = [
     {
+      key: 'name',
       name: t('table.name'),
-      render: (clusterRoleBinding) => clusterRoleBinding?.metadata?.name || clusterRoleBinding?.name,
+      sortable: true,
+      render: (clusterRoleBinding) => clusterRoleBinding?.name,
     },
     {
       name: t('table.roleRef'),
-      render: (clusterRoleBinding) => clusterRoleBinding?.roleRef?.name || clusterRoleBinding?.role || JSON.stringify(clusterRoleBinding?.roleRef),
+      render: (clusterRoleBinding) => clusterRoleBinding?.role,
     },
     {
+      name: t('table.labels'),
+      render: (clusterRoleBinding) => (
+        <Box>
+          {clusterRoleBinding?.labels && Object.entries(clusterRoleBinding.labels).map(([key, value]) => (
+            <Box
+              key={key}
+              sx={{
+                display: 'block', bgcolor: 'grey.200', color: 'text.primary', px: 1,
+                py: 0.5, borderRadius: 1, mr: 0.5, mb: 0.5, fontSize: '0.75rem'
+              }}
+            >
+              {key}: {value}
+            </Box>
+          ))}
+        </Box>
+      )
+    },
+    {
+      key: 'creationTimestamp',
       name: t('table.creationTime'),
-      render: (clusterRoleBinding) => clusterRoleBinding?.metadata?.creationTimestamp || clusterRoleBinding?.creationTimestamp,
+      sortable: true,
+      render: (clusterRoleBinding) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+            {formatDateTime(clusterRoleBinding?.creationTimestamp, currentLanguage)}
+          </Box>
+          <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+            {formatRelativeTime(clusterRoleBinding?.creationTimestamp, currentLanguage)}
+          </Box>
+        </Box>
+      )
     },
     {
       name: t('table.operation'),
@@ -35,51 +86,24 @@ export default function ClusterRoleBindingPage() {
     },
   ];
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [sort, setSort] = useState('name');
-  const [order, setOrder] = useState('asc');
-  const [name, setName] = useState('');
-
-  const params = useMemo(() => ({
-    page,
-    pageSize,
-    sort,
-    order,
-    ...(name && { 'name': `*${name}*` }),
-  }), [page, pageSize, sort, order, name]);
-
-  const { data, mutate } = useListClusterRoleBindings(params);
-  const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
-  const [currentYamlContent, setCurrentYamlContent] = React.useState<any>(null);
-  const [addDialogOpen, setAddDialogOpen] = React.useState(false);
-  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error, success } = useAlert();
-
-  const handleAddClick = () => {
-    setAddDialogOpen(true);
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
   };
 
-  const handleAddDialogClose = () => {
-    setAddDialogOpen(false);
-  };
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
 
-  const handleSubmit = async (_: any, record: ClusterRoleBinding) => {
+  const handleSubmit = async (record: ClusterRoleBinding) => {
     await createClusterRoleBinding(record);
     mutate();
   };
 
-  useEffect(() => {
-    mutate();
-  }, [params, mutate]);
-
-  const handleQueryClick = () => {
-    mutate();
-  };
-
-  const handleYamlClick = async (_: any, row: ClusterRoleBinding) => {
+  const handleYamlClick = async (_: any, row: ConciseClusterRoleBinding) => {
     try {
-      const resp = await getClusterRoleBinding(row?.metadata?.name || '');
+      const resp = await getClusterRoleBinding(row?.name || '');
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (err: any) {
@@ -87,15 +111,13 @@ export default function ClusterRoleBindingPage() {
     }
   };
 
-  const handleYamlDialogClose = () => setYamlDialogOpen(false);
-
-  const handleDeleteClick = (_: any, row: ClusterRoleBinding) => {
+  const handleDeleteClick = (_: any, row: ConciseClusterRoleBinding) => {
     showConfirmDialog({
-      title: t('actions.delete') + ' ' + t('common.clusterRoleBinding'),
-      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
+      title: `${t('actions.delete')} ${t('common.clusterRoleBinding')}`,
+      content: `${t('messages.deleteConfirm')} ${row?.name}?`,
       onConfirm: async () => {
         try {
-          await deleteClusterRoleBinding(row?.metadata?.name || '');
+          await deleteClusterRoleBinding(row?.name || '');
           mutate();
         } catch (err: any) {
           error(err?.response?.data?.message || err?.message || t('messages.error'));
@@ -107,97 +129,51 @@ export default function ClusterRoleBindingPage() {
   }
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
-        <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
-          <TableCard
-            title={t('common.clusterRoleBinding')}
-            addButtonLabel={t('actions.add') + ' ' + t('common.clusterRoleBinding')}
-            columns={columns}
-            data={data?.items}
-            onAddClick={handleAddClick}
-            onRefreshClick={handleQueryClick}
-            onViewOptionsClick={() => alert('View options button clicked')}
-            onDetailClick={handleYamlClick}
-            onDeleteClick={handleDeleteClick}
-            detailButtonLabel="YAML"
-            deleteButtonLabel={t('actions.delete')}
-            noPagination={true}
-          />
-
-          {/* New pagination controls */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, gap: 2 }}>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <TextField
-                select
-                label="Rows per page"
-                value={pageSize}
-                onChange={(e) => setPageSize(Number(e.target.value))}
-                size="small"
-                sx={{ minWidth: 120 }}
-              >
-                <MenuItem value={5}>5</MenuItem>
-                <MenuItem value={10}>10</MenuItem>
-                <MenuItem value={20}>20</MenuItem>
-                <MenuItem value={50}>50</MenuItem>
-              </TextField>
-
-              <TextField
-                select
-                label="Sort"
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                size="small"
-                sx={{ minWidth: 120 }}
-              >
-                <MenuItem value="name">Name</MenuItem>
-                <MenuItem value="role">Role</MenuItem>
-                <MenuItem value="creationTimestamp">Creation Time</MenuItem>
-              </TextField>
-
-              <TextField
-                select
-                label="Order"
-                value={order}
-                onChange={(e) => setOrder(e.target.value)}
-                size="small"
-                sx={{ minWidth: 100 }}
-              >
-                <MenuItem value="asc">Ascending</MenuItem>
-                <MenuItem value="desc">Descending</MenuItem>
-              </TextField>
-
-              <TextField
-                label="Name filter"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                size="small"
-                placeholder="Search by name..."
-                sx={{ minWidth: 150 }}
-              />
-            </Box>
-
-            <Pagination
-              count={data?.total ? Math.ceil(data.total / pageSize) : 1}
-              page={page}
-              onChange={(_, newPage) => setPage(newPage)}
-              color="primary"
-              showFirstButton
-              showLastButton
-            />
-          </Box>
-        </Box>
-        <AddClusterRoleBindingDialog
-          open={addDialogOpen}
-          onClose={handleAddDialogClose}
+    <Box sx={{ width: '100%', bgcolor: 'background.default' }}>
+      <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
+        <TableCard
+          title={t('common.clusterRoleBinding')}
+          addButtonLabel={t('actions.add') + ' ' + t('common.clusterRoleBinding')}
+          columns={columns}
+          data={data?.items}
+          onAddClick={() => setAddDialogOpen(true)}
+          onRefreshClick={() => mutate()}
+          onViewOptionsClick={() => alert('View options button clicked')}
+          onDetailClick={handleYamlClick}
+          onDeleteClick={handleDeleteClick}
+          detailButtonLabel={t('actions.yaml')}
+          deleteButtonLabel={t('actions.delete')}
+          loading={isLoading}
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
+          filter={(
+            <>
+              <TextField size='small' label={t('table.name')} value={name || ''} onChange={(e) => setName(e.target.value || '')} placeholder={t('table.textWildcardHelp')} />
+            </>
+          )}
         />
-        <YAMLViewerDialog
-          open={yamlDialogOpen}
-          onClose={handleYamlDialogClose}
-          content={currentYamlContent}
-        />
-        {ConfirmDialogComponent}
       </Box>
-    </LocalizationProvider>
+      <AddClusterRoleBindingDialog
+        open={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        onSubmit={handleSubmit}
+        onCreated={() => setAddDialogOpen(false)}
+      />
+      <YAMLViewerDialog
+        open={yamlDialogOpen}
+        onClose={() => setYamlDialogOpen(false)}
+        content={currentYamlContent}
+      />
+      {ConfirmDialogComponent}
+    </Box>
   );
 }

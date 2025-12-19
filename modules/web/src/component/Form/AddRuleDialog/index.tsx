@@ -1,42 +1,48 @@
 'use client';
 
-import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import FormView from '@/component/FormView';
+import React, { useState } from 'react';
 import { addRuleSchema } from './schema';
 import { toRule } from './mapper';
 import type { Rule } from '@/types/rule';
-import { createRule } from '@/api/rule';
+import { useListNamespaces } from '@/api/namespace';
+import { useNamespace } from '@/hook/useNamespace';
+import { useI18n } from '@/hook/useI18n';
+import FormDialog from '../FormDialog';
+import { useListRuleEndpoints } from '@/api/ruleEndpoint';
 
-type Props = {
+type AddRuleDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (e: any, record: Rule) => Promise<void> | void;
+  onSubmit: (record: Rule) => Promise<void> | void;
+  onCreated?: () => void;
 };
 
-export default function AddRuleDialog({ open, onClose, onSubmit }: Props) {
-  const handleSubmit = async (values: any) => {
-    const { ns, body } = toRule(values);
+export default function AddRuleDialog({ open, onClose, onSubmit, onCreated }: AddRuleDialogProps) {
+  const { t } = useI18n();
+  const { namespace } = useNamespace();
+  const [ currentNamespace, setCurrentNamespace ] = useState(namespace);
+  const { data: namespaces } = useListNamespaces();
+  const { data: ruleEndpoints } = useListRuleEndpoints(currentNamespace);
 
-    await createRule(ns, body);
-
-    onClose?.();
-  };
+  const handleValueChange = (values: any) => {
+    if (values?.namespace === currentNamespace) {
+      return;
+    }
+    setCurrentNamespace(values?.namespace);
+  }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add Rule</DialogTitle>
-      <DialogContent dividers>
-        <FormView
-          schema={addRuleSchema}
-          initialValues={{}}
-          onSubmit={handleSubmit}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form="addrule-form">SUBMIT</Button>
-      </DialogActions>
-    </Dialog>
-  );
+    <FormDialog
+      title={`${t('actions.add')} ${t('common.rule')}`}
+      formId='add-rule-form'
+      formSchema={addRuleSchema(namespaces, ruleEndpoints)}
+      defaultValues={{ namespace }}
+      open={open}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      onCreated={onCreated}
+      transform={toRule}
+      onChange={handleValueChange}
+    />
+  )
 }
