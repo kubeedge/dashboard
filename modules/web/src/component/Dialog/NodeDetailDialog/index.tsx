@@ -20,15 +20,12 @@ interface NodeDetailDialogProps {
 export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps) {
   const theme = useTheme();
   
-  // 1. 合并 Hooks
   const { t, getCurrentLanguage } = useI18n();
   const currentLanguage = getCurrentLanguage();
   const { success } = useAlert();
   
-  // 2. 引入 YAML 弹窗状态
   const [yamlDialogOpen, setYamlDialogOpen] = useState(false);
 
-  // 3. 引入复制功能的逻辑
   const handleCopyName = async () => {
     if (data?.metadata?.name) {
       await copyToClipboard(String(data.metadata.name));
@@ -45,7 +42,6 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
 
   return (
     <>
-      {/* 4. 使用 main 分支的 DetailDialog 作为容器 */}
       <DetailDialog
         open={open}
         onClose={onClose}
@@ -72,11 +68,10 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
             },
             '& .value': {
               flex: 2,
-              wordBreak: 'break-all', // 防止长字符串撑破布局
+              wordBreak: 'break-all',
             },
           }}
         >
-          {/* 5. 内容区域：使用 main 分支的国际化标签和格式化函数 */}
           <Box className="row">
             <Typography className="label">{t("table.name")}:</Typography>
             <Typography className="value">{data?.metadata?.name}</Typography>
@@ -123,7 +118,6 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
           </Box>
         </Box>
 
-        {/* 6. 底部按钮：重新加入 feat 分支的功能按钮 */}
         <DialogActions>
           <Button onClick={onClose}>{t('actions.cancel')}</Button>
           <Button onClick={handleCopyName} variant="outlined">Copy Name</Button>
@@ -134,7 +128,6 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
         </DialogActions>
       </DetailDialog>
 
-      {/* 7. YAML 弹窗组件 */}
       <YAMLViewerDialog
         open={yamlDialogOpen}
         onClose={() => setYamlDialogOpen(false)}
