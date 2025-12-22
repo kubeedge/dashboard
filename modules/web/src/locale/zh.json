@@ -49,6 +49,12 @@
     "yaml": "YAML",
     "ok": "确定",
     "detail": "详情",
+    "copyYAML": "复制 YAML",
+    "downloadYAML": "下载 YAML",
+    "copiedYAML": "已复制 YAML 到剪贴板",
+    "failedToCopyYAML": "复制 YAML 到剪贴板失败",
+    "downloadedYAML": "已下载 YAML",
+    "failedToDownloadYAML": "下载 YAML 文件失败",
     "addOneItem": "添加一项"
   },
   "table": {

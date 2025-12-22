@@ -1,17 +1,46 @@
+'use client';
+
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box } from '@mui/material';
 import { CodeBlock, dracula } from 'react-code-blocks';
 import { stringify } from 'yaml';
+import { copyToClipboard, downloadAsFile } from '@/helper/util';
+import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
 
 interface YAMLViewerDialogProps {
   open?: boolean;
-  onClose?: (event: React.MouseEvent) => void;
+  onClose?: () => void;
   content?: any;
 }
 
 const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
   const { t } = useI18n();
+  const { success, error } = useAlert();
+
+  const yamlText = stringify(props?.content);
+
+  const handleCopy = async () => {
+    const isSuccess = await copyToClipboard(yamlText);
+    if (isSuccess) {
+      success(t('actions.copiedYAML'));
+    } else {
+      error(t('actions.failedToCopyYAML'));
+    }
+  };
+
+  const handleDownload = () => {
+    const kind = (props?.content?.kind || 'resource').toString().toLowerCase();
+    const name = (props?.content?.metadata?.name || 'unnamed').toString().toLowerCase();
+    
+    const isSuccess = downloadAsFile(`${kind}-${name}.yaml`, yamlText);
+    
+    if (isSuccess) {
+      success(t('actions.downloadedYAML'));
+    } else {
+      error(t('actions.failedToDownloadYAML'));
+    }
+  };
 
   return (
     <Dialog open={!!props?.open} onClose={props?.onClose} fullWidth maxWidth="md">
@@ -19,7 +48,7 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
       <DialogContent>
         <Box sx={{ height: '400px', overflowY: 'auto', fontFamily: 'monospace' }}>
           <CodeBlock
-            text={stringify(props?.content)}
+            text={yamlText}
             language="yaml"
             showLineNumbers
             theme={dracula}
@@ -29,6 +58,12 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
       <DialogActions>
         <Button onClick={props?.onClose} color="primary">
           {t('actions.cancel')}
+        </Button>
+        <Button onClick={handleCopy} color="primary" variant="outlined">
+          {t('actions.copyYAML')}
+        </Button>
+        <Button onClick={handleDownload} variant="contained">
+          {t('actions.downloadYAML')}
         </Button>
       </DialogActions>
     </Dialog>
