@@ -7,3 +7,4 @@ export { default as DeviceModelDetailDialog } from './DeviceModelDetailDialog';
 export { default as DeviceDetailDialog } from './DeviceDetailDialog';
 export { default as DeploymentDetailDialog } from './DeploymentDetailDialog';
 export { default as ConfigmapDetailDialog } from './ConfigMapDetailDialog';
+export { default as DetailDialog } from './DetailDialog';

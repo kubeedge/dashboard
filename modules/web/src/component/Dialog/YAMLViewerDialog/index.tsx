@@ -1,9 +1,8 @@
-// src/component/YAMLViewerDialog.js
-
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box } from '@mui/material';
 import { CodeBlock, dracula } from 'react-code-blocks';
 import { stringify } from 'yaml';
+import { useI18n } from '@/hook/useI18n';
 
 interface YAMLViewerDialogProps {
   open?: boolean;
@@ -12,11 +11,13 @@ interface YAMLViewerDialogProps {
 }
 
 const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
+  const { t } = useI18n();
+
   return (
     <Dialog open={!!props?.open} onClose={props?.onClose} fullWidth maxWidth="md">
-      <DialogTitle>YAML</DialogTitle>
+      <DialogTitle>{t('actions.yaml')}</DialogTitle>
       <DialogContent>
-        <Box sx={{ height: '400px', overflowY: 'auto' }}>
+        <Box sx={{ height: '400px', overflowY: 'auto', fontFamily: 'monospace' }}>
           <CodeBlock
             text={stringify(props?.content)}
             language="yaml"
@@ -27,7 +28,7 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={props?.onClose} color="primary">
-          Cancel
+          {t('actions.cancel')}
         </Button>
       </DialogActions>
     </Dialog>

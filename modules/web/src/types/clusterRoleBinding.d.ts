@@ -1,4 +1,4 @@
-import { ObjectMeta, ResourceList, TypeMeta } from "./common";
+import { DataList, ObjectMeta, ResourceList, TypeMeta } from "./common";
 
 export interface RoleRef {
   apiGroup: string;
@@ -27,3 +27,13 @@ export interface ClusterRoleBindingList extends ResourceList<ClusterRoleBinding>
   sort?: string;
   order?: string;
 }
+
+export interface ConciseClusterRoleBinding {
+  age?: string;
+  creationTimestamp?: string;
+  labels?: Record<string, string>;
+  name?: string;
+  role?: string;
+}
+
+export interface ConciseClusterRoleBindingList extends DataList<ConciseClusterRoleBinding> {}

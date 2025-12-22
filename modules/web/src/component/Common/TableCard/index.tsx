@@ -9,20 +9,16 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
-  TablePagination,
+  CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { ColumnDefinition, SortState, Direction, TableCardHeader } from './header';
+import { TableCardPagination, type Pagination } from './pagination';
 
-export interface ColumnDefinition<T> {
-  name?: string;
-  key?: string;
-  render?: (row: T) => React.ReactNode | string | undefined;
-  renderOperation?: boolean;
-}
+export type { ColumnDefinition, Direction } from './header';
 
 interface TableCardProps<T> {
   addButtonLabel?: string;
@@ -37,18 +33,45 @@ interface TableCardProps<T> {
   onDeleteClick?: (event: React.MouseEvent, data: T, index: number) => void;
   showAddButton?: boolean;
   specialHandling?: boolean;
-  specialBtnHandling?: boolean;
   detailButtonLabel?: string;
   deleteButtonLabel?: string;
   noTableHeader?: boolean;
+  /**
+   * If true, pagination controls will not be displayed.
+   */
   noPagination?: boolean;
-  pagination?: {
-    current: number;
-    pageSize: number;
-    total: number;
-  };
+  /**
+   * If true, the "Add" button will not be displayed.
+   */
+  noAddButton?: boolean;
+  /**
+   * Pagination information. If provided, the component will use this for pagination instead of internal state.
+   */
+  pagination?: Pagination;
+  /**
+   * Options for rows per page selection in pagination, default is [10, 25, 50].
+   */
+  rowsPerPageOptions?: number[];
+  /**
+   * Callback when pagination changes (page or page size).
+   */
   onPaginationChange?: (page: number, pageSize: number) => void;
+  /**
+   * Filter component to be displayed above the table.
+   */
+  filter?: React.ReactNode;
+  /**
+   * Loading state for the table data.
+   */
   loading?: boolean;
+  /**
+   * Current sort state { field, direction }
+   */
+  sort?: SortState;
+  /**
+   * Callback when sort changes.
+   */
+  onSortChange?: (field: string, direction: Direction) => void;
 }
 
 export function TableCard<T>({
@@ -63,50 +86,17 @@ export function TableCard<T>({
   onDeleteClick,
   detailButtonLabel,
   deleteButtonLabel,
-  specialBtnHandling = false,
+  noAddButton = false,
   noTableHeader = false,
   noPagination = false,
   pagination,
+  filter,
   onPaginationChange,
+  rowsPerPageOptions,
+  loading,
+  sort,
+  onSortChange,
 }: TableCardProps<T>) {
-  const [internalPage, setInternalPage] = React.useState(0);
-  const [internalRowsPerPage, setInternalRowsPerPage] = React.useState(10);
-
-  const handleChangePage = (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent> | null,
-    newPage: number
-  ) => {
-    if (onPaginationChange && pagination) {
-      onPaginationChange(newPage + 1, pagination.pageSize);
-    } else {
-      setInternalPage(newPage);
-    }
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const newPageSize = parseInt(event.target.value, 10);
-    if (onPaginationChange && pagination) {
-      onPaginationChange(1, newPageSize);
-    } else {
-      setInternalRowsPerPage(newPageSize);
-      setInternalPage(0);
-    }
-  };
-
-  const currentPage = pagination ? pagination.current - 1 : internalPage;
-  const currentPageSize = pagination ? pagination.pageSize : internalRowsPerPage;
-  const total = pagination ? pagination.total : data?.length || 0;
-
-  let paginatedData = data;
-  if (!noPagination && !pagination) {
-    paginatedData = data?.slice(
-      currentPage * currentPageSize,
-      currentPage * currentPageSize + currentPageSize
-    );
-  }
-
   return (
     <Paper sx={{ boxShadow: 'none' }}>
       {/* Header */}
@@ -122,7 +112,7 @@ export function TableCard<T>({
         >
           <Typography variant="h6">{title}</Typography>
           <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
-            {!specialBtnHandling && (
+            {!noAddButton && (
               <Button
                 onClick={onAddClick}
                 variant="contained"
@@ -141,7 +131,24 @@ export function TableCard<T>({
         </Box>
       )}
 
-      {/* Table */}
+      {/* Filter */}
+      {filter && (
+        <Box
+          sx={{
+            padding: '16px',
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'dark' ? '#2b2b2b' : '#f5f5f5',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            flexWrap: 'wrap',
+          }}
+        >
+          {filter}
+        </Box>
+      )}
+
+      {/* Table Body */}
       <TableContainer
         sx={{
           backgroundColor: (theme) => theme.palette.background.paper,
@@ -149,21 +156,21 @@ export function TableCard<T>({
         }}
       >
         <Table>
-          <TableHead>
-            <TableRow>
-              {columns?.map((col, index) => (
-                <TableCell
-                  key={index}
-                  sx={{ textAlign: 'center', padding: '16px' }}
-                >
-                  {typeof col === 'string' ? col : col.name}
-                </TableCell>
-              ))}
-              <TableCell sx={{ textAlign: 'center', padding: '16px' }} />
-            </TableRow>
-          </TableHead>
+          <TableCardHeader
+            columns={columns}
+            sort={sort}
+            onSortChange={onSortChange}
+          />
           <TableBody>
-            {paginatedData?.map((row, rowIndex) => (
+            {loading ? (
+              <TableRow>
+                <TableCell align="center" colSpan={columns?.length || 1}>
+                  <Box sx={{ p: 3 }}>
+                    <CircularProgress size={24} />
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ) : data?.map((row, rowIndex) => (
               <TableRow key={rowIndex}>
                 {columns?.map((col, colIndex) => {
                   if (col.renderOperation) {
@@ -204,16 +211,12 @@ export function TableCard<T>({
         </Table>
       </TableContainer>
 
-      {/* page */}
-      {!noPagination && (
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 50]}
-          component="div"
-          count={total}
-          rowsPerPage={currentPageSize}
-          page={currentPage}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
+      {/* Pagination */}
+      {!noPagination && pagination && (
+        <TableCardPagination
+          pagination={pagination}
+          onPaginationChange={onPaginationChange || (() => { })}
+          rowsPerPageOptions={rowsPerPageOptions}
         />
       )}
     </Paper>

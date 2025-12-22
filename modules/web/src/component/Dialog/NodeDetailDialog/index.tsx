@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
-import { useAlert } from '@/hook/useAlert';
-import { copyToClipboard } from '@/helper/util';
+import { Box, Typography, Button, DialogActions } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import { Node } from '@/types/node';
 import { getNodeStatus } from '@/helper/status';
 import { convertKiToGTM } from '@/helper/util';
+import { useI18n } from '@/hook/useI18n';
+import { formatStatus, formatDateTime } from '@/helper/localization';
+import DetailDialog from '../DetailDialog';
+import YAMLViewerDialog from '../YAMLViewerDialog';
+import { useAlert } from '@/hook/useAlert';
+import { copyToClipboard } from '@/helper/util';
 
 interface NodeDetailDialogProps {
   open?: boolean;
@@ -15,18 +18,17 @@ interface NodeDetailDialogProps {
 }
 
 export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps) {
-  const [yamlDialogOpen, setYamlDialogOpen] = useState(false);
   const theme = useTheme();
+  
+  // 1. 合并 Hooks
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
   const { success } = useAlert();
+  
+  // 2. 引入 YAML 弹窗状态
+  const [yamlDialogOpen, setYamlDialogOpen] = useState(false);
 
-  const handleYamlOpen = () => {
-    setYamlDialogOpen(true);
-  };
-
-  const handleYamlClose = () => {
-    setYamlDialogOpen(false);
-  };
-
+  // 3. 引入复制功能的逻辑
   const handleCopyName = async () => {
     if (data?.metadata?.name) {
       await copyToClipboard(String(data.metadata.name));
@@ -43,93 +45,100 @@ export function NodeDetailDialog({ open, onClose, data }: NodeDetailDialogProps)
 
   return (
     <>
-      <Dialog open={!!open} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>Node Detail</DialogTitle>
-        <DialogContent>
-          <Box
-            sx={{
+      {/* 4. 使用 main 分支的 DetailDialog 作为容器 */}
+      <DetailDialog
+        open={open}
+        onClose={onClose}
+        data={data}
+        title={`${t("common.node")} ${t("actions.detail")}`}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            '& .row': {
               display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              '& .row': {
-                display: 'flex',
-                backgroundColor: theme.palette.mode === 'dark' ? '#2b2b2b' : '#f5f5f5',
-                padding: '8px 16px',
-                borderRadius: '4px',
-              },
-              '& .row:not(:last-child)': {
-                marginBottom: '8px',
-              },
-              '& .label': {
-                flex: 1,
-                fontWeight: 'bold',
-              },
-              '& .value': {
-                flex: 2,
-              },
-            }}
-          >
-            <Box className="row">
-              <Typography className="label">Name:</Typography>
-              <Typography className="value">{data?.metadata?.name}</Typography>
-              <Typography className="label">Status:</Typography>
-              <Typography className="value">{getNodeStatus(data)}</Typography>
-            </Box>
-            <Box className="row">
-              <Typography className="label">ID:</Typography>
-              <Typography className="value">{data?.metadata?.uid}</Typography>
-              <Typography className="label">Description:</Typography>
-              <Typography className="value">{data?.metadata?.annotations?.['node.alpha.kubernetes.io/ttl']}</Typography>
-            </Box>
-            <Box className="row">
-              <Typography className="label">Creation time:</Typography>
-              <Typography className="value">{data?.metadata?.creationTimestamp}</Typography>
-              <Typography className="label">Hostname:</Typography>
-              <Typography className="value">{data?.status?.addresses?.find(address => address.type === 'Hostname')?.address}</Typography>
-            </Box>
-            <Box className="row">
-              <Typography className="label">System:</Typography>
-              <Typography className="value">
-                {data?.status?.nodeInfo?.osImage} |{" "}
-                {data?.status?.nodeInfo?.operatingSystem} |{" "}
-                {data?.status?.nodeInfo?.architecture} |{" "}
-                {data?.status?.nodeInfo?.kernelVersion}
-              </Typography>
-              <Typography className="label">IP:</Typography>
-              <Typography className="value">{data?.status?.addresses?.find(address => address.type === 'InternalIP')?.address}</Typography>
-            </Box>
-            <Box className="row">
-              <Typography className="label">Configuration:</Typography>
-              <Typography className="value">
-                {data?.status?.capacity?.cpu}Cpu |{" "}
-                {convertKiToGTM(data?.status?.capacity?.memory || "0")}
-              </Typography>
-            </Box>
-            <Box className="row">
-              <Typography className="label">Container runtime version:</Typography>
-              <Typography className="value">{data?.status?.nodeInfo?.containerRuntimeVersion}</Typography>
-            </Box>
-            <Box className="row">
-              <Typography className="label">Edge side software version:</Typography>
-              <Typography className="value">{data?.status?.nodeInfo?.kubeletVersion}</Typography>
-            </Box>
+              backgroundColor: theme.palette.mode === 'dark' ? '#2b2b2b' : '#f5f5f5',
+              padding: '8px 16px',
+              borderRadius: '4px',
+            },
+            '& .row:not(:last-child)': {
+              marginBottom: '8px',
+            },
+            '& .label': {
+              flex: 1,
+              fontWeight: 'bold',
+            },
+            '& .value': {
+              flex: 2,
+              wordBreak: 'break-all', // 防止长字符串撑破布局
+            },
+          }}
+        >
+          {/* 5. 内容区域：使用 main 分支的国际化标签和格式化函数 */}
+          <Box className="row">
+            <Typography className="label">{t("table.name")}:</Typography>
+            <Typography className="value">{data?.metadata?.name}</Typography>
+            <Typography className="label">{t("table.status")}:</Typography>
+            <Typography className="value">{formatStatus(getNodeStatus(data), currentLanguage)}</Typography>
           </Box>
-        </DialogContent>
+          <Box className="row">
+            <Typography className="label">{t("table.id")}:</Typography>
+            <Typography className="value">{data?.metadata?.uid}</Typography>
+            <Typography className="label">{t("table.description")}:</Typography>
+            <Typography className="value">{data?.metadata?.annotations?.['node.alpha.kubernetes.io/ttl']}</Typography>
+          </Box>
+          <Box className="row">
+            <Typography className="label">{t("table.creationTime")}:</Typography>
+            <Typography className="value">{formatDateTime(data?.metadata?.creationTimestamp, currentLanguage)}</Typography>
+            <Typography className="label">{t("table.hostname")}:</Typography>
+            <Typography className="value">{data?.status?.addresses?.find(address => address.type === 'Hostname')?.address}</Typography>
+          </Box>
+          <Box className="row">
+            <Typography className="label">{t("table.system")}:</Typography>
+            <Typography className="value">
+              {data?.status?.nodeInfo?.osImage} |{" "}
+              {data?.status?.nodeInfo?.operatingSystem} |{" "}
+              {data?.status?.nodeInfo?.architecture} |{" "}
+              {data?.status?.nodeInfo?.kernelVersion}
+            </Typography>
+            <Typography className="label">{t("table.ip")}:</Typography>
+            <Typography className="value">{data?.status?.addresses?.find(address => address.type === 'InternalIP')?.address}</Typography>
+          </Box>
+          <Box className="row">
+            <Typography className="label">{t("table.configuration")}:</Typography>
+            <Typography className="value">
+              {data?.status?.capacity?.cpu}Cpu |{" "}
+              {convertKiToGTM(data?.status?.capacity?.memory || "0")}
+            </Typography>
+          </Box>
+          <Box className="row">
+            <Typography className="label">{t("table.containerRuntimeVersion")}:</Typography>
+            <Typography className="value">{data?.status?.nodeInfo?.containerRuntimeVersion}</Typography>
+          </Box>
+          <Box className="row">
+            <Typography className="label">{t("table.kubeletVersion")}:</Typography>
+            <Typography className="value">{data?.status?.nodeInfo?.kubeletVersion}</Typography>
+          </Box>
+        </Box>
+
+        {/* 6. 底部按钮：重新加入 feat 分支的功能按钮 */}
         <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={onClose}>{t('actions.cancel')}</Button>
           <Button onClick={handleCopyName} variant="outlined">Copy Name</Button>
           <Button onClick={handleCopyUID} variant="outlined">Copy ID</Button>
-          <Button onClick={handleYamlOpen} variant="contained">
+          <Button onClick={() => setYamlDialogOpen(true)} variant="contained">
             YAML
           </Button>
         </DialogActions>
-      </Dialog>
+      </DetailDialog>
 
-      {/* YAML Viewer Dialog */}
+      {/* 7. YAML 弹窗组件 */}
       <YAMLViewerDialog
         open={yamlDialogOpen}
-        onClose={handleYamlClose}
-        content={data} // Pass YAML content
+        onClose={() => setYamlDialogOpen(false)}
+        content={data}
       />
     </>
   );

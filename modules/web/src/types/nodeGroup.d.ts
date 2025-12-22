@@ -1,4 +1,4 @@
-import type { Resource, ResourceList } from './common';
+import type { DataList, Resource, ResourceList } from './common';
 
 interface NodeStatus {
   nodeName: string;
@@ -19,3 +19,11 @@ interface NodeGroupStatus {
 export interface NodeGroup extends Resource<NodeGroupSpec, NodeGroupStatus> {}
 
 export interface NodeGroupList extends ResourceList<NodeGroup> {}
+
+export interface ConciseNodeGroup {
+  creationTimestamp?: string;
+  name?: string;
+  namespace?: string;
+}
+
+export interface ConciseNodeGroupList extends DataList<ConciseNodeGroup> {}

@@ -1,61 +1,39 @@
 'use client';
 
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import FormView from '@/component/FormView';
+import React, { useState } from 'react';
 import { addEdgeAppSchema } from './schema';
 import { toEdgeApplication } from './mapper';
-import { createEdgeApplication } from '@/api/edgeApplication';
-import { useAlert } from '@/hook/useAlert';
-import React, { useMemo } from 'react';
+import { EdgeApplication } from '@/types/edgeApplication';
+import FormDialog from '../FormDialog';
+import { useI18n } from '@/hook/useI18n';
+import { useNamespace } from '@/hook/useNamespace';
+import { useListNamespaces } from '@/api/namespace';
+import { useListNodeGroups } from '@/api/nodeGroup';
 
-type Props = {
+type AddEdgeApplicationDialogProps = {
   open: boolean;
   onClose: () => void;
-  initial?: Record<string, any>;
+  onSubmit?: (record: EdgeApplication) => Promise<void>;
   onCreated?: () => void;
 };
 
-export default function AddEdgeApplicationDialog({ open, onClose, initial, onCreated }: Props) {
-  const { success, error } = useAlert();
-
-  const schemaNoActions = useMemo(
-    () => ({ ...addEdgeAppSchema, submitText: undefined, resetText: undefined }),
-    []
-  );
-
-  const handleSubmit = async (values: any) => {
-    try {
-      const { ns, body } = toEdgeApplication(values);
-      await createEdgeApplication(ns, body);
-      success('Created');
-      onCreated?.();
-      onClose();
-    } catch (e: any) {
-      console.error(e);
-      error(e?.response?.data?.message || e?.message || 'Create failed');
-    }
-  };
+export default function AddEdgeApplicationDialog({ open, onClose, onSubmit, onCreated }: AddEdgeApplicationDialogProps) {
+  const { t } = useI18n();
+  const { namespace } = useNamespace();
+  const { data: namespaces } = useListNamespaces();
+  const { data: nodeGroups } = useListNodeGroups();
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add EdgeApplication</DialogTitle>
-      <DialogContent dividers>
-        <FormView
-          schema={schemaNoActions}
-          formId="edgeapp-form"
-          initialValues={{
-            workloadTemplate: [],
-            targetNodeGroups: [],
-          }}
-          onSubmit={handleSubmit}
-        />
-      </DialogContent>
-
-      <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form="edgeapp-form">SUBMIT</Button>
-      </DialogActions>
-
-    </Dialog>
+    <FormDialog
+      title={`${t('actions.add')} ${t('common.edgeApplication')}`}
+      formId='add-edge-application-form'
+      formSchema={addEdgeAppSchema(namespaces, nodeGroups)}
+      defaultValues={{ namespace }}
+      open={open}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      onCreated={onCreated}
+      transform={toEdgeApplication}
+    />
   );
 }

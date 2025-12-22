@@ -31,31 +31,22 @@ type RuleListItem struct {
 	Name              string            `json:"name"`
 	Namespace         string            `json:"namespace"`
 	Source            string            `json:"source"`
-	SourceResource    string            `json:"sourceResource"`
+	SourceResource    map[string]string `json:"sourceResource"`
 	Target            string            `json:"target"`
-	TargetResource    string            `json:"targetResource"`
+	TargetResource    map[string]string `json:"targetResource"`
 	CreationTimestamp time.Time         `json:"creationTimestamp"`
 	Labels            map[string]string `json:"labels,omitempty"`
 }
 
 // RuleToListItem converts a Rule to RuleListItem
 func RuleToListItem(r rulev1.Rule) RuleListItem {
-	// Simplified implementation - using available fields
-	var sourceResource, targetResource string
-	if len(r.Spec.SourceResource) > 0 {
-		sourceResource = fmt.Sprintf("%v", r.Spec.SourceResource)
-	}
-	if len(r.Spec.TargetResource) > 0 {
-		targetResource = fmt.Sprintf("%v", r.Spec.TargetResource)
-	}
-
 	return RuleListItem{
 		Name:              r.ObjectMeta.Name,
 		Namespace:         r.ObjectMeta.Namespace,
 		Source:            r.Spec.Source,
-		SourceResource:    sourceResource,
+		SourceResource:    r.Spec.SourceResource,
 		Target:            r.Spec.Target,
-		TargetResource:    targetResource,
+		TargetResource:    r.Spec.TargetResource,
 		CreationTimestamp: r.ObjectMeta.CreationTimestamp.Time,
 		Labels:            r.ObjectMeta.Labels,
 	}

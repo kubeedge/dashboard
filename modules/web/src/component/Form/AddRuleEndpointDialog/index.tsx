@@ -1,41 +1,34 @@
 'use client';
 
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import FormView from '@/component/FormView/FormView';
 import { addRuleEndpointSchema } from './schema';
 import { toRuleEndpoint } from './mapper';
+import { RuleEndpoint } from '@/types/ruleEndpoint';
+import { useListNamespaces } from '@/api/namespace';
+import { useI18n } from '@/hook/useI18n';
+import FormDialog from '../FormDialog';
 
-type Props = {
+type AddRuleEndpointDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (ns: string, body: any) => Promise<void> | void;
+  onSubmit: (data: RuleEndpoint) => Promise<void> | void;
+  onCreated?: () => void;
 };
 
-export default function AddRuleEndpointDialog({ open, onClose, onSubmit }: Props) {
-  const formId = 'ruleendpoint-form';
-
-  const handleSubmit = async (values: any) => {
-    const { ns, body } = toRuleEndpoint(values);
-    await onSubmit(ns, body);
-    onClose();
-  };
+export default function AddRuleEndpointDialog({ open, onClose, onSubmit, onCreated }: AddRuleEndpointDialogProps) {
+  const { data: namespaces } = useListNamespaces();
+  const { t } = useI18n();
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add RuleEndpoint</DialogTitle>
-      <DialogContent dividers>
-        <FormView
-          formId={formId}
-          schema={addRuleEndpointSchema}
-          initialValues={{}}
-          onSubmit={handleSubmit}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form={formId}>SUBMIT</Button>
-      </DialogActions>
-    </Dialog>
-  );
+    <FormDialog
+      title={`${t('actions.add')} ${t('common.ruleEndpoint')}`}
+      formId='add-rule-endpoint-form'
+      formSchema={addRuleEndpointSchema(namespaces)}
+      open={open}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      onCreated={onCreated}
+      transform={toRuleEndpoint}
+    />
+  )
 }

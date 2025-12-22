@@ -1,4 +1,5 @@
 import {
+  DataList,
   LocalObjectReference,
   ObjectMeta,
   ObjectReference,
@@ -13,11 +14,15 @@ export interface ServiceAccount extends TypeMeta {
   secrets?: ObjectReference[];
 }
 
-export interface ServiceAccountList extends ResourceList<ServiceAccount> {
-  total?: number;
-  page?: number;
-  pageSize?: number;
-  hasNext?: boolean;
-  sort?: string;
-  order?: string;
+export interface ServiceAccountList extends ResourceList<ServiceAccount> {}
+
+export interface ConciseServiceAccount {
+  age?: string;
+  creationTimestamp?: string;
+  labels?: Record<string, string>;
+  name: string;
+  namespace: string;
+  secrets?: string[];
 }
+
+export interface ConciseServiceAccountList extends DataList<ConciseServiceAccount> {}

@@ -2,9 +2,12 @@
 
 import { Controller } from 'react-hook-form';
 import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, FormHelperText } from '@mui/material';
+import { useI18n } from '@/hook/useI18n';
 
 export default function RadioField({ field, control }: any) {
+  const { t } = useI18n();
   const options = Array.isArray(field.options) ? field.options : [];
+
   return (
     <Controller
       name={field.name}
@@ -14,7 +17,7 @@ export default function RadioField({ field, control }: any) {
           {field.label && <FormLabel>{field.label}</FormLabel>}
           <RadioGroup {...rhf} row={field.row ?? false}>
             {options.map((o: any) => (
-              <FormControlLabel key={o.value} value={o.value} control={<Radio />} label={o.label} />
+              <FormControlLabel key={o.value} value={o.value} control={<Radio />} label={t(o.label)} />
             ))}
           </RadioGroup>
           <FormHelperText>{error?.message}</FormHelperText>

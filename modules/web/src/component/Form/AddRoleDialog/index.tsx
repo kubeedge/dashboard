@@ -1,48 +1,32 @@
 'use client';
 
 import React from 'react';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-
-import FormView from '@/component/FormView';
+import { Role } from '@/types/role';
+import { useI18n } from '@/hook/useI18n';
 import { addRoleSchema } from './schema';
 import { toRole } from './mapper';
+import FormDialog from '../FormDialog';
 
-type Props = {
+type AddRoleDialogProps = {
   open: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSubmit: (record: Role) => void | Promise<void>;
+  onCreated?: () => void;
 };
 
-export default function AddRoleDialog({ open, onClose, onSuccess }: Props) {
-  const formId = 'add-role-form';
-
-  const handleSubmit = async (values: any) => {
-    const { ns, body } = toRole(values);
-
-    onSuccess?.();
-    onClose();
-  };
+export default function AddRoleDialog({ open, onClose, onSubmit, onCreated }: AddRoleDialogProps) {
+  const { t } = useI18n();
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>Add Role</DialogTitle>
-      <DialogContent dividers>
-        <FormView
-          formId={formId}
-          schema={addRoleSchema}
-          initialValues={{ rules: [] }}
-          onSubmit={handleSubmit}
-          hideActions
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>CANCEL</Button>
-        <Button type="submit" form={formId}>SUBMIT</Button>
-      </DialogActions>
-    </Dialog>
-  );
+    <FormDialog
+      title={`${t('actions.add')} ${t('common.role')}`}
+      formId='add-role-form'
+      formSchema={addRoleSchema}
+      open={open}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      onCreated={onCreated}
+      transform={toRole}
+    />
+  )
 }

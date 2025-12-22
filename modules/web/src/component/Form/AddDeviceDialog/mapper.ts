@@ -1,30 +1,49 @@
 import type { Device } from '@/types/device';
 
-export function toDevice(values: any): { ns: string; body: Device } {
-  const ns = values?.namespace || values?.ns || '';
+export function toDevice(namespace: string | undefined, values: any): Device {
   const annotations = values?.description
     ? { description: values.description }
     : undefined;
 
   const body: Device = {
-    apiVersion: 'devices.kubeedge.io/v1alpha2',
-    kind: 'Device',
+    apiVersion: "devices.kubeedge.io/v1beta1",
+    kind: "Device",
     metadata: {
+      labels: {
+        description: values.description,
+      },
       name: values.name,
-      namespace: ns,
-      ...(annotations ? { annotations } : {}),
+      namespace: namespace || 'default',
     },
     spec: {
-      deviceModelRef: { name: values.deviceModel },
-      protocol: values?.protocol ? { protocolName: values.protocol } : undefined,
+      deviceModelRef: {
+        name: values.deviceModel,
+      },
       nodeName: values.node,
-      properties: (values?.attributes || []).map((it: any) => ({
-        name: it.key,
-        type: it.type,
-        value: it.value,
-      })),
+      protocol: {
+        protocolName: values.protocol,
+      },
+    },
+    status: {
+      twins: values.attributes?.map((item: any) => {
+        return {
+          observedDesired: {
+            metadata: {
+              type: item.type,
+            },
+            value: item.attributeValue,
+          },
+          propertyName: item.attributeName,
+          reported: {
+            metadata: {
+              type: item.type,
+            },
+            value: item.attributeValue,
+          },
+        };
+      }),
     },
   };
 
-  return { ns, body };
+  return body;
 }

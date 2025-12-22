@@ -1,4 +1,4 @@
-import { LabelSelector, ObjectMeta, ResourceList, TypeMeta } from "./common";
+import { DataList, LabelSelector, ObjectMeta, ResourceList, TypeMeta } from "./common";
 
 interface AggregationRule {
   clusterRoleSelectors?: LabelSelector[];
@@ -26,3 +26,12 @@ export interface ClusterRoleList extends ResourceList<ClusterRole> {
   sort?: string;
   order?: string;
 }
+
+export interface ConciseClusterRole {
+  age: string;
+  creationTimestamp: string;
+  name: string;
+  labels?: Record<string, string>;
+}
+
+export interface ConciseClusterRoleList extends DataList<ConciseClusterRole> {}
