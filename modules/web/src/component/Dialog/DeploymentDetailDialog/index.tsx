@@ -53,8 +53,7 @@ interface DeploymentDetailDialogProps {
 
 function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailDialogProps) {
   const [tab, setTab] = React.useState(0);
-  
-  // 1. 合并 Hooks 和 State
+
   const { t, getCurrentLanguage } = useI18n();
   const currentLanguage = getCurrentLanguage();
   const [yamlDialogOpen, setYamlDialogOpen] = React.useState(false);
@@ -63,7 +62,7 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
   const displayPods = pods?.
     filter((pod) => pod.metadata?.ownerReferences?.[0]?.name?.includes(data?.metadata?.name || '')) || [];
 
-  // 2. 保留复制功能的处理函数
+
   const handleCopyName = async () => {
     if (data?.metadata?.name) {
       await copyToClipboard(String(data.metadata.name));
@@ -80,7 +79,6 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
 
   return (
     <>
-      {/* 3. 使用 main 分支的 DetailDialog 作为外层容器 */}
       <DetailDialog
         open={open}
         onClose={onClose}
@@ -214,7 +212,6 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
                 <TableCell>{t('table.value')}</TableCell>
               </TableRow>
             </TableHead>
-            {/* 4. 使用 main 分支的表格逻辑（修复了 feat 分支的重复代码），并嵌入 DialogActions */}
             <TableBody>
               {(Object.keys(data?.metadata?.labels || {})?.length || 0) > 0 ? (
                 Object.entries(data?.metadata?.labels || {})?.map((pair) => (
@@ -234,7 +231,6 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
           </Table>
         </TabPanel>
 
-        {/* 5. 重新添加 feat 分支的按钮功能 */}
         <DialogActions>
           <Button onClick={onClose}>{t('actions.cancel')}</Button>
           <Button onClick={handleCopyName} variant="outlined">Copy Name</Button>
@@ -245,7 +241,6 @@ function DeploymentDetailDialog({ open, onClose, data, pods }: DeploymentDetailD
         </DialogActions>
       </DetailDialog>
 
-      {/* 6. 添加 YAML 弹窗 */}
       <YAMLViewerDialog
         open={yamlDialogOpen}
         onClose={() => setYamlDialogOpen(false)}
