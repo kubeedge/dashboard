@@ -16,20 +16,30 @@ interface YAMLViewerDialogProps {
 
 const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
   const { t } = useI18n();
-  const { success } = useAlert();
+  const { success, error } = useAlert();
 
   const yamlText = stringify(props?.content);
 
   const handleCopy = async () => {
-    await copyToClipboard(yamlText);
-    success('Copied YAML to clipboard');
+    const isSuccess = await copyToClipboard(yamlText);
+    if (isSuccess) {
+      success('Copied YAML to clipboard');
+    } else {
+      error('Failed to copy YAML to clipboard');
+    }
   };
 
   const handleDownload = () => {
     const kind = (props?.content?.kind || 'resource').toString().toLowerCase();
     const name = (props?.content?.metadata?.name || 'unnamed').toString().toLowerCase();
-    downloadAsFile(`${kind}-${name}.yaml`, yamlText);
-    success('Downloaded YAML');
+    
+    const isSuccess = downloadAsFile(`${kind}-${name}.yaml`, yamlText);
+    
+    if (isSuccess) {
+      success('Downloaded YAML');
+    } else {
+      error('Failed to download YAML file');
+    }
   };
 
   return (
