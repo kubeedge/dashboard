@@ -12,9 +12,10 @@ import (
 
 // ConfigMapListItem is the lightweight view returned by list API.
 type ConfigMapListItem struct {
-	Name              string `json:"name"`
-	Namespace         string `json:"namespace"`
-	CreationTimestamp string `json:"creationTimestamp"`
+	Name              string            `json:"name"`
+	Namespace         string            `json:"namespace"`
+	CreationTimestamp string            `json:"creationTimestamp"`
+	Labels            map[string]string `json:"labels,omitempty"`
 }
 
 func ConfigMapToListItem(cm corev1.ConfigMap) ConfigMapListItem {
@@ -22,6 +23,7 @@ func ConfigMapToListItem(cm corev1.ConfigMap) ConfigMapListItem {
 		Name:              cm.GetName(),
 		Namespace:         cm.GetNamespace(),
 		CreationTimestamp: cm.GetCreationTimestamp().Time.Format(time.RFC3339Nano),
+		Labels:            cm.GetLabels(),
 	}
 }
 

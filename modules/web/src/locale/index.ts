@@ -24,20 +24,18 @@ i18n
     resources,
     fallbackLng: 'en',
     debug: process.env.NODE_ENV === 'development',
-
     // Key configuration: avoid SSR mismatch
     react: {
       useSuspense: false, // Disable Suspense to avoid SSR issues
     },
-
     interpolation: {
       escapeValue: false, // React already handles safely
     },
-
     detection: {
       // Prefer SSR-provided language via <html lang>, then persist
-      order: ['htmlTag', 'localStorage', 'navigator'],
-      caches: ['localStorage'],
+      order: ["cookie", 'localStorage', 'htmlTag', 'navigator'],
+      caches: ["cookie", 'localStorage'],
+      lookupCookie: 'i18nextLng',
       lookupLocalStorage: 'i18nextLng',
     },
   });

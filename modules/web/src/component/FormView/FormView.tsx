@@ -3,27 +3,13 @@
 import { Grid, Box, Stack, Button } from '@mui/material';
 import { useFormState } from './adapters/useFormState';
 import type { FormSchema, FieldSchema } from './schema/types';
-import InputField from './fields/InputField';
-import SelectField from './fields/SelectField';
-import SwitchField from './fields/SwitchField';
-import ArrayField from './fields/ArrayField';
-import RadioField from './fields/RadioField';
-
-const registry: Record<string, (p: any) => JSX.Element> = {
-  text: (p) => <InputField {...p} />,
-  password: (p) => <InputField {...p} />,
-  textarea: (p) => <InputField {...p} />,
-  number: (p) => <InputField {...p} />,
-  select: (p) => <SelectField {...p} />,
-  'multi-select': (p) => <SelectField {...p} />,
-  switch: (p) => <SwitchField {...p} />,
-  array: (p) => <ArrayField {...p} />,
-  radio: (p) => <RadioField {...p} />,
-};
+import { getFieldComponent } from './fields/registry';
+import { useI18n } from '@/hook/useI18n';
+import { useEffect } from 'react';
 
 function renderField(field: FieldSchema, control: any, values: any) {
   if (field.visibleWhen && !field.visibleWhen(values)) return null;
-  const Comp = registry[field.type];
+  const Comp = getFieldComponent(field.type);
 
   if (typeof Comp !== 'function') {
     console.error('Bad field component:', field.type, Comp);
@@ -47,6 +33,7 @@ export default function FormView({
   submitting,
   formId,
   hideActions,
+  onChange,
 }: {
   schema: FormSchema;
   onSubmit: (values: any) => Promise<void> | void;
@@ -54,14 +41,21 @@ export default function FormView({
   submitting?: boolean;
   formId?: string;
   hideActions?: boolean;
+  onChange?: (values: any) => void;
 }) {
+  const { t } = useI18n();
   const form = useFormState(schema, initialValues);
   const { handleSubmit, control, watch, reset } = form;
   const values = watch();
-  // const showActions = !!(schema.submitText || schema.resetText);
+
+  useEffect(() => {
+    if (onChange) {
+      onChange(values);
+    }
+  }, [values, onChange]);
 
   return (
-    <form id={formId} onSubmit={handleSubmit(onSubmit)}> {/*  id */}
+    <form id={formId} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={2}>
         {schema.fields.map(f => renderField(f, control, values))}
       </Grid>
@@ -70,12 +64,12 @@ export default function FormView({
         <Stack direction="row" justifyContent="flex-end" spacing={1} mt={2}>
           {schema.resetText && (
             <Button type="reset" onClick={() => reset(initialValues || {})}>
-              {schema.resetText}
+              {t(schema.resetText)}
             </Button>
           )}
           {schema.submitText && (
             <Button type="submit" disabled={submitting}>
-              {schema.submitText}
+              {t(schema.submitText)}
             </Button>
           )}
         </Stack>

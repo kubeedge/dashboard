@@ -3,17 +3,9 @@
 import React, { useMemo, useState } from 'react';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { NodeDetailDialog } from '@/component/Dialog/NodeDetailDialog';
-import {
-  Box,
-  TextField,
-  MenuItem,
-  Button,
-  Pagination,
-} from '@mui/material';
+import { Box, TextField, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import { deleteNode, getNode, useListNodes } from '@/api/node';
-import { Editor } from '@tinymce/tinymce-react';
-import { Node } from '@/types/node';
-import { getNodeStatus } from '@/helper/status';
+import { Node, ConciseNode } from '@/types/node';
 import AddNodeDialog from '@/component/Form/AddNodeDialog';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
@@ -23,11 +15,17 @@ import { formatRelativeTime, formatStatus, formatDateTime } from '@/helper/local
 export default function NodePage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
-  const [sort, setSort] = useState<string | undefined>('creationTimestamp');
-  const [order, setOrder] = useState<'asc' | 'desc' | undefined>('desc');
-  const [status, setStatus] = useState<string | undefined>(undefined);
-  const [name, setName] = useState<string | undefined>(undefined);
-  // No mock controls in PR branch
+  const [sort, setSort] = useState<'name' | 'creationTimestamp' | '' | string>('');
+  const [order, setOrder] = useState<'asc' | 'desc' | '' | string>('');
+  const [status, setStatus] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
+  const { error } = useAlert();
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+  const [open, setOpen] = useState(false);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<Node | undefined>(undefined);
   const params = useMemo(() => ({
     page,
     pageSize,
@@ -38,104 +36,93 @@ export default function NodePage() {
       name ? `name:${name}` : undefined,
     ].filter(Boolean).join(','),
   }), [page, pageSize, sort, order, status, name]);
+  const { data, mutate, isLoading } = useListNodes(params);
 
-  const { data, mutate } = useListNodes(params);
-  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error, success } = useAlert();
-  const { t, getCurrentLanguage } = useI18n();
-  const currentLanguage = getCurrentLanguage();
-
-  const columns: ColumnDefinition<Node>[] = [{
-    name: t('table.name') + '/ID',
+  const columns: ColumnDefinition<ConciseNode>[] = [{
+    key: 'name',
+    name: `${t('table.name')}/${t('table.id')}`,
+    sortable: true,
     render: (node) => (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ color: 'rgb(47, 84, 235)', fontWeight: 500 }}>
-          {node?.metadata?.name || '-'}
+          {node?.name || '-'}
         </Box>
         <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-          {node?.metadata?.uid || '-'}
+          {node?.uid || '-'}
         </Box>
       </Box>
     )
   }, {
     name: t('table.status'),
     render: (node) => {
-      const status = getNodeStatus(node);
-      return formatStatus(status, currentLanguage);
+      return formatStatus(node?.status, currentLanguage);
     },
   }, {
     name: t('table.hostname'),
     render: (node) => (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box>
-          {node.status?.addresses?.find(address => address.type === 'Hostname')?.address || '-'}
+          {node?.hostname || '-'}
         </Box>
         <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-          {node.status?.addresses?.find(address => address.type === 'InternalIP')?.address || '-'}
+          {node?.internalIP || '-'}
         </Box>
       </Box>
     )
   }, {
+    key: 'creationTimestamp',
     name: t('table.creationTime'),
+    sortable: true,
     render: (node) => (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
-          {formatDateTime(node.metadata?.creationTimestamp, currentLanguage)}
+          {formatDateTime(node?.creationTimestamp, currentLanguage)}
         </Box>
         <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-          {formatRelativeTime(node.metadata?.creationTimestamp, currentLanguage)}
+          {formatRelativeTime(node?.creationTimestamp, currentLanguage)}
         </Box>
       </Box>
     )
   }, {
     name: t('table.version'),
-    render: (node) => node.status?.nodeInfo?.kubeletVersion || '-'
+    render: (node) => node?.kubeletVersion || '-'
   }, {
     name: t('table.actions'),
     renderOperation: true
   }];
 
-  const [open, setOpen] = useState(false);
-
-  const handleAddClick = () => {
-    setOpen(true);
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
 
-  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [selectedNode, setSelectedNode] = useState<Node | undefined>(undefined);
-
-  const handleDetailClick = async (_: any, node: Node) => {
+  const handleDetailClick = async (_: any, node: ConciseNode) => {
     try {
-      const resp = await getNode(node?.metadata?.name || '');
+      const resp = await getNode(node?.name || '');
       setSelectedNode(resp?.data);
       setDetailDialogOpen(true);
     } catch (err: any) {
-      error(err?.response?.data?.message || err?.message || 'Failed to get Node');
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 
-  const handleDetailDialogClose = () => {
-    setDetailDialogOpen(false);
-    setSelectedNode(undefined);
-  };
-
-  const handleDelete = (_: any, row: Node) => {
+  const handleDelete = (_: any, row: ConciseNode) => {
     showConfirmDialog({
-      title: t('actions.delete') + ' ' + t('common.node'),
-      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
+      title: `${t('actions.delete')} ${t('common.node')}`,
+      content: `${t('messages.deleteConfirm')} ${row?.name}?`,
       onConfirm: async () => {
         try {
-          await deleteNode(row?.metadata?.name || '');
+          await deleteNode(row?.name || '');
           mutate();
         } catch (err: any) {
           error(err?.response?.data?.message || err?.message || t('messages.error'));
         }
       },
-      onCancel: () => { },
     })
   }
 
@@ -144,59 +131,57 @@ export default function NodePage() {
       <Box sx={{ width: '100%', p: '20px', minHeight: 350, bgcolor: 'background.paper' }}>
         <TableCard
           title={t('common.node')}
-          addButtonLabel={t('actions.add') + ' ' + t('common.node')}
+          addButtonLabel={`${t('actions.add')} ${t('common.node')}`}
           columns={columns}
           data={data?.items}
-          onAddClick={handleAddClick}
+          onAddClick={() => setOpen(true)}
           onRefreshClick={() => { mutate() }}
           onDetailClick={handleDetailClick}
           onDeleteClick={handleDelete}
           detailButtonLabel={t('actions.view')}
           deleteButtonLabel={t('actions.delete')}
           specialHandling={true}
-          noPagination
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          loading={isLoading}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
+          filter={(
+            <>
+              <FormControl>
+                <InputLabel shrink>{t('table.status')}</InputLabel>
+                <Select
+                  size='small'
+                  label={t('table.status')}
+                  value={status || ''}
+                  onChange={(e) => setStatus(e.target.value || '')}
+                  sx={{ minWidth: 120 }}
+                  displayEmpty
+                >
+                  <MenuItem value=''>{t('status.all')}</MenuItem>
+                  <MenuItem value='Ready'>{t('status.ready')}</MenuItem>
+                  <MenuItem value='NotReady'>{t('status.notReady')}</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField size='small' label={t('table.name')} value={name || ''} onChange={(e) => setName(e.target.value || '')} placeholder={t('table.textWildcardHelp')} />
+            </>
+          )}
         />
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', marginTop: 2, flexWrap: 'wrap' }}>
-          <TextField size="small" select label="Rows per page" value={pageSize}
-            onChange={(e) => { const v = Number(e.target.value) || 10; setPageSize(v); setPage(1); mutate(); }} sx={{ minWidth: 140 }}>
-            <MenuItem value={5}>5</MenuItem>
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={50}>50</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Sort" value={sort || ''} onChange={(e) => setSort(e.target.value || undefined)} sx={{ minWidth: 180 }}>
-            <MenuItem value="">Default</MenuItem>
-            <MenuItem value="name">name</MenuItem>
-            <MenuItem value="creationTimestamp">creationTimestamp</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Order" value={order || ''} onChange={(e) => setOrder((e.target.value as any) || undefined)} sx={{ minWidth: 140 }}>
-            <MenuItem value="">Default</MenuItem>
-            <MenuItem value="asc">asc</MenuItem>
-            <MenuItem value="desc">desc</MenuItem>
-          </TextField>
-          <TextField size="small" select label="Status" value={status || ''} onChange={(e) => setStatus(e.target.value || undefined)} sx={{ minWidth: 120 }}>
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="Ready">Ready</MenuItem>
-            <MenuItem value="NotReady">NotReady</MenuItem>
-          </TextField>
-          <TextField size="small" label="Name" value={name || ''} onChange={(e) => setName(e.target.value || undefined)} placeholder="supports * wildcards" />
-          <Box sx={{ flexGrow: 1 }} />
-          <Pagination
-            page={page}
-            onChange={(_, value) => { setPage(value); mutate(); }}
-            count={Math.max(1, Math.ceil(((data?.total ?? 0) as number) / (pageSize || 1)))}
-            size="small"
-            color="primary"
-          />
-        </Box>
       </Box>
       <AddNodeDialog
         open={open}
-        onClose={handleClose}
+        onClose={() => setOpen(false)}
       />
       <NodeDetailDialog
         open={detailDialogOpen}
-        onClose={handleDetailDialogClose}
+        onClose={() => setDetailDialogOpen(false)}
         data={selectedNode}
       />
       {ConfirmDialogComponent}

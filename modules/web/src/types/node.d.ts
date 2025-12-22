@@ -1,4 +1,4 @@
-import type { Condition, Resource, ResourceList } from "./common";
+import type { Condition, DataList, Resource, ResourceList } from "./common";
 
 interface ConfigMapNodeConfigSource {
   namespace: string;
@@ -97,6 +97,18 @@ interface NodeStatus {
   config?: NodeConfigStatus;
 }
 
-export interface Node extends Resource<NodeSpec, NodeStatus> {}
+export interface Node extends Resource<NodeSpec, NodeStatus> { }
 
-export interface NodeList extends ResourceList<Node> {}
+export interface NodeList extends ResourceList<Node> { }
+
+export interface ConciseNode {
+  creationTimestamp?: string;
+  hostname?: string;
+  internalIP?: string;
+  kubeletVersion?: string;
+  name?: string;
+  status?: string;
+  uid?: string;
+}
+
+export interface ConciseNodeList extends DataList<ConciseNode> { }

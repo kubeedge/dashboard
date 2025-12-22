@@ -15,15 +15,15 @@ import {
   FormLabel,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { ConfigMap } from '@/types/configMap';
-import { Secret } from '@/types/secret';
+import { ConciseConfigMap } from '@/types/configMap';
+import { ConciseSecret } from '@/types/secret';
 import { useI18n } from '@/hook/useI18n';
 
 interface StorageMountFormProps {
   data: any;
   onChange: (field: string, value: any) => void;
-  configMaps: ConfigMap[];
-  secrets: Secret[];
+  configMaps: ConciseConfigMap[];
+  secrets: ConciseSecret[];
 }
 
 export default function StorageMountForm({ data, onChange, configMaps, secrets }: StorageMountFormProps) {
@@ -180,8 +180,8 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
               onBlur={() => handleVolumeBlur(index)}
             >
               {configMaps.map((configMap) => (
-                <MenuItem key={configMap?.metadata?.uid} value={configMap?.metadata?.name}>
-                  {configMap?.metadata?.name}
+                <MenuItem key={configMap?.name} value={configMap?.name}>
+                  {configMap?.name}
                 </MenuItem>
               ))}
             </Select>
@@ -198,8 +198,8 @@ export default function StorageMountForm({ data, onChange, configMaps, secrets }
               onBlur={() => handleVolumeBlur(index)}
             >
               {secrets.map((secret) => (
-                <MenuItem key={secret?.metadata?.uid} value={secret?.metadata?.name}>
-                  {secret?.metadata?.name}
+                <MenuItem key={secret?.name} value={secret?.name}>
+                  {secret?.name}
                 </MenuItem>
               ))}
             </Select>

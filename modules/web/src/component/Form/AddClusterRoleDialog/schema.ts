@@ -1,49 +1,46 @@
 import type { FormSchema } from '@/component/FormView';
 
 export const addClusterRoleSchema: FormSchema = {
-  submitText: undefined,
   fields: [
     {
-      // Name *
       name: 'name',
-      label: 'Name *',
+      label: 'table.name',
       type: 'text',
       fullWidth: true,
-      rules: [{ type: 'required', message: 'Name is required' }],
+      rules: [{ type: 'required' }],
       grid: { md: 12 },
     },
     {
-      // Rules
       name: 'rules',
-      label: 'Rules',
+      label: 'table.rules',
       type: 'array',
-      addText: 'ADD RULE',
-      removeText: 'REMOVE',
+      addText: 'table.addRule',
+      fullWidth: true,
       itemSchema: [
         {
           name: 'verbs',
-          label: 'Verbs',
+          label: 'table.verbs',
           type: 'text',
           fullWidth: true,
           grid: { xs: 12, sm: 12, md: 12 },
         },
         {
           name: 'apiGroups',
-          label: 'API Groups',
+          label: 'table.apiGroups',
           type: 'text',
           fullWidth: true,
           grid: { xs: 12, sm: 12, md: 12 },
         },
         {
           name: 'resources',
-          label: 'Resources',
+          label: 'table.resources',
           type: 'text',
           fullWidth: true,
           grid: { xs: 12, sm: 12, md: 12 },
         },
         {
           name: 'resourceNames',
-          label: 'Resource Names',
+          label: 'table.resourceNames',
           type: 'text',
           fullWidth: true,
           grid: { xs: 12, sm: 12, md: 12 },
@@ -51,28 +48,27 @@ export const addClusterRoleSchema: FormSchema = {
       ],
     },
     {
-      // Match Labels
       name: 'matchLabels',
-      label: 'ClusterRole Selectors',
+      label: 'table.clusterRoleSelectors',
       type: 'array',
-      addText: 'ADD MATCH LABELS',
-      removeText: 'REMOVE',
+      addText: 'table.addMatchLabels',
       itemSchema: [
         {
           name: 'key',
-          label: 'Key',
+          label: 'table.key',
           type: 'text',
           fullWidth: true,
           grid: { xs: 12, sm: 6, md: 6 },
         },
         {
           name: 'value',
-          label: 'Value',
+          label: 'table.value',
           type: 'text',
           fullWidth: true,
           grid: { xs: 12, sm: 6, md: 6 },
         }
       ],
+      inlineRemove: true,
     }
   ],
 };

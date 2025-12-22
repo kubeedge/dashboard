@@ -1,4 +1,4 @@
-import { ObjectMeta, ResourceList, TypeMeta } from "./common";
+import { DataList, ObjectMeta, ResourceList, TypeMeta } from "./common";
 
 interface RuleEndpointSpec {
   properties?: Record<string, string>;
@@ -10,11 +10,14 @@ export interface RuleEndpoint extends TypeMeta {
   spec?: RuleEndpointSpec;
 }
 
-export interface RuleEndpointList extends ResourceList<RuleEndpoint> {
-  total?: number;
-  page?: number;
-  pageSize?: number;
-  hasNext?: boolean;
-  sort?: string;
-  order?: string;
+export interface RuleEndpointList extends ResourceList<RuleEndpoint> {}
+
+export interface ConciseRuleEndpoint {
+  name: string;
+  namespace: string;
+  ruleEndpointType: string;
+  properties?: Record<string, string>;
+  creationTimestamp: string;
 }
+
+export interface ConciseRuleEndpointList extends DataList<ConciseRuleEndpoint> {}

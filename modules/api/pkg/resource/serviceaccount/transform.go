@@ -28,22 +28,28 @@ import (
 
 // ServiceAccountListItem represents a simplified ServiceAccount for list responses
 type ServiceAccountListItem struct {
-	Name              string   `json:"name"`
-	Namespace         string   `json:"namespace"`
-	Secrets           int      `json:"secrets"`
-	Age               string   `json:"age"`
-	CreationTimestamp time.Time `json:"creationTimestamp"`
+	Name              string            `json:"name"`
+	Namespace         string            `json:"namespace"`
+	Secrets           []string          `json:"secrets"`
+	Age               string            `json:"age"`
+	CreationTimestamp time.Time         `json:"creationTimestamp"`
 	Labels            map[string]string `json:"labels,omitempty"`
 }
 
 // ServiceAccountToListItem converts a ServiceAccount to ServiceAccountListItem
 func ServiceAccountToListItem(sa corev1.ServiceAccount) ServiceAccountListItem {
 	age := time.Since(sa.ObjectMeta.CreationTimestamp.Time).Truncate(time.Second).String()
-	
+
 	return ServiceAccountListItem{
-		Name:              sa.ObjectMeta.Name,
-		Namespace:         sa.ObjectMeta.Namespace,
-		Secrets:           len(sa.Secrets),
+		Name:      sa.ObjectMeta.Name,
+		Namespace: sa.ObjectMeta.Namespace,
+		Secrets: func() []string {
+			secrets := make([]string, len(sa.Secrets))
+			for i, secret := range sa.Secrets {
+				secrets[i] = secret.Name
+			}
+			return secrets
+		}(),
 		Age:               age,
 		CreationTimestamp: sa.ObjectMeta.CreationTimestamp.Time,
 		Labels:            sa.ObjectMeta.Labels,

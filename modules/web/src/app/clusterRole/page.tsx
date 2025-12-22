@@ -1,27 +1,78 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { Box, TextField, MenuItem, Pagination } from '@mui/material';
+import React, { useState, useMemo } from 'react';
+import { Box, TextField } from '@mui/material';
 import { ColumnDefinition, TableCard } from '@/component/Common/TableCard';
 import { createClusterRole, deleteClusterRole, getClusterRole, useListClusterRoles } from '@/api/clusterRole';
 import YAMLViewerDialog from '@/component/Dialog/YAMLViewerDialog';
 import AddClusterRoleDialog from '@/component/Form/AddClusterRoleDialog';
-import { ClusterRole } from '@/types/clusterRole';
+import { ClusterRole, ConciseClusterRole } from '@/types/clusterRole';
 import useConfirmDialog from '@/hook/useConfirmDialog';
 import { useAlert } from '@/hook/useAlert';
 import { useI18n } from '@/hook/useI18n';
+import { formatDateTime, formatRelativeTime } from '@/helper/localization';
 
 export default function ClusterRolesPage() {
-  const { t } = useI18n();
+  const { t, getCurrentLanguage } = useI18n();
+  const currentLanguage = getCurrentLanguage();
+  const [yamlDialogOpen, setYamlDialogOpen] = useState(false);
+  const [currentYamlContent, setCurrentYamlContent] = useState<any>(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
+  const { error } = useAlert();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [sort, setSort] = useState('');
+  const [order, setOrder] = useState('');
+  const [name, setName] = useState('');
+  const params = useMemo(() => ({
+    page,
+    pageSize,
+    sort,
+    order,
+    filter: [name ? `name:${name}` : undefined].filter(Boolean).join(','),
+  }), [page, pageSize, sort, order, name]);
+  const { data, mutate, isLoading } = useListClusterRoles(params);
 
-  const columns: ColumnDefinition<ClusterRole | any>[] = [
+  const columns: ColumnDefinition<ConciseClusterRole>[] = [
     {
+      key: 'name',
       name: t('table.name'),
-      render: (clusterRole) => clusterRole?.metadata?.name || clusterRole?.name,
+      sortable: true,
+      render: (role) => role?.name || role?.name,
     },
     {
+      name: t('table.labels'),
+      render: (role) => (
+        <Box>
+          {role?.labels && Object.entries(role.labels).map(([key, value]) => (
+            <Box
+              key={key}
+              sx={{
+                display: 'block', bgcolor: 'grey.200', color: 'text.primary', px: 1,
+                py: 0.5, borderRadius: 1, mr: 0.5, mb: 0.5, fontSize: '0.75rem'
+              }}
+            >
+              {key}: {value}
+            </Box>
+          ))}
+        </Box>
+      )
+    },
+    {
+      key: 'creationTimestamp',
       name: t('table.creationTime'),
-      render: (clusterRole) => clusterRole?.metadata?.creationTimestamp || clusterRole?.creationTimestamp,
+      sortable: true,
+      render: (role) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Box sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+            {formatDateTime(role?.creationTimestamp, currentLanguage)}
+          </Box>
+          <Box sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+            {formatRelativeTime(role?.creationTimestamp, currentLanguage)}
+          </Box>
+        </Box>
+      )
     },
     {
       name: t('table.operation'),
@@ -29,42 +80,19 @@ export default function ClusterRolesPage() {
     },
   ];
 
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [sort, setSort] = useState('name');
-  const [order, setOrder] = useState('asc');
-  const [name, setName] = useState('');
-
-  const params = useMemo(() => ({
-    page,
-    pageSize,
-    sort,
-    order,
-    ...(name && { 'name': `*${name}*` }),
-  }), [page, pageSize, sort, order, name]);
-
-  const { data, mutate } = useListClusterRoles(params);
-  const [yamlDialogOpen, setYamlDialogOpen] = useState(false);
-  const [currentYamlContent, setCurrentYamlContent] = useState<any>(null);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const { showConfirmDialog, ConfirmDialogComponent } = useConfirmDialog();
-  const { error, success } = useAlert();
-
-  const handleAddClick = () => {
-    setAddDialogOpen(true);
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    setPage(newPage);
+    setPageSize(newPageSize);
   };
 
-  useEffect(() => {
-    mutate();
-  }, [params, mutate]);
+  const handleSortChange = (field: string, direction: 'asc' | 'desc') => {
+    setSort(field);
+    setOrder(direction);
+  }
 
-  const handleQueryClick = () => {
-    mutate();
-  };
-
-  const handleYamlClick = async (_: any, row: ClusterRole) => {
+  const handleYamlClick = async (_: any, row: ConciseClusterRole) => {
     try {
-      const resp = await getClusterRole(row?.metadata?.name || '');
+      const resp = await getClusterRole(row?.name || '');
       setCurrentYamlContent(resp?.data);
       setYamlDialogOpen(true);
     } catch (err: any) {
@@ -72,26 +100,18 @@ export default function ClusterRolesPage() {
     }
   };
 
-  const handleSubmit = async (_: any, record: ClusterRole) => {
+  const handleSubmit = async (record: ClusterRole) => {
     await createClusterRole(record);
     mutate();
   }
 
-  const handleYamlDialogClose = () => {
-    setYamlDialogOpen(false);
-  };
-
-  const handleAddDialogClose = () => {
-    setAddDialogOpen(false);
-  };
-
-  const handleDeleteClick = (_: any, row: ClusterRole) => {
+  const handleDeleteClick = (_: any, row: ConciseClusterRole) => {
     showConfirmDialog({
-      title: t('actions.delete') + ' ' + t('common.clusterRole'),
-      content: t('messages.deleteConfirm') + ` ${row?.metadata?.name}?`,
+      title: `${t('actions.delete')} ${t('common.clusterRole')}`,
+      content: `${t('messages.deleteConfirm')} ${row?.name}?`,
       onConfirm: async () => {
         try {
-          await deleteClusterRole(row?.metadata?.name || '');
+          await deleteClusterRole(row?.name || '');
           mutate();
         } catch (err: any) {
           error(err?.response?.data?.message || err?.message || t('messages.error'));
@@ -110,84 +130,41 @@ export default function ClusterRolesPage() {
           addButtonLabel={t('actions.add') + ' ' + t('common.clusterRole')}
           columns={columns}
           data={data?.items}
-          onAddClick={handleAddClick}
-          onQueryClick={handleQueryClick}
+          onAddClick={() => setAddDialogOpen(true)}
+          onQueryClick={() => mutate()}
           onDetailClick={handleYamlClick}
           onDeleteClick={handleDeleteClick}
-          detailButtonLabel="YAML"
+          detailButtonLabel={t('actions.yaml')}
           deleteButtonLabel={t('actions.delete')}
-          noPagination={true}
+          loading={isLoading}
+          pagination={{
+            current: data?.page || 1,
+            pageSize: data?.pageSize || 10,
+            total: data?.total || 0,
+          }}
+          onPaginationChange={handlePaginationChange}
+          sort={{
+            field: sort,
+            direction: order as 'asc' | 'desc',
+          }}
+          onSortChange={handleSortChange}
+          filter={(
+            <>
+              <TextField size='small' label={t('table.name')} value={name || ''} onChange={(e) => setName(e.target.value || '')} placeholder={t('table.textWildcardHelp')} />
+            </>
+          )}
         />
-
-        {/* New pagination controls */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2, gap: 2 }}>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <TextField
-              select
-              label="Rows per page"
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              size="small"
-              sx={{ minWidth: 120 }}
-            >
-              <MenuItem value={5}>5</MenuItem>
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={20}>20</MenuItem>
-              <MenuItem value={50}>50</MenuItem>
-            </TextField>
-
-            <TextField
-              select
-              label="Sort"
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              size="small"
-              sx={{ minWidth: 120 }}
-            >
-              <MenuItem value="name">Name</MenuItem>
-              <MenuItem value="creationTimestamp">Creation Time</MenuItem>
-            </TextField>
-
-            <TextField
-              select
-              label="Order"
-              value={order}
-              onChange={(e) => setOrder(e.target.value)}
-              size="small"
-              sx={{ minWidth: 100 }}
-            >
-              <MenuItem value="asc">Ascending</MenuItem>
-              <MenuItem value="desc">Descending</MenuItem>
-            </TextField>
-
-            <TextField
-              label="Name filter"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              size="small"
-              placeholder="Search by name..."
-              sx={{ minWidth: 150 }}
-            />
-          </Box>
-
-          <Pagination
-            count={data?.total ? Math.ceil(data.total / pageSize) : 1}
-            page={page}
-            onChange={(_, newPage) => setPage(newPage)}
-            color="primary"
-            showFirstButton
-            showLastButton
-          />
-        </Box>
       </Box>
       <YAMLViewerDialog
         open={yamlDialogOpen}
-        onClose={handleYamlDialogClose}
+        onClose={() => setYamlDialogOpen(false)}
         content={currentYamlContent}
       />
       <AddClusterRoleDialog
         open={addDialogOpen}
-        onClose={handleAddDialogClose}
+        onClose={() => setAddDialogOpen(false)}
+        onSubmit={handleSubmit}
+        onCreated={() => setAddDialogOpen(false)}
       />
       {ConfirmDialogComponent}
     </Box>

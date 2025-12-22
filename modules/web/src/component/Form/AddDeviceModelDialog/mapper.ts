@@ -1,49 +1,62 @@
 import type { DeviceModel } from '@/types/deviceModel';
 
-function toPropertyType(t: string) {
-  switch ((t || '').toLowerCase()) {
-    case 'string':
-      return { string: {} };
-    case 'int':
-      return { int: {} };
-    case 'float':
-      return { float: {} };
-    case 'boolean':
-      return { boolean: {} };
-    default:
-      return { string: {} };
-  }
-}
+const typeOptions = {
+  int: {
+    accessMode: "ReadWrite",
+    defaultValue: '1',
+    minimum: '1',
+    maximum: '5',
+    unit: "度",
+  },
+  string: {
+    accessMode: "ReadWrite",
+    defaultValue: "default",
+  },
+  double: {
+    accessMode: "ReadWrite",
+    defaultValue: "1.0",
+    minimum: "1.0",
+    maximum: "5.0",
+    unit: "度",
+  },
+  float: {
+    accessMode: "ReadWrite",
+    defaultValue: "1.0",
+    minimum: "1.0",
+    maximum: "5.0",
+    unit: "度",
+  },
+  boolean: {
+    accessMode: "ReadWrite",
+    defaultValue: 'true',
+  },
+  bytes: {
+    accessMode: "ReadWrite",
+  },
+};
 
-export function toDeviceModel(values: any): { ns: string; body: DeviceModel } {
+export function toDeviceModel(values: any): DeviceModel {
   const ns = values.namespace;
 
-  const attrList: Array<{ name: string; type: any }> = Array.isArray(values.attributes)
-    ? values.attributes
-    : [];
-
-  const properties = attrList
-    .filter((row) => row && row.name)
-    .map((row) => ({
-      name: String(row.name),
-      type: toPropertyType(row.type),
-    }));
 
   const body: DeviceModel = {
-    apiVersion: 'devices.kubeedge.io/v1alpha2',
-    kind: 'DeviceModel',
+    apiVersion: "devices.kubeedge.io/v1beta1",
+    kind: "DeviceModel",
     metadata: {
       name: values.name,
-      namespace: ns,
-      annotations: {
-        ...(values.description ? { 'dashboard.kubeedge.io/description': String(values.description) } : {}),
-        ...(values.protocol ? { 'dashboard.kubeedge.io/protocol': String(values.protocol) } : {}),
-      },
     },
     spec: {
-      ...(properties.length ? { properties } : {}),
-    } as any,
+      protocol: values.protocol,
+      properties: [
+        {
+          name: values.attributeName,
+          description: values.description,
+          type: values.attributeType,
+          ...((typeOptions as any)[values.attributeType] || {}),
+        },
+      ],
+    },
   };
 
-  return { ns, body };
+  return body;
 }

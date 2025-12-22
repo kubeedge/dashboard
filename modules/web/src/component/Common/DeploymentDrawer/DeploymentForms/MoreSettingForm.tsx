@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Button,
   Checkbox,
-  FormControl,
   FormControlLabel,
   FormGroup,
   IconButton,
-  InputLabel,
   MenuItem,
-  Select,
   Slider,
   TextField,
   Typography,

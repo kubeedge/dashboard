@@ -3,83 +3,78 @@ import { listNamespaces } from '@/api/namespace';
 
 async function nsOptions() {
   const res = await listNamespaces();
-  const items = (res?.data?.items ?? []) as any[];
+  const items = res?.data?.items || [];
   return items.map(n => ({
-    label: n?.metadata?.name,
-    value: n?.metadata?.name,
+    label: n?.metadata?.name || '',
+    value: n?.metadata?.name || '',
   }));
 }
 
 export const addClusterRoleBindingSchema: FormSchema = {
   fields: [
     {
-      // Name
       name: 'name',
-      label: 'Name *',
+      label: 'table.name',
       type: 'text',
-      rules: [{ type: 'required', message: 'Missing name' }],
+      rules: [{ type: 'required' }],
       fullWidth: true,
       grid: { md: 12 },
     },
     {
-      // RoleRef
       name: 'roleRefKind',
-      label: 'Kind *',
+      label: 'table.kind',
       type: 'select',
-      options: [{ label: 'ClusterRole', value: 'ClusterRole' }],
+      options: [{ label: 'table.clusterRole', value: 'ClusterRole' }],
       defaultValue: 'ClusterRole',
-      rules: [{ type: 'required', message: 'Missing roleRef kind' }],
+      rules: [{ type: 'required' }],
       grid: { xs: 12, sm: 4, md: 3 },
     },
     {
       name: 'roleRefName',
-      label: 'Name *',
+      label: 'table.name',
       type: 'text',
-      rules: [{ type: 'required', message: 'Missing roleRef name' }],
+      rules: [{ type: 'required' }],
       grid: { xs: 12, sm: 4, md: 4 },
     },
     {
       name: 'roleRefApiGroup',
-      label: 'ApiGroup',
+      label: 'table.apiGroup',
       type: 'text',
-      // rbac
       defaultValue: 'rbac.authorization.k8s.io',
       grid: { xs: 12, sm: 4, md: 5 },
     },
     {
-      // Subjects
       name: 'subjects',
-      label: 'Subjects',
+      label: 'table.subjects',
       type: 'array',
-      addText: 'ADD SUBJECT',
-      removeText: 'REMOVE',
+      addText: 'table.addSubject',
+      inlineRemove: true,
       itemSchema: [
         {
           name: 'kind',
-          label: 'Kind *',
+          label: 'table.kind',
           type: 'select',
-          rules: [{ type: 'required', message: 'Missing subject kind' }],
+          rules: [{ type: 'required' }],
           options: [
-            { label: 'ServiceAccount', value: 'ServiceAccount' },
-            { label: 'User', value: 'User' },
-            { label: 'Group', value: 'Group' },
+            { label: 'table.serviceAccount', value: 'ServiceAccount' },
+            { label: 'table.user', value: 'User' },
+            { label: 'table.group', value: 'Group' },
           ],
           grid: { xs: 12, sm: 6, md: 4 },
         },
         {
           name: 'name',
-          label: 'Name *',
+          label: 'table.name',
           type: 'text',
-          rules: [{ type: 'required', message: 'Missing subject name' }],
+          rules: [{ type: 'required' }],
           grid: { xs: 12, sm: 6, md: 4 },
         },
         {
-          // Namespace
           name: 'namespace',
-          label: 'Namespace *',
+          label: 'table.namespace',
           type: 'select',
           options: nsOptions,
-          rules: [{ type: 'required', message: 'Miss subject namespace' }],
+          rules: [{ type: 'required' }],
           grid: { xs: 12, sm: 6, md: 4 },
         }
       ],

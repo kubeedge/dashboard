@@ -15,34 +15,27 @@ import { useListNamespaces } from '@/api/namespace';
 import { Container, ContainerPort, EnvFromSource, EnvVar, VolumeMount } from '@/types/pod';
 import { Volume } from '@/types/volume';
 
-// Step titles will be dynamically obtained through useI18n
-
 interface DeploymentDrawerProps {
   open?: boolean;
   onClose?: () => void;
-  onSubmit?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, data: Deployment) => void;
+  onSubmit?: (data: Deployment) => void;
+  onCreated?: () => void;
 }
 
-export default function DeploymentDrawer({ open, onClose, onSubmit }: DeploymentDrawerProps) {
+export default function DeploymentDrawer({ open, onClose, onSubmit, onCreated }: DeploymentDrawerProps) {
   const { t } = useI18n();
   const steps = [t('table.basicInfo'), t('table.containerInfo'), t('table.storageMount'), t('table.moreSetting')];
-  const [namespace, setNamespace] = useState<any>('');
+  const [namespace, setNamespace] = useState<string>('');
   const [activeStep, setActiveStep] = useState(0);
-  // const { setErrorMessage } = useAlert();
-  const { error, success } = useAlert();
+  const { error } = useAlert();
 
   const [data, setData] = useState<any>({});
-  const { data: configMaps, mutate: configMapMutate } = useListConfigMaps({ namespace });
-  const { data: secrets, mutate: secretMutate } = useListSecrets({ namespace });
+  const { data: configMaps } = useListConfigMaps(namespace);
+  const { data: secrets } = useListSecrets(namespace);
   const { data: namespaces } = useListNamespaces();
   const [showBasicInfoValidation, setShowBasicInfoValidation] = useState(false);
   // Add below existing state declarations
   const [showContainerInfoValidation, setShowContainerInfoValidation] = useState(false);
-
-  useEffect(() => {
-    configMapMutate();
-    secretMutate();
-  }, [namespace, configMapMutate, secretMutate]);
 
   const handleDataChange = (field: string, value: any) => {
     setData((prev: any) => ({
@@ -446,10 +439,10 @@ export default function DeploymentDrawer({ open, onClose, onSubmit }: Deployment
     };
 
     try {
-      await onSubmit?.(event, payload);
+      await onSubmit?.(payload);
       handleClose(event);
-    } catch (error: any) {
-      error(error?.response?.data?.message || error?.message || 'Failed to create Deployment');
+    } catch (err: any) {
+      error(err?.response?.data?.message || err?.message || t('messages.error'));
     }
   };
 

@@ -1,5 +1,5 @@
 
-import type { Resource, ResourceList } from './common';
+import type { DataList, Resource, ResourceList } from './common';
 
 interface CommandArgsOverrider {
   containerName: string;
@@ -124,3 +124,12 @@ interface EdgeApplicationStatus {
 export interface EdgeApplication extends Resource<EdgeApplicationSpec, EdgeApplicationStatus> {};
 
 export interface EdgeApplicationList extends ResourceList<EdgeApplication> {}
+
+export interface ConciseEdgeApplication {
+  creationTimestamp: string;
+  name: string;
+  namespace: string;
+  nodeGroups?: string;
+}
+
+export interface ConciseEdgeApplicationList extends DataList<ConciseEdgeApplication> {}
