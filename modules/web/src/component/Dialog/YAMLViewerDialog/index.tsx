@@ -15,11 +15,9 @@ interface YAMLViewerDialogProps {
 }
 
 const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
-  // 1. 合并 Hook：同时获取国际化 t 函数和弹窗 success 函数
   const { t } = useI18n();
   const { success } = useAlert();
 
-  // 2. 合并逻辑：保留 feat 分支中关于 yaml 转换和下载的逻辑
   const yamlText = stringify(props?.content);
 
   const handleCopy = async () => {
@@ -51,7 +49,6 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
         <Button onClick={props?.onClose} color="primary">
           {t('actions.cancel')}
         </Button>
-        {/* 保留新功能的按钮 */}
         <Button onClick={handleCopy} color="primary" variant="outlined">
           Copy YAML
         </Button>
