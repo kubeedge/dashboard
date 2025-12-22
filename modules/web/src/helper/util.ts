@@ -16,11 +16,11 @@ export function convertKiToGTM(input: string): string {
   }
 }
 
-export async function copyToClipboard(text: string): Promise<void> {
+export async function copyToClipboard(text: string): Promise<boolean> {
   try {
     if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       await navigator.clipboard.writeText(text);
-      return;
+      return true;
     }
     const textarea = document.createElement('textarea');
     textarea.value = text;
@@ -31,10 +31,13 @@ export async function copyToClipboard(text: string): Promise<void> {
     textarea.select();
     document.execCommand('copy');
     document.body.removeChild(textarea);
-  } catch (_) {}
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
-export function downloadAsFile(filename: string, content: string): void {
+export function downloadAsFile(filename: string, content: string): boolean {
   try {
     const blob = new Blob([content], { type: 'text/yaml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -45,5 +48,8 @@ export function downloadAsFile(filename: string, content: string): void {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  } catch (_) {}
+    return true;
+  } catch (_) {
+    return false;
+  }
 }

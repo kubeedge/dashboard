@@ -23,9 +23,9 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
   const handleCopy = async () => {
     const isSuccess = await copyToClipboard(yamlText);
     if (isSuccess) {
-      success('Copied YAML to clipboard');
+      success(t('actions.copiedYAML'));
     } else {
-      error('Failed to copy YAML to clipboard');
+      error(t('actions.failedToCopyYAML'));
     }
   };
 
@@ -36,9 +36,9 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
     const isSuccess = downloadAsFile(`${kind}-${name}.yaml`, yamlText);
     
     if (isSuccess) {
-      success('Downloaded YAML');
+      success(t('actions.downloadedYAML'));
     } else {
-      error('Failed to download YAML file');
+      error(t('actions.failedToDownloadYAML'));
     }
   };
 
@@ -60,10 +60,10 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
           {t('actions.cancel')}
         </Button>
         <Button onClick={handleCopy} color="primary" variant="outlined">
-          Copy YAML
+          {t('actions.copyYAML')}
         </Button>
         <Button onClick={handleDownload} variant="contained">
-          Download YAML
+          {t('actions.downloadYAML')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -49,6 +49,12 @@
     "yaml": "YAML",
     "ok": "Ok",
     "detail": "Detail",
+    "copyYAML": "Copy YAML",
+    "downloadYAML": "Download YAML",
+    "copiedYAML": "Copied YAML to clipboard",
+    "failedToCopyYAML": "Failed to copy YAML to clipboard",
+    "downloadedYAML": "Downloaded YAML",
+    "failedToDownloadYAML": "Failed to download YAML file",
     "addOneItem": "Add One Item"
   },
   "table": {
