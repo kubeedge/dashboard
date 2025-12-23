@@ -11,81 +11,102 @@ If you have any questions, feel free to reach out to us in the following ways:
 
 ## Prepare environment
 
-The KubeEdge dashboard consists of two modules: backend and frontend. The backend module is responsible for providing APIs to the frontend, while the frontend module is responsible for rendering the user interface.
+The KubeEdge dashboard consists of two modules: API (backend-for-frontend) and Web (frontend). The API provides endpoints consumed by the Web app.
 
-For backend module, golang is needed.
+- **API**: Go toolchain if running locally without Docker
+- **Web**: Node.js 18+ and a package manager (npm/yarn/pnpm)
 
-For frontend module, nodejs, npm/yarn/pnpm is needed, pnpm is recommended.
+## Install packages (local dev)
 
-## Install packages
-
-### Backend
-
-To install the backend dependencies, you need to have Go installed. You can use the following command to install the dependencies:
+### API
 
 ```bash
-cd module
+cd modules
+go work use ./api ./common/client ./common/errors
+cd api
 go mod download
 ```
 
-### Frontend
+### Web
 
-To install the frontend dependencies, you can use npm, yarn, or pnpm. Choose one of the following commands based on your preference:
-
-```bash with npm
-cd module/web
-npm install
-```
-
-```bash with yarn
-cd module/web
-yarn install
-```
-
-or
-
-```bash with pnpm
-cd module/web
-pnpm install
-```
-
-### Start project
-
-### Backend
-
-You can start the backend server by running the following command:
+Use your preferred package manager:
 
 ```bash
-cd module/api
+cd modules/web
+npm install  # or: yarn install / pnpm install
+```
+
+## Run locally (without Docker)
+
+### API
+
+```bash
+cd modules/api
+# Example: connect to a remote API server
 go run main.go --apiserver-host=https://192.168.33.129:6443
+# Add this if using a self-signed certificate:
+#   --apiserver-skip-tls-verify=true
+# Bind/port flags (defaults):
+#   --insecure-bind-address=127.0.0.1 --insecure-port=8080
 ```
 
-If your API server is running with self-signed certificate, you can set `--apiserver-skip-tls-verify true` option to ignore the certificate verification.
+### Web
 
-### Frontend
-
-```bash with npm
-cd module/web
+```bash
+cd modules/web
 npm run build
-API_SERVER={api module address} npm run start
-Example: API_SERVER=http://127.0.0.1:8080 npm run dev
+API_SERVER={api_base_url} npm run start
+# Example for local API:
+#   API_SERVER=http://127.0.0.1:8080 npm run dev
 ```
-or
 
-```bash with yarn
-cd module/web
-yarn build
-API_SERVER={api module address} yarn start
-Example: API_SERVER=http://127.0.0.1:8080 yarn dev
-```
-or
+## Run with Docker
 
-```bash with pnpm
-cd module/web
-pnpm run build
-API_SERVER={api module address} pnpm run start
-Example: API_SERVER=http://127.0.0.1:8080 pnpm run dev
+### Build images
+
+```bash
+# from repo root
+# API image
+docker build -f modules/api/Dockerfile -t kubeedge-dashboard-api:local .
+
+# Web image
+docker build -f modules/web/Dockerfile -t kubeedge-dashboard-web:local modules/web
 ```
+
+### Run containers
+
+```bash
+# 1) Run API (choose ONE of the following connection methods)
+# a) In-cluster auth (run this in Kubernetes instead of locally)
+#    No extra flags needed; container will use in-cluster config
+# b) Remote API server endpoint
+API_HOST=https://<k8s-api-host:port>
+API_INSECURE=false   # set to true for self-signed clusters
+
+docker run --rm -p 8080:8080 \
+  --name kubeedge-dashboard-api \
+  kubeedge-dashboard-api:local \
+  --insecure-bind-address=0.0.0.0 --insecure-port=8080 \
+  --apiserver-host="${API_HOST}" \
+  $( [ "$API_INSECURE" = "true" ] && echo --apiserver-skip-tls-verify=true )
+
+# Alternatively, mount a kubeconfig from the host
+# docker run --rm -p 8080:8080 \
+#   -v $HOME/.kube/config:/kubeconfig:ro \
+#   kubeedge-dashboard-api:local \
+#   --insecure-bind-address=0.0.0.0 --insecure-port=8080 \
+#   --kubeconfig=/kubeconfig
+
+# 2) Run Web and point it to the API container
+docker run --rm -p 3000:3000 \
+  -e API_SERVER=http://host.docker.internal:8080 \ 
+  --name kubeedge-dashboard-web \
+  kubeedge-dashboard-web:local
+```
+
+Notes:
+- The Web container expects `API_SERVER` to be reachable from inside the container. On macOS/Windows Docker Desktop, `host.docker.internal` resolves the host; on Linux, use the host IP or user-defined bridge networking.
+- API listens on 8080 inside the container by default and exposes `/api/v1/*` and `/keink/*` via the Web proxy.
 
 ### Login with token
 
