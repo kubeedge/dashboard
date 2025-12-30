@@ -27,7 +27,11 @@
     "language": "Language",
     "english": "English",
     "chinese": "中文",
-    "allNamespaces": "All Namespaces"
+    "allNamespaces": "All Namespaces",
+    "about": "About",
+    "aboutDescription": "A web-based UI for managing KubeEdge clusters.",
+    "website": "Official Website",
+    "github": "GitHub"
   },
   "actions": {
     "add": "Add",
@@ -48,6 +52,7 @@
     "generateCommand": "Generate Command",
     "yaml": "YAML",
     "ok": "Ok",
+    "close": "Close",
     "detail": "Detail",
     "copyYAML": "Copy YAML",
     "downloadYAML": "Download YAML",
