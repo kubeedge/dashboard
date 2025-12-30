@@ -27,7 +27,11 @@
     "language": "语言",
     "english": "English",
     "chinese": "中文",
-    "allNamespaces": "所有命名空间"
+    "allNamespaces": "所有命名空间",
+    "about": "关于",
+    "aboutDescription": "用于管理 KubeEdge 集群的 Web 界面。",
+    "website": "官方网站",
+    "github": "GitHub"
   },
   "actions": {
     "add": "添加",
@@ -48,6 +52,7 @@
     "generateCommand": "生成命令",
     "yaml": "YAML",
     "ok": "确定",
+    "close": "关闭",
     "detail": "详情",
     "copyYAML": "复制 YAML",
     "downloadYAML": "下载 YAML",
