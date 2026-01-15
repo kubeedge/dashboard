@@ -24,7 +24,7 @@ For frontend module, nodejs, npm/yarn/pnpm is needed, pnpm is recommended.
 To install the backend dependencies, you need to have Go installed. You can use the following command to install the dependencies:
 
 ```bash
-cd module
+cd modules
 go mod download
 ```
 
@@ -33,19 +33,19 @@ go mod download
 To install the frontend dependencies, you can use npm, yarn, or pnpm. Choose one of the following commands based on your preference:
 
 ```bash with npm
-cd module/web
+cd modules/web
 npm install
 ```
 
 ```bash with yarn
-cd module/web
+cd modules/web
 yarn install
 ```
 
 or
 
 ```bash with pnpm
-cd module/web
+cd modules/web
 pnpm install
 ```
 
@@ -56,7 +56,7 @@ pnpm install
 You can start the backend server by running the following command:
 
 ```bash
-cd module/api
+cd modules/api
 go run main.go --apiserver-host=https://192.168.33.129:6443
 ```
 
@@ -65,26 +65,23 @@ If your API server is running with self-signed certificate, you can set `--apise
 ### Frontend
 
 ```bash with npm
-cd module/web
+cd modules/web
 npm run build
-API_SERVER={api module address} npm run start
-Example: API_SERVER=http://127.0.0.1:8080 npm run dev
+API_SERVER=http://127.0.0.1:8080 npm run dev
 ```
 or
 
 ```bash with yarn
-cd module/web
+cd modules/web
 yarn build
-API_SERVER={api module address} yarn start
-Example: API_SERVER=http://127.0.0.1:8080 yarn dev
+API_SERVER=http://127.0.0.1:8080 yarn dev
 ```
 or
 
 ```bash with pnpm
-cd module/web
+cd modules/web
 pnpm run build
-API_SERVER={api module address} pnpm run start
-Example: API_SERVER=http://127.0.0.1:8080 pnpm run dev
+API_SERVER=http://127.0.0.1:8080 pnpm run dev
 ```
 
 ### Login with token
@@ -93,10 +90,12 @@ Example: API_SERVER=http://127.0.0.1:8080 pnpm run dev
 kubectl create serviceaccount curl-user -n kube-system
 kubectl create clusterrolebinding curl-user-binding --clusterrole=cluster-admin --serviceaccount=kube-system:curl-user -n kube-system
 
-# For Kubernetes 1.23 and earlier:
-kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep curl-user | awk '{print $1}')
 # For Kubernetes 1.24 and later:
 kubectl create token curl-user -n kube-system
+# For Kubernetes 1.23 and earlier:
+kubectl -n kube-system describe secret $(
+  kubectl -n kube-system get secret | grep curl-user | awk '{print $1}'
+)
 ```
 
 ## Contributing
