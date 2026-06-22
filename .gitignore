@@ -1,0 +1,8 @@
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# Build and dependencies
+node_modules/
+.next/
