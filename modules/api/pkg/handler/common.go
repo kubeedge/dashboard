@@ -27,12 +27,17 @@ import (
 )
 
 func (apiHandler *APIHandler) addCommonRoutes(apiV1Ws *restful.WebService) *APIHandler {
-	apiV1Ws.Route(
-		apiV1Ws.GET("/version").To(apiHandler.getVersion).
-			Writes(version.Info{}).
-			Returns(http.StatusOK, "OK", version.Info{}))
+    apiV1Ws.Route(
+        apiV1Ws.GET("/version").To(apiHandler.getVersion).
+            Writes(version.Info{}).
+            Returns(http.StatusOK, "OK", version.Info{}))
 
-	return apiHandler
+    apiV1Ws.Route(
+        apiV1Ws.GET("/healthz").To(apiHandler.getHealth).
+            Writes(common.HealthStatus{}).
+            Returns(http.StatusOK, "OK", common.HealthStatus{}))
+
+    return apiHandler
 }
 
 func (apiHandler *APIHandler) getVersion(request *restful.Request, response *restful.Response) {
@@ -47,5 +52,20 @@ func (apiHandler *APIHandler) getVersion(request *restful.Request, response *res
 		return
 	}
 
-	response.WriteEntity(versionInfo)
+    response.WriteEntity(versionInfo)
+}
+
+func (apiHandler *APIHandler) getHealth(request *restful.Request, response *restful.Response) {
+    k8sClient, err := apiHandler.getK8sClient(request, response)
+    if err != nil {
+        return
+    }
+
+    status, err := common.GetHealth(k8sClient)
+    if err != nil {
+        errors.HandleInternalError(response, err)
+        return
+    }
+
+    response.WriteEntity(status)
 }
