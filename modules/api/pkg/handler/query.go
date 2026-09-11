@@ -83,6 +83,11 @@ func parseListQueryFromValues(values url.Values, allowed AllowedFields) (ListQue
 		out.PageSize = defaultPageSize
 	}
 
+	maxPage := int(^uint(0)>>1) / out.PageSize
+	if out.Page > maxPage {
+		return ListQuery{}, k8serrors.NewBadRequest("invalid page: page * pageSize exceeds maximum integer")
+	}
+
 	// sort/order
 	sort := strings.TrimSpace(values.Get("sort"))
 	if sort != "" {
