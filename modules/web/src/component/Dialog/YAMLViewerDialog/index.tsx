@@ -17,6 +17,7 @@ interface YAMLViewerDialogProps {
 const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
   const { t } = useI18n();
   const { success, error } = useAlert();
+  const [fullScreen, setFullScreen] = React.useState(false);
 
   const yamlText = stringify(props?.content);
 
@@ -43,10 +44,20 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
   };
 
   return (
-    <Dialog open={!!props?.open} onClose={props?.onClose} fullWidth maxWidth="md">
+    <Dialog 
+      open={!!props?.open} 
+      onClose={props?.onClose} 
+      fullWidth 
+      maxWidth="md" 
+      fullScreen={fullScreen}
+    >
       <DialogTitle>{t('actions.yaml')}</DialogTitle>
       <DialogContent>
-        <Box sx={{ height: '400px', overflowY: 'auto', fontFamily: 'monospace' }}>
+        <Box sx={{ 
+          height: fullScreen ? 'calc(100vh - 160px)' : '400px', 
+          overflowY: 'auto', 
+          fontFamily: 'monospace' 
+        }}>
           <CodeBlock
             text={yamlText}
             language="yaml"
@@ -57,7 +68,10 @@ const YAMLViewerDialog = (props?: YAMLViewerDialogProps) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={props?.onClose} color="primary">
-          {t('actions.cancel')}
+          {t('actions.close')}
+        </Button>
+        <Button onClick={() => setFullScreen(!fullScreen)} variant="outlined">
+          {fullScreen ? t('actions.exitFullScreen') : t('actions.fullScreen')}
         </Button>
         <Button onClick={handleCopy} color="primary" variant="outlined">
           {t('actions.copyYAML')}
