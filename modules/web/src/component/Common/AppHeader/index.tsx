@@ -16,6 +16,7 @@ import useCookie from '@/hook/useCookie';
 import { redirect } from 'next/navigation';
 import LanguageSwitcher from '@/component/LanguageSwitcher';
 import { useI18n } from '@/hook/useI18n';
+import AboutDialog from '@/component/Dialog/AboutDialog';
 
 const CustomSelect = styled(Select)(({ theme }) => ({
   height: 32,
@@ -50,6 +51,11 @@ export const AppHeader = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleAbout = () => {
+    setOpenAbout(true);
+    handleClose();
   };
 
   const handleLogout = () => {
@@ -115,10 +121,12 @@ export const AppHeader = () => {
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
+            <MenuItem onClick={handleAbout}>{t('common.about')}</MenuItem>
             <MenuItem onClick={handleLogout}>{t('common.logout')}</MenuItem>
           </Menu>
         </Box>
       </Toolbar>
+      <AboutDialog open={openAbout} onClose={() => setOpenAbout(false)} />
     </AppBar>
   );
 };
