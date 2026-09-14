@@ -49,9 +49,11 @@ cd module/web
 pnpm install
 ```
 
-### Start project
+## Start project
 
-### Backend
+### Linux
+
+#### Backend
 
 You can start the backend server by running the following command:
 
@@ -62,7 +64,7 @@ go run main.go --apiserver-host=https://192.168.33.129:6443
 
 If your API server is running with self-signed certificate, you can set `--apiserver-skip-tls-verify true` option to ignore the certificate verification.
 
-### Frontend
+#### Frontend
 
 ```bash with npm
 cd module/web
@@ -85,6 +87,47 @@ cd module/web
 pnpm run build
 API_SERVER={api module address} pnpm run start
 Example: API_SERVER=http://127.0.0.1:8080 pnpm run dev
+```
+
+### Windows
+
+Install Go 1.23 and Node.js 18.17 or later before running the following commands.
+
+#### Backend
+
+Start the backend from Command Prompt:
+
+```cmd
+cd modules\api
+go mod download
+go run main.go --apiserver-host=https://192.168.33.129:6443
+```
+
+The equivalent commands in PowerShell are:
+
+```powershell
+Set-Location modules/api
+go mod download
+go run main.go --apiserver-host=https://192.168.33.129:6443
+```
+
+#### Frontend
+
+In a second Command Prompt window, start the frontend:
+
+```cmd
+cd modules\web
+npm install
+set "API_SERVER=http://127.0.0.1:8080" && npm run dev
+```
+
+In a second PowerShell window:
+
+```powershell
+Set-Location modules/web
+npm install
+$env:API_SERVER = "http://127.0.0.1:8080"
+npm run dev
 ```
 
 ### Login with token
