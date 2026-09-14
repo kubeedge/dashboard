@@ -37,6 +37,7 @@ var (
 
 	argInsecurePort        = pflag.Int("insecure-port", defaultInsecurePort, "port to listen to for incoming HTTP requests")
 	argInsecureBindAddress = pflag.IP("insecure-bind-address", net.IPv4(127, 0, 0, 1), "IP address on which to serve the --insecure-port, set to 0.0.0.0 for all interfaces")
+	argEnableKeink         = pflag.Bool("enable-keink", false, "enable the Keink API that builds and runs KubeEdge on this host")
 )
 
 func init() {
@@ -65,4 +66,8 @@ func KubeConfigFile() string {
 
 func InsecureAddress() string {
 	return net.JoinHostPort(argInsecureBindAddress.String(), strconv.Itoa(*argInsecurePort))
+}
+
+func EnableKeink() bool {
+	return *argEnableKeink
 }
