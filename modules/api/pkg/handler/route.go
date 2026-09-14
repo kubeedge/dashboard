@@ -60,10 +60,13 @@ func CreateHTTPAPIHandler() (*restful.Container, error) {
 	return wsContainer, nil
 }
 
-func CreateKeinkAPIHandler() (*restful.Container, error) {
-	apiHandler := APIHandler{}
-
+func CreateKeinkAPIHandler(enabled bool) (*restful.Container, error) {
 	wsContainer := restful.NewContainer()
+	if !enabled {
+		return wsContainer, nil
+	}
+
+	apiHandler := APIHandler{}
 
 	keinkWs := new(restful.WebService)
 

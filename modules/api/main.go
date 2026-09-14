@@ -41,7 +41,7 @@ func main() {
 		return
 	}
 
-	keinkHandler, err := handler.CreateKeinkAPIHandler()
+	keinkHandler, err := handler.CreateKeinkAPIHandler(args.EnableKeink())
 	if err != nil {
 		klog.ErrorS(err, "Failed to create Keink API handler")
 		return
