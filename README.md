@@ -24,7 +24,7 @@ For frontend module, nodejs, npm/yarn/pnpm is needed, pnpm is recommended.
 To install the backend dependencies, you need to have Go installed. You can use the following command to install the dependencies:
 
 ```bash
-cd module
+cd modules
 go mod download
 ```
 
