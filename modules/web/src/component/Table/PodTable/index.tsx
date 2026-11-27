@@ -8,7 +8,8 @@ import {
   formatRelativeTime,
   formatCpuResource,
   formatMemoryResource,
-  formatStatus
+  formatStatus,
+  sumContainerRequests
 } from '@/helper/localization';
 
 const statusColor = {
@@ -150,14 +151,14 @@ export const PodsTable = (props: PodsTableProps) => {
     {
       name: 'CPU',
       render: (row) => {
-        const cpu = row.spec?.containers?.at(0)?.resources?.requests?.cpu;
+        const cpu = sumContainerRequests(row.spec?.containers, 'cpu');
         return formatCpuResource(cpu, currentLanguage);
       },
     },
     {
       name: t('dashboard.memory'),
       render: (row) => {
-        const memory = row.spec?.containers?.at(0)?.resources?.requests?.memory;
+        const memory = sumContainerRequests(row.spec?.containers, 'memory');
         return formatMemoryResource(memory, currentLanguage);
       },
     },
