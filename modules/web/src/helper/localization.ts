@@ -138,13 +138,14 @@ export function formatStorageSize(bytes: number | string | undefined, language: 
   if (isNaN(numBytes)) return String(bytes);
 
   const units = language.startsWith('zh')
-    ? ['字节', 'KB', 'MB', 'GB', 'TB', 'PB']
-    : ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+    ? ['字节', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']
+    : ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
 
   if (numBytes === 0) return `0 ${units[0]}`;
 
   const k = 1024;
-  const i = Math.floor(Math.log(numBytes) / Math.log(k));
+  // Keep the index inside the unit list for values below 1 byte or above the largest unit.
+  const i = Math.min(Math.max(Math.floor(Math.log(numBytes) / Math.log(k)), 0), units.length - 1);
   const size = (numBytes / Math.pow(k, i)).toFixed(1);
 
   return `${size} ${units[i]}`;
@@ -191,24 +192,28 @@ export function formatCpuResource(cpu: string | undefined, language: string): st
 export function formatMemoryResource(memory: string | undefined, language: string): string {
   if (!memory) return '-';
 
-  // Kubernetes memory unit conversion
-  const units = {
+  // Kubernetes memory unit conversion. Kubernetes uses a lowercase "k" for 1000 ("K" is
+  // kept for compatibility), and a quantity without a suffix is a number of bytes.
+  const units: Record<string, number> = {
+    '': 1,
     'Ki': 1024,
-    'Mi': 1024 * 1024,
-    'Gi': 1024 * 1024 * 1024,
-    'Ti': 1024 * 1024 * 1024 * 1024,
+    'Mi': 1024 ** 2,
+    'Gi': 1024 ** 3,
+    'Ti': 1024 ** 4,
+    'Pi': 1024 ** 5,
+    'Ei': 1024 ** 6,
+    'k': 1000,
     'K': 1000,
-    'M': 1000 * 1000,
-    'G': 1000 * 1000 * 1000,
-    'T': 1000 * 1000 * 1000 * 1000,
+    'M': 1000 ** 2,
+    'G': 1000 ** 3,
+    'T': 1000 ** 4,
+    'P': 1000 ** 5,
+    'E': 1000 ** 6,
   };
 
-  for (const [unit, multiplier] of Object.entries(units)) {
-    if (memory.endsWith(unit)) {
-      const value = parseFloat(memory.slice(0, -unit.length));
-      const bytes = value * multiplier;
-      return formatStorageSize(bytes, language);
-    }
+  const match = /^\s*(\d+(?:\.\d+)?)\s*([a-zA-Z]*)\s*$/.exec(memory);
+  if (match && match[2] in units) {
+    return formatStorageSize(parseFloat(match[1]) * units[match[2]], language);
   }
 
   return memory;
