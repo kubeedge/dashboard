@@ -242,3 +242,52 @@ export function formatStatus(status: string | undefined, language: string): stri
 
   return status;
 }
+
+const CPU_SUFFIX_MILLICORES: Record<string, number> = { '': 1000, m: 1, u: 0.001, n: 0.000001 };
+
+const MEMORY_SUFFIX_BYTES: Record<string, number> = {
+  '': 1,
+  Ki: 1024,
+  Mi: 1024 ** 2,
+  Gi: 1024 ** 3,
+  Ti: 1024 ** 4,
+  Pi: 1024 ** 5,
+  Ei: 1024 ** 6,
+  k: 1e3,
+  K: 1e3,
+  M: 1e6,
+  G: 1e9,
+  T: 1e12,
+  P: 1e15,
+  E: 1e18,
+};
+
+/**
+ * Sum a resource request over all containers of a pod
+ * @param containers Pod containers (spec.containers)
+ * @param resource 'cpu' or 'memory'
+ * @returns The total as a quantity ("150m" for CPU, "<n>Ki" for memory), or undefined
+ * when no container requests the resource or a value can't be parsed
+ */
+export function sumContainerRequests(
+  containers: { resources?: { requests?: Record<string, string | undefined> } }[] | undefined,
+  resource: 'cpu' | 'memory'
+): string | undefined {
+  const suffixes = resource === 'cpu' ? CPU_SUFFIX_MILLICORES : MEMORY_SUFFIX_BYTES;
+  let total = 0;
+  let found = false;
+
+  for (const container of containers || []) {
+    const quantity = container?.resources?.requests?.[resource];
+    if (!quantity) continue;
+
+    const match = /^\s*(\d+(?:\.\d+)?)\s*([a-zA-Z]*)\s*$/.exec(quantity);
+    if (!match || !(match[2] in suffixes)) return undefined;
+
+    total += parseFloat(match[1]) * suffixes[match[2]];
+    found = true;
+  }
+
+  if (!found) return undefined;
+  return resource === 'cpu' ? `${Math.round(total)}m` : `${Math.round(total / 1024)}Ki`;
+}
