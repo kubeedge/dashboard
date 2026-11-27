@@ -138,13 +138,14 @@ export function formatStorageSize(bytes: number | string | undefined, language: 
   if (isNaN(numBytes)) return String(bytes);
 
   const units = language.startsWith('zh')
-    ? ['字节', 'KB', 'MB', 'GB', 'TB', 'PB']
-    : ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+    ? ['字节', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']
+    : ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
 
   if (numBytes === 0) return `0 ${units[0]}`;
 
   const k = 1024;
-  const i = Math.floor(Math.log(numBytes) / Math.log(k));
+  // Keep the index inside the unit list for values below 1 byte or above the largest unit.
+  const i = Math.min(Math.max(Math.floor(Math.log(numBytes) / Math.log(k)), 0), units.length - 1);
   const size = (numBytes / Math.pow(k, i)).toFixed(1);
 
   return `${size} ${units[i]}`;
