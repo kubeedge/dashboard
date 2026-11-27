@@ -1,9 +1,38 @@
+// Multipliers, in bytes, of the Kubernetes quantity suffixes used for memory.
+const QUANTITY_SUFFIX_BYTES: Record<string, number> = {
+  "": 1,
+  Ki: 1024,
+  Mi: 1024 ** 2,
+  Gi: 1024 ** 3,
+  Ti: 1024 ** 4,
+  Pi: 1024 ** 5,
+  Ei: 1024 ** 6,
+  k: 1e3,
+  M: 1e6,
+  G: 1e9,
+  T: 1e12,
+  P: 1e15,
+  E: 1e18,
+};
+
+// Converts a Kubernetes memory quantity (e.g. "16316816Ki", "8000Mi", "16Gi" or
+// "17179869184") to KiB. Returns NaN if the quantity can't be parsed.
+function quantityToKi(input: string): number {
+  const match = /^\s*(\d+(?:\.\d+)?)\s*(Ki|Mi|Gi|Ti|Pi|Ei|k|M|G|T|P|E)?\s*$/.exec(input);
+  if (!match) {
+    return NaN;
+  }
+  return (parseFloat(match[1]) * QUANTITY_SUFFIX_BYTES[match[2] ?? ""]) / 1024;
+}
+
 export function convertKiToGTM(input: string): string {
   const GIGA = 1024 * 1024;
   const TERA = 1024 * 1024 * 1024;
   const MEGA = 1024;
 
-  const value = parseInt(input.replace(/[^0-9]/g, ""), 10);
+  // The value is converted to KiB first, so any unit the node reports is handled,
+  // not only "Ki".
+  const value = quantityToKi(input);
 
   if (value >= TERA) {
     return (value / TERA).toFixed(2) + "Ti";
